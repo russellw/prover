@@ -1,5 +1,9 @@
 package olivine;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Properties;
+
 public final class Prover {
   private enum Language {
     DIMACS,
@@ -16,17 +20,56 @@ public final class Prover {
     file = s;
   }
 
-  private static void args(String[] args) {
+  private static void help() {
+    System.out.println("-h  Show help");
+    System.out.println("-V  Show version");
+  }
+
+  private static String version() throws IOException {
+    var properties = new Properties();
+    var stream =
+        Prover.class
+            .getClassLoader()
+            .getResourceAsStream("META-INF/maven/prover/prover/pom.properties");
+    if (stream == null) return null;
+    properties.load(stream);
+    return properties.getProperty("version");
+  }
+
+  private static void args(String[] args) throws IOException {
     for (var i = 0; i < args.length; i++) {
       var arg = args[i];
       if (arg.charAt(0) != '-') {
         setFile(arg);
         continue;
       }
+      if ("-".equals(arg)) {
+        setFile("stdin");
+        continue;
+      }
+      var opt = arg;
+      while (opt.charAt(0) == '-') opt = opt.substring(1);
+      switch (opt) {
+        case "?":
+        case "h":
+        case "help":
+          help();
+          System.exit(0);
+        case "V":
+        case "version":
+          System.out.printf(
+              "Olivine %s, %s\n",
+              Objects.toString(version(), "[unknown version, not running from jar]"),
+              System.getProperty("java.class.path"));
+          System.exit(0);
+        default:
+          System.err.printf("%s: unknown option\n", arg);
+          System.exit(1);
+      }
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     args(args);
   }
 }
