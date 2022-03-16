@@ -50,21 +50,31 @@ public final class Prover {
       var opt = arg;
       while (opt.charAt(0) == '-') opt = opt.substring(1);
       switch (opt) {
-        case "?":
-        case "h":
-        case "help":
+        case "?", "h", "help" -> {
           help();
           System.exit(0);
-        case "V":
-        case "version":
+        }
+        case "V", "version" -> {
           System.out.printf(
               "Olivine %s, %s\n",
               Objects.toString(version(), "[unknown version, not running from jar]"),
               System.getProperty("java.class.path"));
+          System.out.printf(
+              "%s, %s, %s\n",
+              System.getProperty("java.vm.name"),
+              System.getProperty("java.vm.version"),
+              System.getProperty("java.home"));
+          System.out.printf(
+              "%s, %s, %s\n",
+              System.getProperty("os.name"),
+              System.getProperty("os.version"),
+              System.getProperty("os.arch"));
           System.exit(0);
-        default:
+        }
+        default -> {
           System.err.printf("%s: unknown option\n", arg);
           System.exit(1);
+        }
       }
     }
   }
