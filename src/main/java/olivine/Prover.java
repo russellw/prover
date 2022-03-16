@@ -12,6 +12,8 @@ public final class Prover {
 
   private static String file;
 
+  private Prover() {}
+
   private static void setFile(String s) {
     if (file != null) {
       System.err.printf("%s: file already specified\n", s);
