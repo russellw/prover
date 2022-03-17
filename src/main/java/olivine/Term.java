@@ -1,10 +1,19 @@
 package olivine;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Objects;
 
 public abstract class Term {
   public abstract Tag tag();
+
+  public int size() {
+    return 0;
+  }
+
+  public Term get(int i) {
+    throw new UnsupportedOperationException(tag().toString());
+  }
 
   public static final Term FALSE =
       new Term() {
@@ -31,6 +40,23 @@ public abstract class Term {
           return "$true";
         }
       };
+
+  public static Term of(Tag tag, Term a) {
+    return new Term1(tag, a);
+  }
+
+  public static Term of(Tag tag, Term a, Term b) {
+    return new Term2(tag, a, b);
+  }
+
+  public static Term of(Tag tag, Term[] v) {
+    return switch (v.length) {
+      case 0 -> throw new IllegalArgumentException(tag.toString());
+      case 1 -> new Term1(tag, v[0]);
+      case 2 -> new Term2(tag, v[0], v[1]);
+      default -> new Terms(tag, v);
+    };
+  }
 
   public static Term distinctObject(String name) {
     return new DistinctObject(name);
@@ -149,6 +175,125 @@ public abstract class Term {
     @Override
     public Tag tag() {
       return Tag.DISTINCT_OBJECT;
+    }
+  }
+
+  private static final class Term1 extends Term {
+    final Tag tag;
+    final Term a;
+
+    Term1(Tag tag, Term a) {
+      this.tag = tag;
+      this.a = a;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Term1 term1 = (Term1) o;
+      return tag == term1.tag && a.equals(term1.a);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(tag, a);
+    }
+
+    @Override
+    public Term get(int i) {
+      assert 0 <= i && i < size();
+      return a;
+    }
+
+    @Override
+    public int size() {
+      return 1;
+    }
+
+    @Override
+    public Tag tag() {
+      return tag;
+    }
+  }
+
+  private static final class Term2 extends Term {
+    final Tag tag;
+    final Term a, b;
+
+    Term2(Tag tag, Term a, Term b) {
+      this.tag = tag;
+      this.a = a;
+      this.b = b;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Term2 term2 = (Term2) o;
+      return tag == term2.tag && a.equals(term2.a) && b.equals(term2.b);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(tag, a, b);
+    }
+
+    @Override
+    public Term get(int i) {
+      assert 0 <= i && i < size();
+      return i == 0 ? a : b;
+    }
+
+    @Override
+    public int size() {
+      return 2;
+    }
+
+    @Override
+    public Tag tag() {
+      return tag;
+    }
+  }
+
+  private static final class Terms extends Term {
+    final Tag tag;
+    final Term[] v;
+
+    Terms(Tag tag, Term[] v) {
+      this.tag = tag;
+      this.v = v;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Terms terms = (Terms) o;
+      return tag == terms.tag && Arrays.equals(v, terms.v);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = Objects.hash(tag);
+      result = 31 * result + Arrays.hashCode(v);
+      return result;
+    }
+
+    @Override
+    public int size() {
+      return v.length;
+    }
+
+    @Override
+    public Term get(int i) {
+      return v[i];
+    }
+
+    @Override
+    public Tag tag() {
+      return tag;
     }
   }
 }

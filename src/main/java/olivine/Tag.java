@@ -4,6 +4,7 @@ public enum Tag {
   FALSE,
   TRUE,
   DISTINCT_OBJECT,
+  VARIABLE,
   CALL,
   INTEGER,
   RATIONAL,
