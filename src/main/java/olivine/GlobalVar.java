@@ -15,6 +15,11 @@ public final class GlobalVar extends Term {
   }
 
   @Override
+  public String toString() {
+    return name;
+  }
+
+  @Override
   public Tag tag() {
     return Tag.GLOBAL_VAR;
   }

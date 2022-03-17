@@ -24,4 +24,17 @@ public class TermTest {
     a = Term.of(Tag.ALL, p2.call(x, y), x, y, z);
     assertEquals(a.freeVars(), Set.of());
   }
+
+  @Test
+  public void quantify() {
+    var x = new Var(Type.INDIVIDUAL);
+    var y = new Var(Type.INDIVIDUAL);
+    var p2 = new Func("p2", Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL);
+
+    var a = Term.of(Tag.EXISTS, p2.call(x, x), x);
+    assertEquals(a.quantify(), a);
+
+    a = Term.of(Tag.EXISTS, p2.call(x, y), x);
+    assertEquals(a.quantify(), Term.of(Tag.ALL, Term.of(Tag.EXISTS, p2.call(x, y), x), y));
+  }
 }

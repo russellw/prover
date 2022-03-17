@@ -14,6 +14,11 @@ public final class Var extends Term {
   }
 
   @Override
+  public String toString() {
+    return String.format("%%%x", hashCode());
+  }
+
+  @Override
   public Tag tag() {
     return Tag.VAR;
   }

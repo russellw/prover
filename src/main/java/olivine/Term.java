@@ -1,10 +1,7 @@
 package olivine;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public abstract class Term {
@@ -329,12 +326,16 @@ public abstract class Term {
     return of(Tag.OR, of(Tag.NOT, this), b);
   }
 
+  public static Term of(Tag tag, Term a, Term[] v) {
+    var w = new Term[1 + v.length];
+    w[0] = a;
+    System.arraycopy(v, 0, w, 1, v.length);
+    return of(tag, w);
+  }
+
   public final Term call(Term... args) {
     assert args.length > 0;
-    var v = new Term[1 + args.length];
-    v[0] = this;
-    System.arraycopy(args, 0, v, 1, args.length);
-    return of(Tag.CALL, v);
+    return of(Tag.CALL, this, args);
   }
 
   public final Term map(Function<Term, Term> f) {
@@ -349,7 +350,8 @@ public abstract class Term {
     if (size() == 0) {
       var a = map.get(this);
       assert !Objects.equals(a, this);
-      return a != null ? a.replace(map) : this;
+      if (a == null) return this;
+      return a.replace(map);
     }
     return map(a -> a.replace(map));
   }
@@ -372,8 +374,29 @@ public abstract class Term {
   }
 
   public final Set<Term> freeVars() {
-    var free = new HashSet<Term>();
+    var free = new LinkedHashSet<Term>();
     freeVars(FSet.EMPTY, free);
     return free;
+  }
+
+  @Override
+  public String toString() {
+    var sb = new StringBuilder();
+    sb.append(tag());
+    var n = size();
+    if (n > 0) {
+      sb.append('[');
+      for (var i = 0; i < n; i++) {
+        if (i > 0) sb.append(',');
+        sb.append(get(i));
+      }
+    }
+    return sb.toString();
+  }
+
+  public final Term quantify() {
+    var free = freeVars();
+    if (free.isEmpty()) return this;
+    return of(Tag.ALL, this, free.toArray(new Term[0]));
   }
 }
