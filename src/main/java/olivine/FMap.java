@@ -21,6 +21,20 @@ public final class FMap {
     return null;
   }
 
+  @Override
+  public String toString() {
+    var sb = new StringBuilder();
+    sb.append('{');
+    for (var map = this; map != EMPTY; map = map.parent) {
+      if (map != this) sb.append(", ");
+      sb.append(map.key);
+      sb.append(':');
+      sb.append(map.value);
+    }
+    sb.append('}');
+    return sb.toString();
+  }
+
   public int size() {
     var n = 0;
     for (var map = this; map != EMPTY; map = map.parent) n++;

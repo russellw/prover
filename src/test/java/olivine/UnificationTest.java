@@ -43,7 +43,7 @@ public class UnificationTest {
         map = Unification.match(FMap.EMPTY,x, y);
         assertNotNull(map);
         assertEquals(map.size(), 1);
-        assertEquals(x.replace( map), y.replace( map));
+        assertEquals(x.replace( map), y);
 
         // Function and constant symbols match, x is unified with the constant b
         map = Unification.match(FMap.EMPTY,f2.call(a, x), f2.call(a, b));
