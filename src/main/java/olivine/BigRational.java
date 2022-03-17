@@ -50,6 +50,19 @@ public final class BigRational extends Number implements Comparable<BigRational>
     return new BigRational(Etc.divideEuclidean(num.multiply(b.den), den.multiply(b.num)));
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    BigRational that = (BigRational) o;
+    return num.equals(that.num) && den.equals(that.den);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(num, den);
+  }
+
   public BigRational divideFloor(BigRational b) {
     return new BigRational(Etc.divideFloor(num.multiply(b.den), den.multiply(b.num)));
   }
@@ -63,19 +76,6 @@ public final class BigRational extends Number implements Comparable<BigRational>
   @Override
   public double doubleValue() {
     return num.doubleValue() / den.doubleValue();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof BigRational)) return false;
-    BigRational that = (BigRational) o;
-    return Objects.equals(num, that.num) && Objects.equals(den, that.den);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(num, den);
   }
 
   @Override
