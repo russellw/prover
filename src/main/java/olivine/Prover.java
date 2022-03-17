@@ -2,7 +2,6 @@ package olivine;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Properties;
 
 final class Prover {
   private enum Language {
@@ -27,17 +26,6 @@ final class Prover {
     System.out.println("-V  Show version");
   }
 
-  private static String version() throws IOException {
-    var properties = new Properties();
-    var stream =
-        Prover.class
-            .getClassLoader()
-            .getResourceAsStream("META-INF/maven/olivine/olivine/pom.properties");
-    if (stream == null) return null;
-    properties.load(stream);
-    return properties.getProperty("version");
-  }
-
   private static void args(String[] args) throws IOException {
     for (var i = 0; i < args.length; i++) {
       var arg = args[i];
@@ -59,7 +47,7 @@ final class Prover {
         case "V", "version" -> {
           System.out.printf(
               "Olivine %s, %s\n",
-              Objects.toString(version(), "[unknown version, not running from jar]"),
+              Objects.toString(Etc.version(), "[unknown version, not running from jar]"),
               System.getProperty("java.class.path"));
           System.out.printf(
               "%s, %s, %s\n",
@@ -83,5 +71,9 @@ final class Prover {
 
   public static void main(String[] args) throws IOException {
     args(args);
+    if (file == null) {
+      System.err.println("Input not specified");
+      System.exit(1);
+    }
   }
 }

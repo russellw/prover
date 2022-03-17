@@ -1,8 +1,10 @@
 package olivine;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public final class Etc {
   private Etc() {}
@@ -66,5 +68,16 @@ public final class Etc {
     }
     sb.append(q);
     return sb.toString();
+  }
+
+  public static String version() throws IOException {
+    var properties = new Properties();
+    var stream =
+        Prover.class
+            .getClassLoader()
+            .getResourceAsStream("META-INF/maven/olivine/olivine/pom.properties");
+    if (stream == null) return null;
+    properties.load(stream);
+    return properties.getProperty("version");
   }
 }
