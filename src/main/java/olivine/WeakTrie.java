@@ -17,16 +17,14 @@ public final class WeakTrie<T> {
     if (i == key.length) {
       @SuppressWarnings("unchecked")
       var set = (Map<T, Boolean>) node;
-      if (set == null) {
-        set = new WeakHashMap<>();
-      }
+      if (set == null) set = new WeakHashMap<>();
       set.put(value, true);
       return set;
     }
     var k = key[i];
-    var q = realloc((Object[]) node, k + 1);
-    q[k] = add(key, value, i + 1, q[k]);
-    return q;
+    var v = realloc((Object[]) node, k + 1);
+    v[k] = add(key, value, i + 1, v[k]);
+    return v;
   }
 
   public T findLessEqual(int[] key, Predicate<T> f) {
@@ -37,25 +35,15 @@ public final class WeakTrie<T> {
     if (i == key.length) {
       @SuppressWarnings("unchecked")
       var set = (Map<T, Boolean>) node;
-      if (set == null) {
-        return null;
-      }
-      for (var value : set.keySet()) {
-        if (f.test(value)) {
-          return value;
-        }
-      }
+      if (set == null) return null;
+      for (var value : set.keySet()) if (f.test(value)) return value;
       return null;
     }
-    var q = (Object[]) node;
-    if (q == null) {
-      return null;
-    }
-    for (var k = 0; (k <= key[i]) && (k < q.length); k++) {
-      var value = findLessEqual(key, f, i + 1, q[k]);
-      if (value != null) {
-        return value;
-      }
+    var v = (Object[]) node;
+    if (v == null) return null;
+    for (var k = 0; (k <= key[i]) && (k < v.length); k++) {
+      var value = findLessEqual(key, f, i + 1, v[k]);
+      if (value != null) return value;
     }
     return null;
   }
@@ -68,30 +56,18 @@ public final class WeakTrie<T> {
     if (i == key.length) {
       @SuppressWarnings("unchecked")
       var set = (Map<T, Boolean>) node;
-      if (set == null) {
-        return;
-      }
-      for (var value : set.keySet()) {
-        f.accept(value);
-      }
+      if (set == null) return;
+      for (var value : set.keySet()) f.accept(value);
       return;
     }
-    var q = (Object[]) node;
-    if (q == null) {
-      return;
-    }
-    for (var k = key[i]; k < q.length; k++) {
-      forGreaterEqual(key, f, i + 1, q[k]);
-    }
+    var v = (Object[]) node;
+    if (v == null) return;
+    for (var k = key[i]; k < v.length; k++) forGreaterEqual(key, f, i + 1, v[k]);
   }
 
-  private static Object[] realloc(Object[] q, int n) {
-    if (q == null) {
-      return new Object[n];
-    }
-    if (n <= q.length) {
-      return q;
-    }
-    return Arrays.copyOf(q, Math.max(n, q.length * 2));
+  private static Object[] realloc(Object[] v, int n) {
+    if (v == null) return new Object[n];
+    if (n <= v.length) return v;
+    return Arrays.copyOf(v, Math.max(n, v.length * 2));
   }
 }
