@@ -349,6 +349,6 @@ public abstract class Term {
       assert !Objects.equals(a, this);
       return a != null ? a.replace(map) : this;
     }
-    return map(a -> replace(map));
+    return map(a -> a.replace(map));
   }
 }
