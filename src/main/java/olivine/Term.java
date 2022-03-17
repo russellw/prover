@@ -72,7 +72,6 @@ public abstract class Term {
           return "$false";
         }
       };
-
   public static final Term TRUE =
       new Term() {
         @Override
@@ -331,6 +330,13 @@ public abstract class Term {
     w[0] = a;
     System.arraycopy(v, 0, w, 1, v.length);
     return of(tag, w);
+  }
+
+  public static Term[] remove(Term[] v, int i) {
+    var w = new Term[v.length - 1];
+    System.arraycopy(v, 0, w, 0, i);
+    System.arraycopy(v, i + 1, w, i, w.length - i);
+    return w;
   }
 
   public final Term call(Term... args) {

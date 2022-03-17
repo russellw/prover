@@ -27,7 +27,6 @@ public abstract class Type {
           return "$o";
         }
       };
-
   public static final Type INDIVIDUAL =
       new Type() {
         @Override
@@ -40,7 +39,6 @@ public abstract class Type {
           return "$i";
         }
       };
-
   public static final Type INTEGER =
       new Type() {
         @Override
@@ -53,7 +51,6 @@ public abstract class Type {
           return "$int";
         }
       };
-
   public static final Type RATIONAL =
       new Type() {
         @Override
@@ -66,7 +63,6 @@ public abstract class Type {
           return "$rat";
         }
       };
-
   public static final Type REAL =
       new Type() {
         @Override
