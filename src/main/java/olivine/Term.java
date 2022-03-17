@@ -346,7 +346,8 @@ public abstract class Term {
   public final Term replace(FMap map) {
     if (size() == 0) {
       var a = map.get(this);
-      return a != null ? a : this;
+      assert !Objects.equals(a, this);
+      return a != null ? a.replace(map) : this;
     }
     return map(a -> replace(map));
   }

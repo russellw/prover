@@ -11,8 +11,8 @@ public class UnificationTest {
     // Gives different results in several cases;
     // in particular, has no notion of an occurs check
     // Assumes the inputs have disjoint variables
-    var a = new Func("a", Type.INDIVIDUAL);
-    var b = new Func("b", Type.INDIVIDUAL);
+    var a = new GlobalVar("a", Type.INDIVIDUAL);
+    var b = new GlobalVar("b", Type.INDIVIDUAL);
     var f1 = new Func("f1", Type.INDIVIDUAL, Type.INDIVIDUAL);
     var f2 = new Func("f2", Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL);
     var g1 = new Func("g1", Type.INDIVIDUAL, Type.INDIVIDUAL);
@@ -104,8 +104,8 @@ public class UnificationTest {
   @Test
   public void unify() {
     // https://en.wikipedia.org/wiki/Unification_(computer_science)#Examples_of_syntactic_unification_of_first-order_terms
-    var a = new Func("a", Type.INDIVIDUAL);
-    var b = new Func("b", Type.INDIVIDUAL);
+    var a = new GlobalVar("a", Type.INDIVIDUAL);
+    var b = new GlobalVar("b", Type.INDIVIDUAL);
     var f1 = new Func("f1", Type.INDIVIDUAL, Type.INDIVIDUAL);
     var f2 = new Func("f2", Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL);
     var g1 = new Func("g1", Type.INDIVIDUAL, Type.INDIVIDUAL);
