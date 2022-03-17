@@ -15,11 +15,52 @@ public abstract class Term {
     throw new UnsupportedOperationException(tag().toString());
   }
 
+  public Type type() {
+    return switch (tag()) {
+      case NOT,
+          LESS,
+          LESS_EQUALS,
+          OR,
+          AND,
+          EQUALS,
+          EQV,
+          EXISTS,
+          ALL,
+          IS_INTEGER,
+          IS_RATIONAL -> Type.BOOLEAN;
+      case ADD,
+          SUBTRACT,
+          MULTIPLY,
+          DIVIDE,
+          CEILING,
+          FLOOR,
+          ROUND,
+          TRUNCATE,
+          NEGATE,
+          DIVIDE_EUCLIDEAN,
+          DIVIDE_FLOOR,
+          DIVIDE_TRUNCATE,
+          REMAINDER_EUCLIDEAN,
+          REMAINDER_FLOOR,
+          REMAINDER_TRUNCATE -> get(0).type();
+      case FALSE, TRUE, DISTINCT_OBJECT, INTEGER, VARIABLE -> throw new IllegalStateException(
+          tag().toString());
+      case CALL -> null;
+      case RATIONAL -> null;
+      case REAL -> null;
+    };
+  }
+
   public static final Term FALSE =
       new Term() {
         @Override
         public Tag tag() {
           return Tag.FALSE;
+        }
+
+        @Override
+        public Type type() {
+          return Type.BOOLEAN;
         }
 
         @Override
@@ -33,6 +74,11 @@ public abstract class Term {
         @Override
         public Tag tag() {
           return Tag.TRUE;
+        }
+
+        @Override
+        public Type type() {
+          return Type.BOOLEAN;
         }
 
         @Override
@@ -88,6 +134,11 @@ public abstract class Term {
     @Override
     public BigInteger integerValue() {
       return value;
+    }
+
+    @Override
+    public Type type() {
+      return Type.INTEGER;
     }
 
     @Override
@@ -165,6 +216,11 @@ public abstract class Term {
       if (o == null || getClass() != o.getClass()) return false;
       DistinctObject that = (DistinctObject) o;
       return name.equals(that.name);
+    }
+
+    @Override
+    public Type type() {
+      return Type.INDIVIDUAL;
     }
 
     @Override
