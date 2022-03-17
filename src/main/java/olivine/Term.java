@@ -2,7 +2,9 @@ package olivine;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 public abstract class Term {
@@ -100,7 +102,7 @@ public abstract class Term {
     return new Term2(tag, a, b);
   }
 
-  public static Term of(Tag tag, Term[] v) {
+  public static Term of(Tag tag, Term... v) {
     return switch (v.length) {
       case 0 -> throw new IllegalArgumentException(tag.toString());
       case 1 -> new Term1(tag, v[0]);
@@ -350,5 +352,28 @@ public abstract class Term {
       return a != null ? a.replace(map) : this;
     }
     return map(a -> a.replace(map));
+  }
+
+  private void freeVars(FSet bound, Set<Term> free) {
+    switch (tag()) {
+      case VAR -> {
+        if (!bound.contains(this)) free.add(this);
+        return;
+      }
+      case ALL, EXISTS -> {
+        var n = size();
+        for (var i = 1; i < n; i++) bound = bound.add(get(i));
+        get(0).freeVars(bound, free);
+        return;
+      }
+    }
+    var n = size();
+    for (var i = 0; i < n; i++) get(i).freeVars(bound, free);
+  }
+
+  public final Set<Term> freeVars() {
+    var free = new HashSet<Term>();
+    freeVars(FSet.EMPTY, free);
+    return free;
   }
 }
