@@ -321,4 +321,8 @@ public abstract class Term {
       return tag;
     }
   }
+
+  public final Term implies(Term b) {
+    return of(Tag.OR, of(Tag.NOT, this), b);
+  }
 }
