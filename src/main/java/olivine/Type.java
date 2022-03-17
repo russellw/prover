@@ -7,8 +7,12 @@ public abstract class Type {
     return 0;
   }
 
-  public Term get(int i) {
+  public Type get(int i) {
     throw new UnsupportedOperationException(kind().toString());
+  }
+
+  public static Type of(Kind kind, Type[] v) {
+    return new Types(kind, v);
   }
 
   public static final Type BOOLEAN =
@@ -83,6 +87,16 @@ public abstract class Type {
     private Types(Kind kind, Type[] v) {
       this.kind = kind;
       this.v = v;
+    }
+
+    @Override
+    public int size() {
+      return v.length;
+    }
+
+    @Override
+    public Type get(int i) {
+      return v[i];
     }
 
     @Override

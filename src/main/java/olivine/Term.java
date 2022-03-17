@@ -49,7 +49,7 @@ public abstract class Term {
           DISTINCT_OBJECT,
           INTEGER,
           VAR -> throw new IllegalStateException(tag().toString());
-      case CALL -> null;
+      case CALL -> ((Func) get(0)).returnType;
       case RATIONAL -> null;
       case REAL -> null;
     };
@@ -106,10 +106,6 @@ public abstract class Term {
       case 2 -> new Term2(tag, v[0], v[1]);
       default -> new Terms(tag, v);
     };
-  }
-
-  public static Term distinctObject(String name) {
-    return new DistinctObject(name);
   }
 
   public static Term integer(BigInteger value) {
@@ -204,37 +200,6 @@ public abstract class Term {
     @Override
     public int hashCode() {
       return Objects.hash(value);
-    }
-  }
-
-  private static final class DistinctObject extends Term {
-    final String name;
-
-    DistinctObject(String name) {
-      this.name = name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      DistinctObject that = (DistinctObject) o;
-      return name.equals(that.name);
-    }
-
-    @Override
-    public Type type() {
-      return Type.INDIVIDUAL;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(name);
-    }
-
-    @Override
-    public Tag tag() {
-      return Tag.DISTINCT_OBJECT;
     }
   }
 
