@@ -405,4 +405,8 @@ public abstract class Term {
     if (free.isEmpty()) return this;
     return of(Tag.ALL, this, free.toArray(new Term[0]));
   }
+
+  public final Term simplify() {
+    return this;
+  }
 }
