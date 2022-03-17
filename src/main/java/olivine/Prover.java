@@ -32,7 +32,7 @@ final class Prover {
     var stream =
         Prover.class
             .getClassLoader()
-            .getResourceAsStream("META-INF/maven/prover/prover/pom.properties");
+            .getResourceAsStream("META-INF/maven/olivine/olivine/pom.properties");
     if (stream == null) return null;
     properties.load(stream);
     return properties.getProperty("version");
