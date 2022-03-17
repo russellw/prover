@@ -6,6 +6,7 @@ public final class FMap {
   public static final FMap EMPTY = new FMap(null, null, null);
 
   public FMap add(Term key, Term value) {
+    assert key.size() == 0;
     return new FMap(this, key, value);
   }
 
@@ -16,7 +17,13 @@ public final class FMap {
   }
 
   public Term get(Term key) {
-    for (var m = this; m != EMPTY; m = m.parent) if (m.key.equals(key)) return m.value;
+    for (var map = this; map != EMPTY; map = map.parent) if (map.key.equals(key)) return map.value;
     return null;
+  }
+
+  public int size() {
+    var n = 0;
+    for (var map = this; map != EMPTY; map = map.parent) n++;
+    return n;
   }
 }

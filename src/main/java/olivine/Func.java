@@ -2,11 +2,13 @@ package olivine;
 
 public final class Func extends Term {
   final String name;
-  Type returnType;
-  Type[] params;
+  final Type returnType;
+  final Type[] params;
 
-  public Func(String name) {
+  public Func(String name, Type returnType, Type... params) {
     this.name = name;
+    this.returnType = returnType;
+    this.params = params;
   }
 
   @Override

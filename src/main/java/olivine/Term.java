@@ -3,6 +3,7 @@ package olivine;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 
 public abstract class Term {
   public abstract Tag tag();
@@ -324,5 +325,29 @@ public abstract class Term {
 
   public final Term implies(Term b) {
     return of(Tag.OR, of(Tag.NOT, this), b);
+  }
+
+  public final Term call(Term... args) {
+    assert args.length > 0;
+    var v = new Term[1 + args.length];
+    v[0] = this;
+    System.arraycopy(args, 0, v, 1, args.length);
+    return of(Tag.CALL, v);
+  }
+
+  public final Term map(Function<Term, Term> f) {
+    int n = size();
+    if (n == 0) return this;
+    var v = new Term[n];
+    for (var i = 0; i < n; i++) v[i] = f.apply(get(i));
+    return of(tag(), v);
+  }
+
+  public final Term replace(FMap map) {
+    if (size() == 0) {
+      var a = map.get(this);
+      return a != null ? a : this;
+    }
+    return map(a -> replace(map));
   }
 }

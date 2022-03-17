@@ -1,0 +1,68 @@
+package olivine;
+
+public final class Unification {
+  private Unification() {}
+
+  public static FMap match(FMap map, Term a, Term b) {
+    assert map != null;
+    if (a.equals(b)) return map;
+    if (!a.type().equals(b.type())) return null;
+    if (a.tag() == Tag.VAR) {
+      var a1 = map.get(a);
+      if (a1 != null) return a1.equals(b) ? map : null;
+      return map.add(a, b);
+    }
+    if (a.tag() != b.tag()) return null;
+    var n = a.size();
+    if (n == 0) return null;
+    if (n != b.size()) return null;
+    for (var i = 0; i < n; i++) {
+      map = match(map, a.get(i), b.get(i));
+      if (map == null) break;
+    }
+    return map;
+  }
+
+  private static boolean occurs(FMap map, Term a, Term b) {
+    assert a.tag() == Tag.VAR;
+    if (b.tag() == Tag.VAR) {
+      if (a == b) return true;
+      var b1 = map.get(b);
+      if (b1 != null) return occurs(map, a, b1);
+      return false;
+    }
+    var n = b.size();
+    for (var i = 0; i < n; i++) if (occurs(map, a, b.get(i))) return true;
+    return false;
+  }
+
+  public static FMap unifyVar(FMap map, Term a, Term b) {
+    assert a.tag() == Tag.VAR;
+
+    var a1 = map.get(a);
+    if (a1 != null) return unify(map, a1, b);
+
+    var b1 = map.get(b);
+    if (b1 != null) return unify(map, a, b1);
+
+    if (occurs(map, a, b)) return null;
+    return map.add(a, b);
+  }
+
+  public static FMap unify(FMap map, Term a, Term b) {
+    assert map != null;
+    if (a.equals(b)) return map;
+    if (!a.type().equals(b.type())) return null;
+    if (a.tag() == Tag.VAR) return unifyVar(map, a, b);
+    if (b.tag() == Tag.VAR) return unifyVar(map, b, a);
+    if (a.tag() != b.tag()) return null;
+    var n = a.size();
+    if (n == 0) return null;
+    if (n != b.size()) return null;
+    for (var i = 0; i < n; i++) {
+      map = unify(map, a.get(i), b.get(i));
+      if (map == null) break;
+    }
+    return map;
+  }
+}
