@@ -34,10 +34,4 @@ public final class FMap {
     sb.append('}');
     return sb.toString();
   }
-
-  public int size() {
-    var n = 0;
-    for (var map = this; map != EMPTY; map = map.parent) n++;
-    return n;
-  }
 }
