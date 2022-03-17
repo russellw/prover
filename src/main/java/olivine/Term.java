@@ -43,8 +43,12 @@ public abstract class Term {
           REMAINDER_EUCLIDEAN,
           REMAINDER_FLOOR,
           REMAINDER_TRUNCATE -> get(0).type();
-      case FALSE, TRUE, DISTINCT_OBJECT, INTEGER, VARIABLE -> throw new IllegalStateException(
-          tag().toString());
+      case GLOBAL_VAR,
+          FALSE,
+          TRUE,
+          DISTINCT_OBJECT,
+          INTEGER,
+          VAR -> throw new IllegalStateException(tag().toString());
       case CALL -> null;
       case RATIONAL -> null;
       case REAL -> null;

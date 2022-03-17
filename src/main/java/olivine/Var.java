@@ -1,9 +1,9 @@
 package olivine;
 
-public final class Variable extends Term {
+public final class Var extends Term {
   private final Type type;
 
-  public Variable(Type type) {
+  public Var(Type type) {
     assert type != Type.BOOLEAN;
     this.type = type;
   }
@@ -15,6 +15,6 @@ public final class Variable extends Term {
 
   @Override
   public Tag tag() {
-    return Tag.VARIABLE;
+    return Tag.VAR;
   }
 }

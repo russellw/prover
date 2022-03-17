@@ -6,5 +6,6 @@ public enum Kind {
   REAL,
   BOOLEAN,
   INDIVIDUAL,
-  FUNCTION,
+  FUNC,
+  OPAQUE,
 }
