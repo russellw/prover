@@ -284,6 +284,13 @@ public final class TptpParser {
     if (!eat(k)) throw err(String.format("expected %c", k));
   }
 
+  private String word() throws IOException {
+    if (tok != WORD) throw err("expected word");
+    var s = tokString;
+    lex();
+    return s;
+  }
+
   // types
   private Type atomicType() throws IOException {
     var s = tokString;
@@ -504,7 +511,120 @@ public final class TptpParser {
     }
   }
 
+  private Term infixUnary(MapString bound) throws IOException {
+    var a = atomicTerm(bound);
+    switch (tok) {
+      case '=':
+        lex();
+        return Term.of(Tag.EQUALS, a, atomicTerm(bound));
+      case NOT_EQUALS:
+        lex();
+        return Term.of(Tag.NOT, Term.of(Tag.EQUALS, a, atomicTerm(bound)));
+    }
+    return a;
+  }
+
+  private Term quant(MapString bound, Tag tag) throws IOException {
+    lex();
+    expect('[');
+    var v = new ArrayList<Term>();
+    do {
+      if (tok != VAR) throw err("expected variable");
+      var name = tokString;
+      lex();
+      var type = Type.INDIVIDUAL;
+      if (eat(':')) type = atomicType();
+      var x = new Var(type);
+      v.add(x);
+      // TODO: compare the speed of this implementation versus a hash table
+      bound = bound.add(name, x);
+    } while (eat(','));
+    expect(']');
+    expect(':');
+    return Term.of(tag, unary(bound), v);
+  }
+
+  private Term unary(MapString bound) throws IOException {
+    switch (tok) {
+      case '~':
+        lex();
+        return Term.of(Tag.NOT, unary(bound));
+      case '!':
+        return quant(bound, Tag.ALL);
+      case '?':
+        return quant(bound, Tag.EXISTS);
+    }
+    return infixUnary(bound);
+  }
+
+  private Term logicFormula1(MapString bound, Tag tag, Term a) throws IOException {
+    var k = tok;
+    var v = new ArrayList<Term>();
+    v.add(a);
+    while (eat(k)) v.add(unary(bound));
+    return Term.of(tag, v);
+  }
+
+  private Term logicFormula(MapString bound) throws IOException {
+    var a = unary(bound);
+    switch (tok) {
+      case '&':
+        return logicFormula1(bound, Tag.AND, a);
+      case '|':
+        return logicFormula1(bound, Tag.OR, a);
+      case EQV:
+        lex();
+        return Term.of(Tag.EQV, a, unary(bound));
+      case IMPLIES:
+        lex();
+        return a.implies(unary(bound));
+      case IMPLIESR:
+        lex();
+        return unary(bound).implies(a);
+      case NAND:
+        lex();
+        return Term.of(Tag.NOT, Term.of(Tag.AND, a, unary(bound)));
+      case NOR:
+        lex();
+        return Term.of(Tag.NOT, Term.of(Tag.OR, a, unary(bound)));
+      case XOR:
+        lex();
+        return Term.of(Tag.NOT, Term.of(Tag.EQV, a, unary(bound)));
+    }
+    return a;
+  }
+
   // top level
+  private String formulaName() throws IOException {
+    switch (tok) {
+      case WORD:
+      case INTEGER:
+        {
+          var s = tokString;
+          lex();
+          return s;
+        }
+    }
+    throw err("expected formula name");
+  }
+
+  private boolean selecting(String name) {
+    if (select == null) return true;
+    return select.contains(name);
+  }
+
+  private void skip() throws IOException {
+    switch (tok) {
+      case '(':
+        lex();
+        while (!eat(')')) skip();
+        return;
+      case -1:
+        throw err("unclosed '('");
+    }
+    lex();
+  }
+
   private TptpParser(String file, InputStream stream, Set<String> select, Problem problem)
       throws IOException {
     this.file = file;
@@ -518,6 +638,26 @@ public final class TptpParser {
     types = problem.types;
 
     lex();
+    while (tok >= 0) {
+      var s = word();
+      expect('(');
+      var name = word();
+      switch (s) {
+        case "cnf" -> {
+          expect(',');
+
+          word();
+          expect(',');
+
+          var a = logicFormula(null).quantify();
+        }
+        case "thf" -> throw new InappropriateException();
+        default -> throw err(String.format("'%s': unknown language", s));
+      }
+      if (tok == ',') do skip(); while (tok != ')');
+      expect(')');
+      expect('.');
+    }
   }
 
   public static Formula parse(String file, InputStream stream, List<Formula> formulas)

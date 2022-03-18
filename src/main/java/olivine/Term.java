@@ -400,6 +400,13 @@ public abstract class Term {
     return of(tag, w);
   }
 
+  public static Term of(Tag tag, Term a, List<Term> v) {
+    var w = new Term[1 + v.size()];
+    w[0] = a;
+    for (var i = 0; i < v.size(); i++) w[1 + i] = v.get(i);
+    return of(tag, w);
+  }
+
   public static Term[] remove(Term[] v, int i) {
     var w = new Term[v.length - 1];
     System.arraycopy(v, 0, w, 0, i);
@@ -413,7 +420,8 @@ public abstract class Term {
   }
 
   public final Term call(List<Term> args) {
-    return call(args.toArray(new Term[0]));
+    assert args.size() > 0;
+    return of(Tag.CALL, this, args);
   }
 
   public Term map(Function<Term, Term> f) {
