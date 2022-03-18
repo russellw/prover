@@ -15,6 +15,20 @@ public abstract class Term {
     throw new UnsupportedOperationException(tag().toString());
   }
 
+  public void setType(Type type) {
+    // A statement about the return type of a function call, can directly imply the type of the
+    // function. This generally does not
+    // apply to basic operators; in most cases, they already have a definite type. That is not
+    // entirely true of the arithmetic
+    // operators, but we don't try to do global type inference to figure those out.
+    if (tag() == Tag.CALL) {
+      var v = new Type[size()];
+      v[0] = type;
+      for (var i = 1; i < v.length; i++) v[i] = get(i).type();
+      get(0).setType(Type.of(Kind.FUNC, v));
+    }
+  }
+
   public final void check(Type expected) {
     var type = type();
     if (type == null) throw new TypeException(String.format("%s: null type", this));
@@ -53,14 +67,28 @@ public abstract class Term {
       }
       case EQUALS -> {
         type = get(0).type();
+        switch (type.kind()) {
+          case BOOLEAN, FUNC -> throw new TypeException(
+              String.format("%s: type error: %s", this, type));
+        }
         for (var i = 0; i < n; i++) get(i).check(type);
       }
       case ALL, EXISTS -> {
         for (var i = 1; i < n; i++) get(i).check(get(i).type());
         get(0).check(Type.BOOLEAN);
       }
+      case CALL -> {
+        type = get(0).type();
+        if (type.kind() != Kind.FUNC)
+          throw new TypeException(String.format("%s: type error: %s", this, type));
+        assert type.get(0).equals(expected);
+        if (n != type.size())
+          throw new TypeException(
+              String.format("%s: arity mismatch: %d != %d", this, n, type.size()));
+        for (var i = 1; i < n; i++) get(i).check(type.get(i));
+      }
       case FUNC -> {
-        var f = (Func) this;
+        assert type.kind() == Kind.FUNC;
       }
       case LESS_EQUALS,
           LESS,

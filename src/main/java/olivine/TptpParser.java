@@ -329,6 +329,15 @@ public final class TptpParser {
   }
 
   // terms
+  private Term global(String name, boolean func) {
+    var a = globals.get(name);
+    if (a == null) {
+      a = func ? new Func(name) : new GlobalVar(name);
+      globals.put(name, a);
+    }
+    return a;
+  }
+
   private void args(Map<String, Var> bound, List<Term> v) throws IOException {
     expect('(');
     do v.add(atomicTerm(bound));
@@ -479,20 +488,11 @@ public final class TptpParser {
         }
       case WORD:
         {
+          var a = global(s, tok == '(');
           if (tok == '(') {
             var r = new ArrayList<Term>();
             args(bound, r);
-            var a = globals.get(s);
-            if (a == null) {
-              a = new Func(s);
-              globals.put(s, a);
-            }
             return a.call(r);
-          }
-          var a = globals.get(s);
-          if (a == null) {
-            a = new GlobalVar(s);
-            globals.put(s, a);
           }
           return a;
         }
@@ -536,14 +536,13 @@ public final class TptpParser {
   }
 
   private Term unary(Map<String, Var> bound) throws IOException {
+    Term a;
     switch (tok) {
       case '(':
-        {
-          lex();
-          var a = logicFormula(bound);
-          expect(')');
-          return a;
-        }
+        lex();
+        a = logicFormula(bound);
+        expect(')');
+        break;
       case '~':
         lex();
         return Term.of(Tag.NOT, unary(bound));
@@ -551,8 +550,12 @@ public final class TptpParser {
         return quant(bound, Tag.ALL);
       case '?':
         return quant(bound, Tag.EXISTS);
+      default:
+        a = infixUnary(bound);
+        break;
     }
-    return infixUnary(bound);
+    a.setType(Type.BOOLEAN);
+    return a;
   }
 
   private Term logicFormula1(Map<String, Var> bound, Tag tag, Term a) throws IOException {
@@ -614,7 +617,7 @@ public final class TptpParser {
   private void collect(String name, boolean negatedConjecture, Term a) {
     if (!selecting(name)) return;
     a.check(Type.BOOLEAN);
-    cnf.add(new Formula(name, false, a, file));
+    cnf.add(new Formula(name, negatedConjecture, a, file));
   }
 
   private void skip() throws IOException {
@@ -689,7 +692,9 @@ public final class TptpParser {
                 // required at this point, so accept this and move on.
               } else {
                 // The symbol is the name of a global  with the specified type.
-                topLevelType();
+                var type = topLevelType();
+                var a = global(name, type.kind() == Kind.FUNC);
+                a.setType(type);
               }
 
               while (parens-- > 0) expect(')');

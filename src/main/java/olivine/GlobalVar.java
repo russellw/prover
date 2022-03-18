@@ -4,6 +4,12 @@ public final class GlobalVar extends Term {
   final String name;
   private Type type;
 
+  @Override
+  public void setType(Type type) {
+    if (this.type == null) this.type = type;
+    check(type);
+  }
+
   public GlobalVar(String name) {
     this.name = name;
   }

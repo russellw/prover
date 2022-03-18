@@ -9,6 +9,16 @@ public final class Func extends Term {
     this.name = name;
   }
 
+  @Override
+  public void setType(Type type) {
+    if (returnType == null) {
+      returnType = type.get(0);
+      params = new Type[type.size() - 1];
+      for (var i = 0; i < params.length; i++) params[i] = type.get(1 + i);
+    }
+    check(type);
+  }
+
   public Func(String name, Type returnType, Type... params) {
     this.name = name;
     this.returnType = returnType;
