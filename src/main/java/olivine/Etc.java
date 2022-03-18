@@ -9,6 +9,30 @@ import java.util.Properties;
 public final class Etc {
   private Etc() {}
 
+  public static boolean isDigit(int c) {
+    return '0' <= c && c <= '9';
+  }
+
+  public static boolean isUpper(int c) {
+    return 'A' <= c && c <= 'Z';
+  }
+
+  public static boolean isAlpha(int c) {
+    return isLower(c) || isUpper(c);
+  }
+
+  public static boolean isIdPart(int c) {
+    return isAlnum(c) || c == '_';
+  }
+
+  public static boolean isAlnum(int c) {
+    return isAlpha(c) || isDigit(c);
+  }
+
+  public static boolean isLower(int c) {
+    return 'a' <= c && c <= 'z';
+  }
+
   public static String extension(String file) {
     var i = file.lastIndexOf('.');
     if (i < 0) return "";
