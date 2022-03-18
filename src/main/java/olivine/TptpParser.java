@@ -95,9 +95,9 @@ public final class TptpParser {
           tok = DISTINCT_OBJECT;
         }
         case '$' -> {
+          c = stream.read();
           var sb = new StringBuilder();
-          do readc(sb);
-          while (Etc.isIdPart(c));
+          while (Etc.isIdPart(c)) readc(sb);
           tok = DEFINED_WORD;
           tokString = sb.toString();
         }
@@ -111,23 +111,23 @@ public final class TptpParser {
           do readc(sb);
           while (Etc.isDigit(c));
           switch (c) {
-            case '.':
+            case '.' -> {
               do readc(sb);
               while (Etc.isDigit(c));
-              break;
-            case '/':
+            }
+            case '/' -> {
               do readc(sb);
               while (Etc.isDigit(c));
               tok = RATIONAL;
               tokString = sb.toString();
               return;
-            case 'E':
-            case 'e':
-              break;
-            default:
+            }
+            case 'E', 'e' -> {}
+            default -> {
               tok = INTEGER;
               tokString = sb.toString();
               return;
+            }
           }
           if (c == 'e' || c == 'E') readc(sb);
           if (c == '+' || c == '-') readc(sb);
@@ -281,6 +281,24 @@ public final class TptpParser {
   }
 
   // types
+  private Type atomicType() throws IOException {
+    switch (tok) {
+      case DEFINED_WORD -> {
+        var s = tokString;
+        lex();
+        return switch (s) {
+          case "o" -> Type.BOOLEAN;
+          case "i" -> Type.INDIVIDUAL;
+          case "int" -> Type.INTEGER;
+          case "rat" -> Type.RATIONAL;
+          case "real" -> Type.REAL;
+          case "tType" -> throw new InappropriateException();
+          default -> throw err("unknown type");
+        };
+      }
+    }
+    throw err("expected type");
+  }
 
   // top level
   private TptpParser(String file, InputStream stream, Set<String> select, Problem problem)
