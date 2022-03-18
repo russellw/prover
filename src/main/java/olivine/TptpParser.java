@@ -23,28 +23,15 @@ public final class TptpParser {
   private static final int XOR = -15;
 
   // Problem state
-  private static final class Problem {
-    final Map<String, OpaqueType> types = new HashMap<>();
-    final Map<String, Term> globals = new HashMap<>();
-    final Map<String, DistinctObject> distinctObjects = new HashMap<>();
-    Formula negatedConjecture;
-    final List<Formula> formulas;
-
-    Problem(List<Formula> formulas) {
-      this.formulas = formulas;
-    }
-  }
-
+  final CNF cnf;
   final Map<String, OpaqueType> types;
-  final Map<String, Term> globals;
   final Map<String, DistinctObject> distinctObjects;
-  final List<Formula> formulas;
+  final Map<String, Term> globals;
 
   // File state
   private final String file;
   private final InputStream stream;
   private final Set<String> select;
-  private final Problem problem;
   private int c;
   private int line = 1;
   private int tok;
@@ -625,17 +612,22 @@ public final class TptpParser {
     lex();
   }
 
-  private TptpParser(String file, InputStream stream, Set<String> select, Problem problem)
+  private TptpParser(
+      String file,
+      InputStream stream,
+      CNF cnf,
+      Map<String, OpaqueType> types,
+      Map<String, DistinctObject> distinctObjects,
+      Map<String, Term> globals,
+      Set<String> select)
       throws IOException {
     this.file = file;
     this.stream = stream;
+    this.cnf = cnf;
+    this.types = types;
+    this.distinctObjects = distinctObjects;
+    this.globals = globals;
     this.select = select;
-    this.problem = problem;
-
-    distinctObjects = problem.distinctObjects;
-    formulas = problem.formulas;
-    globals = problem.globals;
-    types = problem.types;
 
     lex();
     while (tok >= 0) {
@@ -649,7 +641,51 @@ public final class TptpParser {
           word();
           expect(',');
 
+          // we could treat CNF input specially as clauses, but it is equally correct and simpler
+          // to just treat it as formulas
           var a = logicFormula(null).quantify();
+          if (selecting(name)) cnf.add(new Formula(name, false, a, file));
+        }
+        case "fof", "tff", "tcf" -> {
+          expect(',');
+
+          var role = word();
+          expect(',');
+
+          if (role.equals("type")) {
+            // either naming a type, or typing a global
+            var parens = 0;
+            while (eat('(')) parens++;
+
+            name = word();
+            expect(':');
+
+            if (tok == DEFINED_WORD && tokString.equals("tType")) {
+              lex();
+              if (tok == '>')
+                // this is some kind of higher-order construct that Olivine doesn't understand
+                throw new InappropriateException();
+              // Otherwise, the symbol will be simply used as the name of a type. No particular
+              // action is
+              // required at this point, so accept this and move on.
+            } else {
+              // The symbol is the name of a global  with the specified type.
+            }
+
+            while (parens-- > 0) expect(')');
+          }
+
+          // formula
+          var negatedConjecture = false;
+          var a = logicFormula(MapString.EMPTY);
+          assert a.freeVars().equals(Set.of());
+          if (selecting(name)) {
+            if (role.equals("conjecture")) {
+              negatedConjecture = true;
+              a = Term.of(Tag.NOT, a);
+            }
+            cnf.add(new Formula(name, false, a, file));
+          }
         }
         case "thf" -> throw new InappropriateException();
         default -> throw err(String.format("'%s': unknown language", s));
@@ -660,10 +696,7 @@ public final class TptpParser {
     }
   }
 
-  public static Formula parse(String file, InputStream stream, List<Formula> formulas)
-      throws IOException {
-    var problem = new Problem(formulas);
-    new TptpParser(file, stream, null, problem);
-    return problem.negatedConjecture;
+  public static void parse(String file, InputStream stream, CNF cnf) throws IOException {
+    new TptpParser(file, stream, cnf, new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
   }
 }
