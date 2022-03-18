@@ -329,27 +329,27 @@ public final class TptpParser {
   }
 
   // terms
-  private void args(MapString bound, List<Term> v) throws IOException {
+  private void args(Map<String, Var> bound, List<Term> v) throws IOException {
     expect('(');
     do v.add(atomicTerm(bound));
     while (eat(','));
     expect(')');
   }
 
-  private void args(MapString bound, List<Term> v, int arity) throws IOException {
+  private void args(Map<String, Var> bound, List<Term> v, int arity) throws IOException {
     int n = v.size();
     args(bound, v);
     n = v.size() - n;
     if (n != arity) throw err(String.format("arg count: %d != %d", n, arity));
   }
 
-  private Term definedAtomicTerm(MapString bound, Tag tag, int arity) throws IOException {
+  private Term definedAtomicTerm(Map<String, Var> bound, Tag tag, int arity) throws IOException {
     var r = new ArrayList<Term>();
     args(bound, r, arity);
     return Term.of(tag, r);
   }
 
-  private Term atomicTerm(MapString bound) throws IOException {
+  private Term atomicTerm(Map<String, Var> bound) throws IOException {
     var k = tok;
     var s = tokString;
     lex();
@@ -501,7 +501,7 @@ public final class TptpParser {
     }
   }
 
-  private Term infixUnary(MapString bound) throws IOException {
+  private Term infixUnary(Map<String, Var> bound) throws IOException {
     var a = atomicTerm(bound);
     switch (tok) {
       case '=':
@@ -514,10 +514,11 @@ public final class TptpParser {
     return a;
   }
 
-  private Term quant(MapString bound, Tag tag) throws IOException {
+  private Term quant(Map<String, Var> bound, Tag tag) throws IOException {
     lex();
     expect('[');
     var v = new ArrayList<Term>();
+    bound = new HashMap<>(bound);
     do {
       if (tok != VAR) throw err("expected variable");
       var name = tokString;
@@ -526,15 +527,14 @@ public final class TptpParser {
       if (eat(':')) type = atomicType();
       var x = new Var(type);
       v.add(x);
-      // TODO: compare the speed of this implementation versus a hash table
-      bound = bound.add(name, x);
+      bound.put(name, x);
     } while (eat(','));
     expect(']');
     expect(':');
     return Term.of(tag, unary(bound), v);
   }
 
-  private Term unary(MapString bound) throws IOException {
+  private Term unary(Map<String, Var> bound) throws IOException {
     switch (tok) {
       case '(':
         {
@@ -554,7 +554,7 @@ public final class TptpParser {
     return infixUnary(bound);
   }
 
-  private Term logicFormula1(MapString bound, Tag tag, Term a) throws IOException {
+  private Term logicFormula1(Map<String, Var> bound, Tag tag, Term a) throws IOException {
     var k = tok;
     var v = new ArrayList<Term>();
     v.add(a);
@@ -562,7 +562,7 @@ public final class TptpParser {
     return Term.of(tag, v);
   }
 
-  private Term logicFormula(MapString bound) throws IOException {
+  private Term logicFormula(Map<String, Var> bound) throws IOException {
     var a = unary(bound);
     switch (tok) {
       case '&':
@@ -690,7 +690,7 @@ public final class TptpParser {
 
           // formula
           var negatedConjecture = false;
-          var a = logicFormula(MapString.EMPTY);
+          var a = logicFormula(new HashMap<>());
           assert a.freeVars().equals(Set.of());
           if (selecting(name)) {
             if (role.equals("conjecture")) {
