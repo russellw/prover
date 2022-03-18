@@ -1,16 +1,16 @@
 package olivine;
 
-public final class FSet {
-  private final FSet parent;
+public final class SetTerm {
+  private final SetTerm parent;
   private final Term value;
-  public static final FSet EMPTY = new FSet(null, null);
+  public static final SetTerm EMPTY = new SetTerm(null, null);
 
-  public FSet add(Term value) {
+  public SetTerm add(Term value) {
     assert value.tag() == Tag.VAR;
-    return new FSet(this, value);
+    return new SetTerm(this, value);
   }
 
-  private FSet(FSet parent, Term value) {
+  private SetTerm(SetTerm parent, Term value) {
     this.parent = parent;
     this.value = value;
   }

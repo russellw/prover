@@ -424,7 +424,7 @@ public abstract class Term {
     return of(tag(), v);
   }
 
-  public final Term replace(FMap map) {
+  public final Term replace(MapTerm map) {
     if (size() == 0) {
       var a = map.get(this);
       assert !Objects.equals(a, this);
@@ -434,7 +434,7 @@ public abstract class Term {
     return map(a -> a.replace(map));
   }
 
-  private void freeVars(FSet bound, Set<Term> free) {
+  private void freeVars(SetTerm bound, Set<Term> free) {
     switch (tag()) {
       case VAR -> {
         if (!bound.contains(this)) free.add(this);
@@ -453,7 +453,7 @@ public abstract class Term {
 
   public final Set<Term> freeVars() {
     var free = new LinkedHashSet<Term>();
-    freeVars(FSet.EMPTY, free);
+    freeVars(SetTerm.EMPTY, free);
     return free;
   }
 

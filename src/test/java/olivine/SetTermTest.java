@@ -4,14 +4,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class FSetTest {
+public class SetTermTest {
   @Test
   public void contains() {
     var x = new Var(Type.INTEGER);
     var y = new Var(Type.INTEGER);
     var z = new Var(Type.INTEGER);
 
-    var set = FSet.EMPTY;
+    var set = SetTerm.EMPTY;
     assert !set.contains(x);
     assert !set.contains(y);
     assert !set.contains(z);
@@ -26,6 +26,6 @@ public class FSetTest {
     assert set.contains(y);
     assert !set.contains(z);
 
-    assertNotEquals(set, FSet.EMPTY);
+    assertNotEquals(set, SetTerm.EMPTY);
   }
 }

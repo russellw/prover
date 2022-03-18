@@ -1,17 +1,17 @@
 package olivine;
 
-public final class FMap {
-  private final FMap parent;
+public final class MapTerm {
+  private final MapTerm parent;
   private final Term key;
   private final Term value;
-  public static final FMap EMPTY = new FMap(null, null, null);
+  public static final MapTerm EMPTY = new MapTerm(null, null, null);
 
-  public FMap add(Term key, Term value) {
+  public MapTerm add(Term key, Term value) {
     assert key.size() == 0;
-    return new FMap(this, key, value);
+    return new MapTerm(this, key, value);
   }
 
-  private FMap(FMap parent, Term key, Term value) {
+  private MapTerm(MapTerm parent, Term key, Term value) {
     this.parent = parent;
     this.key = key;
     this.value = value;
