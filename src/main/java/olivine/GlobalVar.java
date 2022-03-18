@@ -2,7 +2,11 @@ package olivine;
 
 public final class GlobalVar extends Term {
   final String name;
-  private final Type type;
+  private Type type;
+
+  public GlobalVar(String name) {
+    this.name = name;
+  }
 
   public GlobalVar(String name, Type type) {
     this.name = name;

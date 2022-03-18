@@ -1,5 +1,7 @@
 package olivine;
 
+import java.util.List;
+
 public abstract class Type {
   abstract Kind kind();
 
@@ -11,8 +13,12 @@ public abstract class Type {
     throw new UnsupportedOperationException(kind().toString());
   }
 
-  public static Type of(Kind kind, Type[] v) {
+  public static Type of(Kind kind, Type... v) {
     return new Types(kind, v);
+  }
+
+  public static Type of(Kind kind, List<Type> v) {
+    return new Types(kind, v.toArray(new Type[0]));
   }
 
   public static final Type BOOLEAN =

@@ -2,8 +2,12 @@ package olivine;
 
 public final class Func extends Term {
   final String name;
-  final Type returnType;
-  final Type[] params;
+  Type returnType;
+  Type[] params;
+
+  public Func(String name) {
+    this.name = name;
+  }
 
   public Func(String name, Type returnType, Type... params) {
     this.name = name;
@@ -26,6 +30,6 @@ public final class Func extends Term {
 
   @Override
   public Tag tag() {
-    return Tag.GLOBAL_VAR;
+    return Tag.FUNC;
   }
 }

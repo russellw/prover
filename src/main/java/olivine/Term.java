@@ -44,14 +44,15 @@ public abstract class Term {
           REMAINDER_FLOOR,
           REMAINDER_TRUNCATE -> get(0).type();
       case GLOBAL_VAR,
+          CAST,
+          RATIONAL,
+          FUNC,
           FALSE,
           TRUE,
           DISTINCT_OBJECT,
           INTEGER,
           VAR -> throw new IllegalStateException(tag().toString());
       case CALL -> ((Func) get(0)).returnType;
-      case RATIONAL -> null;
-      case REAL -> null;
     };
   }
 
@@ -98,6 +99,15 @@ public abstract class Term {
     return new Term2(tag, a, b);
   }
 
+  public static Term of(Tag tag, List<Term> v) {
+    return switch (v.size()) {
+      case 0 -> throw new IllegalArgumentException(tag.toString());
+      case 1 -> new Term1(tag, v.get(0));
+      case 2 -> new Term2(tag, v.get(0), v.get(1));
+      default -> new Terms(tag, v.toArray(new Term[0]));
+    };
+  }
+
   public static Term of(Tag tag, Term... v) {
     return switch (v.length) {
       case 0 -> throw new IllegalArgumentException(tag.toString());
@@ -107,12 +117,16 @@ public abstract class Term {
     };
   }
 
+  public static Term cast(Type type, Term a) {
+    return new Cast(type, a);
+  }
+
   public static Term integer(BigInteger value) {
     return new IntegerTerm(value);
   }
 
-  public static Term rational(Tag tag, BigRational value) {
-    return new RationalTerm(tag, value);
+  public static Term rational(Type type, BigRational value) {
+    return new RationalTerm(type, value);
   }
 
   public BigInteger integerValue() {
@@ -165,12 +179,17 @@ public abstract class Term {
   }
 
   private static final class RationalTerm extends Term {
-    final Tag tag;
+    final Type type;
     final BigRational value;
 
-    RationalTerm(Tag tag, BigRational value) {
-      this.tag = tag;
+    RationalTerm(Type type, BigRational value) {
+      this.type = type;
       this.value = value;
+    }
+
+    @Override
+    public Type type() {
+      return type;
     }
 
     @Override
@@ -185,7 +204,7 @@ public abstract class Term {
 
     @Override
     public Tag tag() {
-      return tag;
+      return Tag.RATIONAL;
     }
 
     @Override
@@ -199,6 +218,55 @@ public abstract class Term {
     @Override
     public int hashCode() {
       return Objects.hash(value);
+    }
+  }
+
+  private static final class Cast extends Term {
+    final Type type;
+    final Term a;
+
+    @Override
+    public Term map(Function<Term, Term> f) {
+      return new Cast(type, f.apply(a));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Cast cast = (Cast) o;
+      return type.equals(cast.type) && a.equals(cast.a);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(type, a);
+    }
+
+    Cast(Type type, Term a) {
+      this.type = type;
+      this.a = a;
+    }
+
+    @Override
+    public Type type() {
+      return type;
+    }
+
+    @Override
+    public Term get(int i) {
+      assert 0 <= i && i < size();
+      return a;
+    }
+
+    @Override
+    public int size() {
+      return 1;
+    }
+
+    @Override
+    public Tag tag() {
+      return Tag.CAST;
     }
   }
 
@@ -344,7 +412,11 @@ public abstract class Term {
     return of(Tag.CALL, this, args);
   }
 
-  public final Term map(Function<Term, Term> f) {
+  public final Term call(List<Term> args) {
+    return call(args.toArray(new Term[0]));
+  }
+
+  public Term map(Function<Term, Term> f) {
     int n = size();
     if (n == 0) return this;
     var v = new Term[n];

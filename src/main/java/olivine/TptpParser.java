@@ -2,10 +2,8 @@ package olivine;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 
 public final class TptpParser {
   // Tokens
@@ -37,6 +35,11 @@ public final class TptpParser {
     }
   }
 
+  final Map<String, OpaqueType> types;
+  final Map<String, Term> globals;
+  final Map<String, DistinctObject> distinctObjects;
+  final List<Formula> formulas;
+
   // File state
   private final String file;
   private final InputStream stream;
@@ -46,6 +49,7 @@ public final class TptpParser {
   private int line = 1;
   private int tok;
   private String tokString;
+  private final Map<String, Var> free = new HashMap<>();
 
   private IOException err(String s) {
     return new IOException(String.format("%s:%d: %s", file, line, s));
@@ -282,9 +286,9 @@ public final class TptpParser {
 
   // types
   private Type atomicType() throws IOException {
+    var s = tokString;
     switch (tok) {
       case DEFINED_WORD -> {
-        var s = tokString;
         lex();
         return switch (s) {
           case "o" -> Type.BOOLEAN;
@@ -293,11 +297,211 @@ public final class TptpParser {
           case "rat" -> Type.RATIONAL;
           case "real" -> Type.REAL;
           case "tType" -> throw new InappropriateException();
-          default -> throw err("unknown type");
+          default -> throw err(String.format("'$%s': unknown type", s));
         };
+      }
+      case WORD -> {
+        lex();
+        var type = types.get(s);
+        if (type == null) {
+          type = new OpaqueType(s);
+          types.put(s, type);
+        }
+        return type;
       }
     }
     throw err("expected type");
+  }
+
+  private Type topLevelType() throws IOException {
+    if (eat('(')) {
+      var v = new ArrayList<Type>();
+      v.add(null);
+      do v.add(atomicType());
+      while (eat('*'));
+      expect(')');
+      expect('>');
+      var returnType = atomicType();
+      v.set(0, returnType);
+      return Type.of(Kind.FUNC, v);
+    }
+    var type = atomicType();
+    if (eat('>')) {
+      var returnType = atomicType();
+      return Type.of(Kind.FUNC, returnType, type);
+    }
+    return type;
+  }
+
+  // terms
+  private void args(MapString bound, List<Term> v) throws IOException {
+    expect('(');
+    do v.add(atomicTerm(bound));
+    while (eat(','));
+    expect(')');
+  }
+
+  private void args(MapString bound, List<Term> v, int arity) throws IOException {
+    int n = v.size();
+    args(bound, v);
+    n = v.size() - n;
+    if (n != arity) throw err(String.format("arg count: %d != %d", n, arity));
+  }
+
+  private Term definedAtomicTerm(MapString bound, Tag tag, int arity) throws IOException {
+    var r = new ArrayList<Term>();
+    args(bound, r, arity);
+    return Term.of(tag, r);
+  }
+
+  private Term atomicTerm(MapString bound) throws IOException {
+    var k = tok;
+    var s = tokString;
+    lex();
+    switch (k) {
+      case '!':
+      case '?':
+      case '[':
+        throw new InappropriateException();
+      case DEFINED_WORD:
+        switch (s) {
+          case "ceiling":
+            return definedAtomicTerm(bound, Tag.CEILING, 1);
+          case "difference":
+            return definedAtomicTerm(bound, Tag.SUBTRACT, 2);
+          case "distinct":
+            {
+              var v = new ArrayList<Term>();
+              args(bound, v);
+              var inequalities = new ArrayList<Term>();
+              for (var i = 0; i < v.size(); i++)
+                for (var j = 0; j < v.size(); j++)
+                  if (i != j)
+                    inequalities.add(Term.of(Tag.NOT, Term.of(Tag.EQUALS, v.get(i), v.get(j))));
+              return Term.of(Tag.AND, inequalities);
+            }
+          case "false":
+            return Term.FALSE;
+          case "floor":
+            return definedAtomicTerm(bound, Tag.FLOOR, 1);
+          case "greater":
+            {
+              var v = new ArrayList<Term>();
+              args(bound, v, 2);
+              return Term.of(Tag.LESS, v.get(1), v.get(0));
+            }
+          case "greatereq":
+            {
+              var v = new ArrayList<Term>();
+              args(bound, v, 2);
+              return Term.of(Tag.LESS_EQUALS, v.get(1), v.get(0));
+            }
+          case "is_int":
+            return definedAtomicTerm(bound, Tag.IS_INTEGER, 1);
+          case "is_rat":
+            return definedAtomicTerm(bound, Tag.IS_RATIONAL, 1);
+          case "less":
+            return definedAtomicTerm(bound, Tag.LESS, 2);
+          case "lesseq":
+            return definedAtomicTerm(bound, Tag.LESS_EQUALS, 2);
+          case "product":
+            return definedAtomicTerm(bound, Tag.MULTIPLY, 2);
+          case "quotient":
+            return definedAtomicTerm(bound, Tag.DIVIDE, 2);
+          case "quotient_e":
+            return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN, 2);
+          case "quotient_f":
+            return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR, 2);
+          case "quotient_t":
+            return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE, 2);
+          case "remainder_e":
+            return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN, 2);
+          case "remainder_f":
+            return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR, 2);
+          case "remainder_t":
+            return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE, 2);
+          case "round":
+            return definedAtomicTerm(bound, Tag.ROUND, 1);
+          case "sum":
+            return definedAtomicTerm(bound, Tag.ADD, 2);
+          case "to_int":
+            {
+              var v = new ArrayList<Term>();
+              args(bound, v, 1);
+              return Term.cast(Type.INTEGER, v.get(0));
+            }
+          case "to_rat":
+            {
+              var v = new ArrayList<Term>();
+              args(bound, v, 1);
+              return Term.cast(Type.RATIONAL, v.get(0));
+            }
+          case "to_real":
+            {
+              var v = new ArrayList<Term>();
+              args(bound, v, 1);
+              return Term.cast(Type.REAL, v.get(0));
+            }
+          case "true":
+            return Term.TRUE;
+          case "truncate":
+            return definedAtomicTerm(bound, Tag.TRUNCATE, 1);
+          case "uminus":
+            return definedAtomicTerm(bound, Tag.NEGATE, 1);
+          default:
+            throw err(String.format("'$%s': unknown word", s));
+        }
+      case DISTINCT_OBJECT:
+        {
+          var a = distinctObjects.get(s);
+          if (a == null) {
+            a = new DistinctObject(s);
+            distinctObjects.put(s, a);
+          }
+          return a;
+        }
+      case INTEGER:
+        return Term.integer(new BigInteger(s));
+      case RATIONAL:
+        return Term.rational(Type.RATIONAL, BigRational.of(s));
+      case REAL:
+        return Term.rational(Type.REAL, BigRational.ofDecimal(s));
+      case VAR:
+        {
+          if (bound == null) {
+            var a = free.get(s);
+            if (a == null) {
+              a = new Var(Type.INDIVIDUAL);
+              free.put(s, a);
+            }
+            return a;
+          }
+          var a = bound.get(s);
+          if (a == null) throw err(String.format("'%s': unknown variable", s));
+          return a;
+        }
+      case WORD:
+        {
+          if (tok == '(') {
+            var r = new ArrayList<Term>();
+            args(bound, r);
+            var a = globals.get(s);
+            if (a == null) {
+              a = new Func(s);
+              globals.put(s, a);
+            }
+            return a.call(r);
+          }
+          var a = globals.get(s);
+          if (a == null) {
+            a = new GlobalVar(s);
+            globals.put(s, a);
+          }
+          return a;
+        }
+      default:
+        throw err("expected term");
+    }
   }
 
   // top level
@@ -307,6 +511,12 @@ public final class TptpParser {
     this.stream = stream;
     this.select = select;
     this.problem = problem;
+
+    distinctObjects = problem.distinctObjects;
+    formulas = problem.formulas;
+    globals = problem.globals;
+    types = problem.types;
+
     lex();
   }
 
