@@ -611,6 +611,12 @@ public final class TptpParser {
     return select.contains(name);
   }
 
+  private void collect(String name, boolean negatedConjecture, Term a) {
+    if (!selecting(name)) return;
+    a.check(Type.BOOLEAN);
+    cnf.add(new Formula(name, false, a, file));
+  }
+
   private void skip() throws IOException {
     switch (tok) {
       case '(':
@@ -641,94 +647,98 @@ public final class TptpParser {
     this.select = select;
     c = stream.read();
     lex();
-    while (tok != -1) {
-      var s = word();
-      expect('(');
-      var name = formulaName();
-      switch (s) {
-        case "cnf" -> {
-          expect(',');
+    try {
+      while (tok != -1) {
+        var s = word();
+        expect('(');
+        var name = formulaName();
+        switch (s) {
+          case "cnf" -> {
+            expect(',');
 
-          word();
-          expect(',');
+            word();
+            expect(',');
 
-          // we could treat CNF input specially as clauses, but it is equally correct and simpler
-          // to just treat it as formulas
-          var a = logicFormula(null).quantify();
-          if (selecting(name)) cnf.add(new Formula(name, false, a, file));
-        }
-        case "fof", "tff", "tcf" -> {
-          expect(',');
+            // we could treat CNF input specially as clauses, but it is equally correct and simpler
+            // to just treat it as formulas
+            var a = logicFormula(null).quantify();
+            collect(name, false, a);
+          }
+          case "fof", "tff", "tcf" -> {
+            expect(',');
 
-          var role = word();
-          expect(',');
+            var role = word();
+            expect(',');
 
-          if (role.equals("type")) {
-            // either naming a type, or typing a global
-            var parens = 0;
-            while (eat('(')) parens++;
+            if (role.equals("type")) {
+              // either naming a type, or typing a global
+              var parens = 0;
+              while (eat('(')) parens++;
 
-            name = word();
-            expect(':');
+              name = word();
+              expect(':');
 
-            if (tok == DEFINED_WORD && tokString.equals("tType")) {
-              lex();
-              if (tok == '>')
-                // this is some higher-order construct that Olivine doesn't understand
-                throw new InappropriateException();
+              if (tok == DEFINED_WORD && tokString.equals("tType")) {
+                lex();
+                if (tok == '>')
+                  // this is some higher-order construct that Olivine doesn't understand
+                  throw new InappropriateException();
 
-              // Otherwise, the symbol will be simply used as the name of a type. No particular
-              // action is
-              // required at this point, so accept this and move on.
-            } else {
-              // The symbol is the name of a global  with the specified type.
-              topLevelType();
+                // Otherwise, the symbol will be simply used as the name of a type. No particular
+                // action is
+                // required at this point, so accept this and move on.
+              } else {
+                // The symbol is the name of a global  with the specified type.
+                topLevelType();
+              }
+
+              while (parens-- > 0) expect(')');
+              break;
             }
 
-            while (parens-- > 0) expect(')');
-            break;
-          }
-
-          // formula
-          var negatedConjecture = false;
-          var a = logicFormula(Map.of());
-          assert a.freeVars().equals(Set.of());
-          if (selecting(name)) {
-            if (role.equals("conjecture")) {
-              negatedConjecture = true;
-              a = Term.of(Tag.NOT, a);
-            }
-            cnf.add(new Formula(name, negatedConjecture, a, file));
-          }
-        }
-        case "thf" -> throw new InappropriateException();
-        case "include" -> {
-          var dir = System.getenv("TPTP");
-          if (dir == null) throw err("TPTP environment variable not set");
-          var file1 = Path.of(dir, name).toString();
-          var select1 = select;
-          if (eat(',')) {
-            if (tok == WORD && tokString.equals("all")) {
-              lex();
-            } else {
-              expect('[');
-              select1 = new HashSet<>();
-              do {
-                var name1 = formulaName();
-                if (selecting(name1)) select1.add(name1);
-              } while (eat(','));
-              expect(']');
+            // formula
+            var negatedConjecture = false;
+            var a = logicFormula(Map.of());
+            assert a.freeVars().equals(Set.of());
+            if (selecting(name)) {
+              if (role.equals("conjecture")) {
+                negatedConjecture = true;
+                a = Term.of(Tag.NOT, a);
+              }
+              collect(name, negatedConjecture, a);
             }
           }
-          try (var stream1 = new BufferedInputStream(new FileInputStream(file1))) {
-            new TptpParser(file1, stream1, cnf, types, distinctObjects, globals, select1);
+          case "thf" -> throw new InappropriateException();
+          case "include" -> {
+            var dir = System.getenv("TPTP");
+            if (dir == null) throw err("TPTP environment variable not set");
+            var file1 = Path.of(dir, name).toString();
+            var select1 = select;
+            if (eat(',')) {
+              if (tok == WORD && tokString.equals("all")) {
+                lex();
+              } else {
+                expect('[');
+                select1 = new HashSet<>();
+                do {
+                  var name1 = formulaName();
+                  if (selecting(name1)) select1.add(name1);
+                } while (eat(','));
+                expect(']');
+              }
+            }
+            try (var stream1 = new BufferedInputStream(new FileInputStream(file1))) {
+              new TptpParser(file1, stream1, cnf, types, distinctObjects, globals, select1);
+            }
           }
+          default -> throw err(String.format("'%s': unknown language", s));
         }
-        default -> throw err(String.format("'%s': unknown language", s));
+        if (tok == ',') do skip(); while (tok != ')');
+        expect(')');
+        expect('.');
       }
-      if (tok == ',') do skip(); while (tok != ')');
-      expect(')');
-      expect('.');
+    } catch (TypeException e) {
+      throw err(e.getMessage());
     }
   }
 

@@ -15,6 +15,81 @@ public abstract class Term {
     throw new UnsupportedOperationException(tag().toString());
   }
 
+  public final void check(Type expected) {
+    var type = type();
+    if (type == null) throw new TypeException(String.format("%s: null type", this));
+    if (!type.equals(expected))
+      throw new TypeException(String.format("%s: type error: %s != %s", this, type, expected));
+
+    var n = size();
+    switch (tag()) {
+      case NOT, AND, OR, EQV -> {
+        for (var i = 0; i < n; i++) get(i).check(Type.BOOLEAN);
+      }
+      case RATIONAL -> {
+        switch (type.kind()) {
+          case RATIONAL, REAL -> {}
+          default -> throw new TypeException(String.format("%s: type error: %s", this, type));
+        }
+      }
+      case GLOBAL_VAR -> {
+        if (type.kind() == Kind.FUNC)
+          throw new TypeException(String.format("%s: type error: %s", this, type));
+      }
+      case VAR -> {
+        switch (type.kind()) {
+          case BOOLEAN, FUNC -> throw new TypeException(
+              String.format("%s: type error: %s", this, type));
+        }
+      }
+      case INTEGER -> {
+        assert type == Type.INTEGER;
+      }
+      case FALSE, TRUE -> {
+        assert type == Type.BOOLEAN;
+      }
+      case DISTINCT_OBJECT -> {
+        assert type == Type.INDIVIDUAL;
+      }
+      case EQUALS -> {
+        type = get(0).type();
+        for (var i = 0; i < n; i++) get(i).check(type);
+      }
+      case ALL, EXISTS -> {
+        for (var i = 1; i < n; i++) get(i).check(get(i).type());
+        get(0).check(Type.BOOLEAN);
+      }
+      case FUNC -> {
+        var f = (Func) this;
+      }
+      case LESS_EQUALS,
+          LESS,
+          CAST,
+          TRUNCATE,
+          NEGATE,
+          IS_INTEGER,
+          IS_RATIONAL,
+          ADD,
+          SUBTRACT,
+          MULTIPLY,
+          DIVIDE,
+          DIVIDE_EUCLIDEAN,
+          DIVIDE_FLOOR,
+          DIVIDE_TRUNCATE,
+          REMAINDER_EUCLIDEAN,
+          REMAINDER_FLOOR,
+          REMAINDER_TRUNCATE,
+          ROUND,
+          FLOOR,
+          CEILING -> {
+        type = get(0).type();
+        if (!type().isNumeric())
+          throw new TypeException(String.format("%s: type error: %s is not numeric", this, type));
+        for (var i = 0; i < n; i++) get(i).check(type);
+      }
+    }
+  }
+
   public Type type() {
     return switch (tag()) {
       case NOT,

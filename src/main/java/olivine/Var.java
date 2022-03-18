@@ -4,7 +4,6 @@ public final class Var extends Term {
   private final Type type;
 
   public Var(Type type) {
-    assert type != Type.BOOLEAN;
     this.type = type;
   }
 

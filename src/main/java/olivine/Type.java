@@ -82,6 +82,13 @@ public abstract class Type {
         }
       };
 
+  public final boolean isNumeric() {
+    return switch (kind()) {
+      case INTEGER, RATIONAL, REAL -> true;
+      default -> false;
+    };
+  }
+
   private static final class Types extends Type {
     final Kind kind;
     final Type[] v;
