@@ -1,8 +1,8 @@
 package olivine;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.util.*;
 
 public final class TptpParser {
@@ -282,6 +282,7 @@ public final class TptpParser {
   private Type atomicType() throws IOException {
     var s = tokString;
     switch (tok) {
+      case '!', '[' -> throw new InappropriateException();
       case DEFINED_WORD -> {
         lex();
         return switch (s) {
@@ -442,6 +443,8 @@ public final class TptpParser {
             return definedAtomicTerm(bound, Tag.TRUNCATE, 1);
           case "uminus":
             return definedAtomicTerm(bound, Tag.NEGATE, 1);
+          case "ite":
+            throw new InappropriateException();
           default:
             throw err(String.format("'$%s': unknown word", s));
         }
@@ -533,6 +536,13 @@ public final class TptpParser {
 
   private Term unary(MapString bound) throws IOException {
     switch (tok) {
+      case '(':
+        {
+          lex();
+          var a = logicFormula(bound);
+          expect(')');
+          return a;
+        }
       case '~':
         lex();
         return Term.of(Tag.NOT, unary(bound));
@@ -630,10 +640,10 @@ public final class TptpParser {
     this.select = select;
     c = stream.read();
     lex();
-    while (tok >= 0) {
+    while (tok != -1) {
       var s = word();
       expect('(');
-      var name = word();
+      var name = formulaName();
       switch (s) {
         case "cnf" -> {
           expect(',');
@@ -663,16 +673,19 @@ public final class TptpParser {
             if (tok == DEFINED_WORD && tokString.equals("tType")) {
               lex();
               if (tok == '>')
-                // this is some kind of higher-order construct that Olivine doesn't understand
+                // this is some higher-order construct that Olivine doesn't understand
                 throw new InappropriateException();
+
               // Otherwise, the symbol will be simply used as the name of a type. No particular
               // action is
               // required at this point, so accept this and move on.
             } else {
               // The symbol is the name of a global  with the specified type.
+              topLevelType();
             }
 
             while (parens-- > 0) expect(')');
+            break;
           }
 
           // formula
@@ -688,6 +701,28 @@ public final class TptpParser {
           }
         }
         case "thf" -> throw new InappropriateException();
+        case "include" -> {
+          var dir = System.getenv("TPTP");
+          if (dir == null) throw err("TPTP environment variable not set");
+          var file1 = Path.of(dir, name).toString();
+          var select1 = select;
+          if (eat(',')) {
+            if (tok == WORD && tokString.equals("all")) {
+              lex();
+            } else {
+              expect('[');
+              select1 = new HashSet<>();
+              do {
+                var name1 = formulaName();
+                if (selecting(name1)) select1.add(name1);
+              } while (eat(','));
+              expect(']');
+            }
+          }
+          try (var stream1 = new BufferedInputStream(new FileInputStream(file1))) {
+            new TptpParser(file1, stream1, cnf, types, distinctObjects, globals, select1);
+          }
+        }
         default -> throw err(String.format("'%s': unknown language", s));
       }
       if (tok == ',') do skip(); while (tok != ')');

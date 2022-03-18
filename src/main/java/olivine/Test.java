@@ -89,6 +89,8 @@ final class Test {
       var st = System.currentTimeMillis();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
         TptpParser.parse(file, stream, cnf);
+      } catch (InappropriateException e) {
+        System.out.println("% SZS status Inappropriate");
       }
       System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - st) / 1000.0);
       System.out.println();
