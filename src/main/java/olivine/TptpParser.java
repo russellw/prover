@@ -536,13 +536,14 @@ public final class TptpParser {
   }
 
   private Term unary(Map<String, Var> bound) throws IOException {
-    Term a;
     switch (tok) {
       case '(':
-        lex();
-        a = logicFormula(bound);
-        expect(')');
-        break;
+        {
+          lex();
+          var a = logicFormula(bound);
+          expect(')');
+          return a;
+        }
       case '~':
         lex();
         return Term.of(Tag.NOT, unary(bound));
@@ -550,10 +551,8 @@ public final class TptpParser {
         return quant(bound, Tag.ALL);
       case '?':
         return quant(bound, Tag.EXISTS);
-      default:
-        a = infixUnary(bound);
-        break;
     }
+    var a = infixUnary(bound);
     a.setType(Type.BOOLEAN);
     return a;
   }
