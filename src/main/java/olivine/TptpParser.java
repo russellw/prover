@@ -684,7 +684,7 @@ public final class TptpParser {
               negatedConjecture = true;
               a = Term.of(Tag.NOT, a);
             }
-            cnf.add(new Formula(name, false, a, file));
+            cnf.add(new Formula(name, negatedConjecture, a, file));
           }
         }
         case "thf" -> throw new InappropriateException();
