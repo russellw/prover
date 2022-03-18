@@ -38,8 +38,8 @@ public final class TptpParser {
   private String tokString;
   private final Map<String, Var> free = new HashMap<>();
 
-  private IOException err(String s) {
-    return new IOException(String.format("%s:%d: %s", file, line, s));
+  private ParseException err(String s) {
+    return new ParseException(String.format("%s:%d: %s", file, line, s));
   }
 
   // Tokenizer
@@ -628,7 +628,7 @@ public final class TptpParser {
     this.distinctObjects = distinctObjects;
     this.globals = globals;
     this.select = select;
-
+    c = stream.read();
     lex();
     while (tok >= 0) {
       var s = word();

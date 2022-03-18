@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 public final class Etc {
@@ -103,5 +104,22 @@ public final class Etc {
     if (stream == null) return null;
     properties.load(stream);
     return properties.getProperty("version");
+  }
+
+  public static void printVersion() throws IOException {
+    System.out.printf(
+        "Olivine %s, %s\n",
+        Objects.toString(version(), "[unknown version, not running from jar]"),
+        System.getProperty("java.class.path"));
+    System.out.printf(
+        "%s, %s, %s\n",
+        System.getProperty("java.vm.name"),
+        System.getProperty("java.vm.version"),
+        System.getProperty("java.home"));
+    System.out.printf(
+        "%s, %s, %s\n",
+        System.getProperty("os.name"),
+        System.getProperty("os.version"),
+        System.getProperty("os.arch"));
   }
 }

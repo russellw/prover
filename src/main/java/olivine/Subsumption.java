@@ -29,26 +29,26 @@ public final class Subsumption {
         var de = new Equation(d[di]);
 
         // Try orienting equation one way
-        var map1 = Unification.match(map, ce.left, de.left);
-        if (map1 != null) {
-          map1 = Unification.match(map1, ce.right, de.right);
-          if (map1 != null) {
+        var m = Unification.match(map, ce.left, de.left);
+        if (m != null) {
+          m = Unification.match(m, ce.right, de.right);
+          if (m != null) {
             if (c1 == null) c1 = Term.remove(c, ci);
             d1 = Term.remove(d, di);
-            map1 = search(map1, c1, c2, d1, d2);
-            if (map1 != null) return map1;
+            m = search(m, c1, c2, d1, d2);
+            if (m != null) return m;
           }
         }
 
         // And the other way
-        map1 = Unification.match(map, ce.left, de.right);
-        if (map1 != null) {
-          map1 = Unification.match(map1, ce.right, de.left);
-          if (map1 != null) {
+        m = Unification.match(map, ce.left, de.right);
+        if (m != null) {
+          m = Unification.match(m, ce.right, de.left);
+          if (m != null) {
             if (c1 == null) c1 = Term.remove(c, ci);
             if (d1 == null) d1 = Term.remove(d, di);
-            map1 = search(map1, c1, c2, d1, d2);
-            if (map1 != null) return map1;
+            m = search(m, c1, c2, d1, d2);
+            if (m != null) return m;
           }
         }
       }
