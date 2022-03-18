@@ -74,82 +74,68 @@ public final class TptpParser {
     for (; ; ) {
       tok = c;
       switch (c) {
-        case '\n':
+        case '\n' -> {
           line++;
-        case ' ':
-        case '\f':
-        case '\r':
-        case '\t':
           c = stream.read();
           continue;
-        case '!':
+        }
+        case ' ', '\f', '\r', '\t' -> {
+          c = stream.read();
+          continue;
+        }
+        case '!' -> {
           c = stream.read();
           if (c == '=') {
             c = stream.read();
             tok = NOT_EQUALS;
-            break;
           }
-          break;
-        case '"':
+        }
+        case '"' -> {
           lexQuote();
           tok = DISTINCT_OBJECT;
-          break;
-        case '$':
-          {
-            var sb = new StringBuilder();
-            do readc(sb);
-            while (Etc.isIdPart(c));
-            tok = DEFINED_WORD;
-            tokString = sb.toString();
-            break;
-          }
-        case '%':
+        }
+        case '$' -> {
+          var sb = new StringBuilder();
+          do readc(sb);
+          while (Etc.isIdPart(c));
+          tok = DEFINED_WORD;
+          tokString = sb.toString();
+        }
+        case '%' -> {
           do c = stream.read();
           while (c != '\n' && c >= 0);
           continue;
-        case '+':
-        case '-':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-          {
-            var sb = new StringBuilder();
-            do readc(sb);
-            while (Etc.isDigit(c));
-            switch (c) {
-              case '.':
-                do readc(sb);
-                while (Etc.isDigit(c));
-                break;
-              case '/':
-                do readc(sb);
-                while (Etc.isDigit(c));
-                tok = RATIONAL;
-                tokString = sb.toString();
-                return;
-              case 'E':
-              case 'e':
-                break;
-              default:
-                tok = INTEGER;
-                tokString = sb.toString();
-                return;
-            }
-            if (c == 'e' || c == 'E') readc(sb);
-            if (c == '+' || c == '-') readc(sb);
-            while (Etc.isDigit(c)) readc(sb);
-            tok = REAL;
-            tokString = sb.toString();
-            break;
+        }
+        case '+', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+          var sb = new StringBuilder();
+          do readc(sb);
+          while (Etc.isDigit(c));
+          switch (c) {
+            case '.':
+              do readc(sb);
+              while (Etc.isDigit(c));
+              break;
+            case '/':
+              do readc(sb);
+              while (Etc.isDigit(c));
+              tok = RATIONAL;
+              tokString = sb.toString();
+              return;
+            case 'E':
+            case 'e':
+              break;
+            default:
+              tok = INTEGER;
+              tokString = sb.toString();
+              return;
           }
-        case '/':
+          if (c == 'e' || c == 'E') readc(sb);
+          if (c == '+' || c == '-') readc(sb);
+          while (Etc.isDigit(c)) readc(sb);
+          tok = REAL;
+          tokString = sb.toString();
+        }
+        case '/' -> {
           c = stream.read();
           if (c != '*') throw err("'*' expected");
           do {
@@ -162,7 +148,8 @@ public final class TptpParser {
           } while (c != '/');
           c = stream.read();
           continue;
-        case '<':
+        }
+        case '<' -> {
           c = stream.read();
           switch (c) {
             case '=' -> {
@@ -184,89 +171,84 @@ public final class TptpParser {
               throw err("expected '>'");
             }
           }
-          break;
-        case '=':
+        }
+        case '=' -> {
           c = stream.read();
           if (c == '>') {
             c = stream.read();
             tok = IMPLIES;
-            break;
           }
-          break;
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-        case 'H':
-        case 'I':
-        case 'J':
-        case 'K':
-        case 'L':
-        case 'M':
-        case 'N':
-        case 'O':
-        case 'P':
-        case 'Q':
-        case 'R':
-        case 'S':
-        case 'T':
-        case 'U':
-        case 'V':
-        case 'W':
-        case 'X':
-        case 'Y':
-        case 'Z':
-          {
-            var sb = new StringBuilder();
-            do readc(sb);
-            while (Etc.isIdPart(c));
-            tok = VAR;
-            tokString = sb.toString();
-            break;
-          }
-        case '\'':
+        }
+        case 'A',
+            'B',
+            'C',
+            'D',
+            'E',
+            'F',
+            'G',
+            'H',
+            'I',
+            'J',
+            'K',
+            'L',
+            'M',
+            'N',
+            'O',
+            'P',
+            'Q',
+            'R',
+            'S',
+            'T',
+            'U',
+            'V',
+            'W',
+            'X',
+            'Y',
+            'Z' -> {
+          var sb = new StringBuilder();
+          do readc(sb);
+          while (Etc.isIdPart(c));
+          tok = VAR;
+          tokString = sb.toString();
+        }
+        case '\'' -> {
           lexQuote();
           if (tokString.length() == 0) throw err("empty word");
           tok = WORD;
-          break;
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-        case 'g':
-        case 'h':
-        case 'i':
-        case 'j':
-        case 'k':
-        case 'l':
-        case 'm':
-        case 'n':
-        case 'o':
-        case 'p':
-        case 'q':
-        case 'r':
-        case 's':
-        case 't':
-        case 'u':
-        case 'v':
-        case 'w':
-        case 'x':
-        case 'y':
-        case 'z':
-          {
-            var sb = new StringBuilder();
-            do readc(sb);
-            while (Etc.isIdPart(c));
-            tok = WORD;
-            tokString = sb.toString();
-            break;
-          }
-        case '~':
+        }
+        case 'a',
+            'b',
+            'c',
+            'd',
+            'e',
+            'f',
+            'g',
+            'h',
+            'i',
+            'j',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+            'q',
+            'r',
+            's',
+            't',
+            'u',
+            'v',
+            'w',
+            'x',
+            'y',
+            'z' -> {
+          var sb = new StringBuilder();
+          do readc(sb);
+          while (Etc.isIdPart(c));
+          tok = WORD;
+          tokString = sb.toString();
+        }
+        case '~' -> {
           c = stream.read();
           switch (c) {
             case '&' -> {
@@ -278,10 +260,8 @@ public final class TptpParser {
               tok = NOR;
             }
           }
-          break;
-        default:
-          c = stream.read();
-          break;
+        }
+        default -> c = stream.read();
       }
       return;
     }
@@ -299,6 +279,8 @@ public final class TptpParser {
   private void expect(int k) throws IOException {
     if (!eat(k)) throw err(String.format("expected %c", k));
   }
+
+  // types
 
   // top level
   private TptpParser(String file, InputStream stream, Set<String> select, Problem problem)
