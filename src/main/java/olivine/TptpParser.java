@@ -377,6 +377,7 @@ public final class TptpParser {
             {
               var v = new ArrayList<Term>();
               args(bound, v);
+              for (var a : v) a.defaultType(Type.INDIVIDUAL);
               var inequalities = new ArrayList<Term>();
               for (var i = 0; i < v.size(); i++)
                 for (var j = 0; j < v.size(); j++)
@@ -489,10 +490,16 @@ public final class TptpParser {
       case WORD:
         {
           var a = global(s, tok == '(');
-          if (tok == '(') {
-            var r = new ArrayList<Term>();
-            args(bound, r);
-            return a.call(r);
+          if (eat('(')) {
+            var v = new ArrayList<Term>();
+            v.add(a);
+            do {
+              var b = atomicTerm(bound);
+              b.defaultType(Type.INDIVIDUAL);
+              v.add(b);
+            } while (eat(','));
+            expect(')');
+            return Term.of(Tag.CALL, v);
           }
           return a;
         }
@@ -501,17 +508,21 @@ public final class TptpParser {
     }
   }
 
+  private Term infixEquals(Map<String, Var> bound, Term a) throws IOException {
+    lex();
+    var b = atomicTerm(bound);
+    a.defaultType(Type.INDIVIDUAL);
+    b.defaultType(Type.INDIVIDUAL);
+    return Term.of(Tag.EQUALS, a, b);
+  }
+
   private Term infixUnary(Map<String, Var> bound) throws IOException {
     var a = atomicTerm(bound);
-    switch (tok) {
-      case '=':
-        lex();
-        return Term.of(Tag.EQUALS, a, atomicTerm(bound));
-      case NOT_EQUALS:
-        lex();
-        return Term.of(Tag.NOT, Term.of(Tag.EQUALS, a, atomicTerm(bound)));
-    }
-    return a;
+    return switch (tok) {
+      case '=' -> infixEquals(bound, a);
+      case NOT_EQUALS -> Term.of(Tag.NOT, infixEquals(bound, a));
+      default -> a;
+    };
   }
 
   private Term quant(Map<String, Var> bound, Tag tag) throws IOException {

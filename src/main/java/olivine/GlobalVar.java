@@ -5,6 +5,11 @@ public final class GlobalVar extends Term {
   private Type type;
 
   @Override
+  public void defaultType(Type type) {
+    if (this.type == null) setType(type);
+  }
+
+  @Override
   public void setType(Type type) {
     if (this.type == null) this.type = type;
     check(type);

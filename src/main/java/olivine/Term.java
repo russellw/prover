@@ -15,6 +15,13 @@ public abstract class Term {
     throw new UnsupportedOperationException(tag().toString());
   }
 
+  public void defaultType(Type type) {
+    if (tag() == Tag.CALL) {
+      var f = (Func) get(0);
+      if (f.returnType == null) setType(type);
+    }
+  }
+
   public void setType(Type type) {
     // A statement about the return type of a function call, can directly imply the type of the
     // function. This generally does not

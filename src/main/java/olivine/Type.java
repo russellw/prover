@@ -1,6 +1,8 @@
 package olivine;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Type {
   abstract Kind kind();
@@ -106,6 +108,26 @@ public abstract class Type {
     @Override
     public Type get(int i) {
       return v[i];
+    }
+
+    @Override
+    public String toString() {
+      return Arrays.toString(v);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Types types = (Types) o;
+      return kind == types.kind && Arrays.equals(v, types.v);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = Objects.hash(kind);
+      result = 31 * result + Arrays.hashCode(v);
+      return result;
     }
 
     @Override
