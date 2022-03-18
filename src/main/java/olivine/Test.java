@@ -12,6 +12,7 @@ import java.util.Random;
 final class Test {
   private static List<String> files = new ArrayList<>();
   private static boolean shuffle;
+  private static int randomSeed = -1;
   private static int maxFiles = -1;
 
   private Test() {}
@@ -22,46 +23,48 @@ final class Test {
     files.add(s);
   }
 
-  private static void args(String[] args) throws IOException {
-    for (var i = 0; i < args.length; i++) {
-      var arg = args[i];
-      if (arg.charAt(0) != '-') {
-        var path = Path.of(arg);
-        if (Files.isDirectory(path)) {
-          for (var s :
-              Files.walk(path)
-                  .filter(p -> !Files.isDirectory(p))
-                  .map(Path::toString)
-                  .toArray(String[]::new)) addFile(s);
-          continue;
-        }
-        if (arg.endsWith(".lst")) {
-          try (var reader = new BufferedReader(new FileReader(arg, StandardCharsets.UTF_8))) {
-            String s;
-            while ((s = reader.readLine()) != null) addFile(s);
+  private static void args(String[] v) throws IOException {
+    for (var s : v) {
+      if (s.charAt(0) == '-') {
+        var option = new Option(s);
+        switch (option.option) {
+          case "V", "version" -> {
+            Etc.printVersion();
+            System.exit(0);
           }
-          continue;
+          case "n" -> maxFiles = Integer.parseInt(option.getArg());
+          case "s" -> {
+            shuffle = true;
+            if (option.arg != null) randomSeed = Integer.parseInt(option.arg);
+          }
+          default -> {
+            System.err.printf("%s: unknown option\n", s);
+            System.exit(1);
+          }
         }
-        addFile(arg);
         continue;
       }
-      var option = arg;
-      while (option.startsWith("-")) option = option.substring(1);
-      switch (option) {
-        case "V", "version" -> {
-          Etc.printVersion();
-          System.exit(0);
-        }
-        case "s" -> shuffle = true;
-        default -> {
-          System.err.printf("%s: unknown option\n", arg);
-          System.exit(1);
-        }
+      var path = Path.of(s);
+      if (Files.isDirectory(path)) {
+        for (var file :
+            Files.walk(path)
+                .filter(p -> !Files.isDirectory(p))
+                .map(Path::toString)
+                .toArray(String[]::new)) addFile(file);
+        continue;
       }
+      if (s.endsWith(".lst")) {
+        try (var reader = new BufferedReader(new FileReader(s, StandardCharsets.UTF_8))) {
+          String file;
+          while ((file = reader.readLine()) != null) addFile(file);
+        }
+        continue;
+      }
+      addFile(s);
     }
   }
 
-  private static void printHeader(String file) throws IOException {
+  private static void header(String file) throws IOException {
     try (var reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
       String s;
       while ((s = reader.readLine()) != null) {
@@ -73,12 +76,15 @@ final class Test {
 
   public static void main(String[] args) throws IOException {
     args(args);
-    if (shuffle) Collections.shuffle(files, new Random(0));
+    if (shuffle) {
+      var random = randomSeed == -1 ? new Random() : new Random(randomSeed);
+      Collections.shuffle(files, random);
+    }
     if (maxFiles >= 0 && files.size() > maxFiles) files = files.subList(0, maxFiles);
 
     var start = System.currentTimeMillis();
     for (var file : files) {
-      printHeader(file);
+      header(file);
       var cnf = new CNF();
       var st = System.currentTimeMillis();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
