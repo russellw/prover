@@ -1,7 +1,12 @@
 package olivine;
 
 public final class DistinctObject extends Term {
-  final String name;
+  private final String name;
+
+  @Override
+  public String toString() {
+    return name;
+  }
 
   DistinctObject(String name) {
     this.name = name;

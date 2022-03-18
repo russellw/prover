@@ -118,7 +118,7 @@ public abstract class Term {
           FLOOR,
           CEILING -> {
         type = get(0).type();
-        if (!type().isNumeric())
+        if (!type.isNumeric())
           throw new TypeException(String.format("%s: type error: %s is not numeric", this, type));
         for (var i = 0; i < n; i++) get(i).check(type);
       }
@@ -177,11 +177,6 @@ public abstract class Term {
         public Type type() {
           return Type.BOOLEAN;
         }
-
-        @Override
-        public String toString() {
-          return "$false";
-        }
       };
   public static final Term TRUE =
       new Term() {
@@ -193,11 +188,6 @@ public abstract class Term {
         @Override
         public Type type() {
           return Type.BOOLEAN;
-        }
-
-        @Override
-        public String toString() {
-          return "$true";
         }
       };
 
@@ -552,6 +542,7 @@ public abstract class Term {
     return map(a -> a.replace(map));
   }
 
+  // TODO: SetTerm might not be worth using
   private void freeVars(SetTerm bound, Set<Term> free) {
     switch (tag()) {
       case VAR -> {
@@ -575,18 +566,17 @@ public abstract class Term {
     return free;
   }
 
+  private Term[] toArray() {
+    var v = new Term[size()];
+    for (var i = 0; i < v.length; i++) v[i] = get(i);
+    return v;
+  }
+
   @Override
   public String toString() {
     var sb = new StringBuilder();
     sb.append(tag());
-    var n = size();
-    if (n > 0) {
-      sb.append('[');
-      for (var i = 0; i < n; i++) {
-        if (i > 0) sb.append(',');
-        sb.append(get(i));
-      }
-    }
+    if (size() > 0) sb.append(Arrays.toString(toArray()));
     return sb.toString();
   }
 

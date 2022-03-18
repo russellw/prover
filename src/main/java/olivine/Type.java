@@ -29,22 +29,12 @@ public abstract class Type {
         Kind kind() {
           return Kind.BOOLEAN;
         }
-
-        @Override
-        public String toString() {
-          return "$o";
-        }
       };
   public static final Type INDIVIDUAL =
       new Type() {
         @Override
         Kind kind() {
           return Kind.INDIVIDUAL;
-        }
-
-        @Override
-        public String toString() {
-          return "$i";
         }
       };
   public static final Type INTEGER =
@@ -53,22 +43,12 @@ public abstract class Type {
         Kind kind() {
           return Kind.INTEGER;
         }
-
-        @Override
-        public String toString() {
-          return "$int";
-        }
       };
   public static final Type RATIONAL =
       new Type() {
         @Override
         Kind kind() {
           return Kind.RATIONAL;
-        }
-
-        @Override
-        public String toString() {
-          return "$rat";
         }
       };
   public static final Type REAL =
@@ -77,11 +57,6 @@ public abstract class Type {
         Kind kind() {
           return Kind.REAL;
         }
-
-        @Override
-        public String toString() {
-          return "$real";
-        }
       };
 
   public final boolean isNumeric() {
@@ -89,6 +64,11 @@ public abstract class Type {
       case INTEGER, RATIONAL, REAL -> true;
       default -> false;
     };
+  }
+
+  @Override
+  public String toString() {
+    return kind().toString();
   }
 
   private static final class Types extends Type {

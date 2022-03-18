@@ -346,6 +346,7 @@ public final class TptpParser {
   }
 
   private void args(Map<String, Var> bound, List<Term> v, int arity) throws IOException {
+    // TODO: necessary?
     int n = v.size();
     args(bound, v);
     n = v.size() - n;

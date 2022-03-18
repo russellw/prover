@@ -8,8 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 final class Test {
+  private static final Pattern STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
+
   private static List<String> files = new ArrayList<>();
   private static boolean shuffle;
   private static int randomSeed = -1;
@@ -64,14 +67,20 @@ final class Test {
     }
   }
 
-  private static void header(String file) throws IOException {
+  private static String header(String file) throws IOException {
+    String expected = null;
     try (var reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
       String s;
       while ((s = reader.readLine()) != null) {
         if (!s.isBlank() && s.charAt(0) != '%') break;
         System.out.println(s);
+        if (expected == null) {
+          var matcher = STATUS_PATTERN.matcher(s);
+          if (matcher.matches()) expected = matcher.group(1);
+        }
       }
     }
+    return expected;
   }
 
   public static void main(String[] args) throws IOException {
@@ -84,15 +93,18 @@ final class Test {
 
     var start = System.currentTimeMillis();
     for (var file : files) {
-      header(file);
+      var expected = header(file);
+      if (expected != null) System.out.printf("%% %s expected\n", expected);
+      var start1 = System.currentTimeMillis();
+
       var cnf = new CNF();
-      var st = System.currentTimeMillis();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
         TptpParser.parse(file, stream, cnf);
       } catch (InappropriateException e) {
         System.out.println("% SZS status Inappropriate");
       }
-      System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - st) / 1000.0);
+
+      System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start1) / 1000.0);
       System.out.println();
     }
     System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start) / 1000.0);
