@@ -5,12 +5,22 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 final class Test {
-  private static final List<String> files = new ArrayList<>();
+  private static List<String> files = new ArrayList<>();
+  private static boolean shuffle;
+  private static int maxFiles = -1;
 
   private Test() {}
+
+  private static void addFile(String s) {
+    if (s.contains("^")) return;
+    if (s.endsWith(".rm")) return;
+    files.add(s);
+  }
 
   private static void args(String[] args) throws IOException {
     for (var i = 0; i < args.length; i++) {
@@ -18,29 +28,31 @@ final class Test {
       if (arg.charAt(0) != '-') {
         var path = Path.of(arg);
         if (Files.isDirectory(path)) {
-          args(
+          for (var s :
               Files.walk(path)
                   .filter(p -> !Files.isDirectory(p))
                   .map(Path::toString)
-                  .toArray(String[]::new));
+                  .toArray(String[]::new)) addFile(s);
           continue;
         }
-        if (arg.contains("^")) continue;
-        switch (Etc.extension(arg)) {
-          case "lst" -> args(
-              Files.readAllLines(path, StandardCharsets.UTF_8).toArray(new String[0]));
-          case "rm" -> {}
-          default -> files.add(arg);
+        if (arg.endsWith(".lst")) {
+          try (var reader = new BufferedReader(new FileReader(arg, StandardCharsets.UTF_8))) {
+            String s;
+            while ((s = reader.readLine()) != null) addFile(s);
+          }
+          continue;
         }
+        addFile(arg);
         continue;
       }
-      var opt = arg;
-      while (opt.startsWith("-")) opt = opt.substring(1);
-      switch (opt) {
+      var option = arg;
+      while (option.startsWith("-")) option = option.substring(1);
+      switch (option) {
         case "V", "version" -> {
           Etc.printVersion();
           System.exit(0);
         }
+        case "s" -> shuffle = true;
         default -> {
           System.err.printf("%s: unknown option\n", arg);
           System.exit(1);
@@ -61,6 +73,9 @@ final class Test {
 
   public static void main(String[] args) throws IOException {
     args(args);
+    if (shuffle) Collections.shuffle(files, new Random(0));
+    if (maxFiles >= 0 && files.size() > maxFiles) files = files.subList(0, maxFiles);
+
     var start = System.currentTimeMillis();
     for (var file : files) {
       printHeader(file);

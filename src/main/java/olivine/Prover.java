@@ -31,9 +31,9 @@ final class Prover {
         setFile("stdin");
         continue;
       }
-      var opt = arg;
-      while (opt.startsWith("-")) opt = opt.substring(1);
-      switch (opt) {
+      var option = arg;
+      while (option.startsWith("-")) option = option.substring(1);
+      switch (option) {
         case "?", "h", "help" -> {
           help();
           System.exit(0);
