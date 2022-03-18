@@ -515,6 +515,7 @@ public final class TptpParser {
   }
 
   private Term quant(Map<String, Var> bound, Tag tag) throws IOException {
+    if (bound == null) throw err("quantifier in cnf");
     lex();
     expect('[');
     var v = new ArrayList<Term>();
@@ -690,7 +691,7 @@ public final class TptpParser {
 
           // formula
           var negatedConjecture = false;
-          var a = logicFormula(new HashMap<>());
+          var a = logicFormula(Map.of());
           assert a.freeVars().equals(Set.of());
           if (selecting(name)) {
             if (role.equals("conjecture")) {
