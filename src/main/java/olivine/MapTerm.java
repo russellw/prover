@@ -18,7 +18,7 @@ public final class MapTerm {
   }
 
   public Term get(Term key) {
-    for (var map = this; map != EMPTY; map = map.parent) if (map.key.equals(key)) return map.value;
+    for (var map = this; map != EMPTY; map = map.parent) if (map.key == key) return map.value;
     return null;
   }
 
