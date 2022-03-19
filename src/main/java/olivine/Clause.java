@@ -7,9 +7,11 @@ import java.util.Set;
 public final class Clause extends AbstractFormula {
   final Term[] literals;
   final int negativeSize;
-  AbstractFormula[] from;
+  final AbstractFormula[] from;
 
-  public Clause(List<Term> negative, List<Term> positive) {
+  public Clause(List<Term> negative, List<Term> positive, AbstractFormula... from) {
+    this.from = from;
+
     // Simplify
     for (var i = 0; i < negative.size(); i++) negative.set(i, negative.get(i).simplify());
     for (var i = 0; i < positive.size(); i++) positive.set(i, positive.get(i).simplify());

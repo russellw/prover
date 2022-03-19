@@ -5,6 +5,8 @@ import java.util.*;
 public final class CNF {
   private static final int MANY = 50;
   private final List<Term> defs = new ArrayList<>();
+  private final List<Term> negative = new ArrayList<>();
+  private final List<Term> positive = new ArrayList<>();
   public final List<Clause> clauses = new ArrayList<>();
 
   // How many clauses a term will expand into, for the purpose of deciding when subformulas need to
@@ -154,10 +156,34 @@ public final class CNF {
   // complexity
   // and of the memory traffic for the extra iteration through the formula set)
   private Term maybeRename(int pol, Term a) {
+    Term[] v;
     switch (a.tag()) {
+      case ALL, EXISTS -> {
+        v = a.toArray();
+        v[0] = maybeRename(pol, v[0]);
+      }
+
       case NOT -> {
         return Term.of(Tag.NOT, maybeRename(-pol, a.get(0)));
       }
+
+      case OR -> {
+        v = a.toArray();
+
+        // If this formula will be used with positive polarity (including the case where it will be
+        // used both ways), we are
+        // looking at OR over possible ANDs, which would produce exponential expansion at the
+        // distribution stage, so may need to
+        // rename some of the arguments.
+        if (pol >= 0) maybeRename(pol, v);
+      }
+      case AND -> {
+        v = a.toArray();
+
+        // NOT-AND yields OR, so mirror the OR case.
+        if (pol <= 0) maybeRename(pol, v);
+      }
+
       case EQV -> {
         var x = maybeRename(0, a.get(0));
         var y = maybeRename(0, a.get(1));
@@ -169,6 +195,7 @@ public final class CNF {
         return a;
       }
     }
+    return Term.of(a.tag(), v);
   }
 
   // For-all doesn't need much work to convert. Clauses contain variables with implied for-all. The
@@ -276,9 +303,6 @@ public final class CNF {
     return pol ? a : Term.of(Tag.NOT, a);
   }
 
-  // Distribute OR down into AND, completing the layering of the operators for CNF. This is the
-  // second place where exponential
-  // expansion would occur, had selected formulas not already been renamed.
   private static void flatten(Tag tag, Term a, List<Term> v) {
     if (a.tag() == tag) {
       var n = a.size();
@@ -298,6 +322,9 @@ public final class CNF {
     return v;
   }
 
+  // Distribute OR down into AND, completing the layering of the operators for CNF. This is the
+  // second place where exponential
+  // expansion would occur, had selected formulas not already been renamed.
   private Term distribute(Term a) {
     switch (a.tag()) {
       case AND -> {
@@ -315,9 +342,56 @@ public final class CNF {
         for (var i = 0; i < and.length; i++) and[i] = Term.of(Tag.OR, ors.get(i));
         return Term.of(Tag.AND, and);
       }
+      default -> {
+        return a;
+      }
     }
-    return a;
   }
 
-  public void add(Formula formula) {}
+  // Convert a suitably rearranged term into actual clauses.
+  private void literals(Term a) {
+    switch (a.tag()) {
+      case NOT -> negative.add(a.get(0));
+      case OR -> {
+        for (var b : a) literals(b);
+      }
+      default -> positive.add(a);
+    }
+  }
+
+  private void clausify(Formula from, Term a) {
+    if (a.tag() == Tag.AND) {
+      for (var b : a) clausify(from, b);
+      return;
+    }
+    negative.clear();
+    positive.clear();
+    literals(a);
+    var c = new Clause(negative, positive, from);
+    if (c.isTrue()) return;
+    clauses.add(c);
+  }
+
+  public void add(Formula formula) {
+    // First run the input formula through the full process: Rename subformulas where necessary to
+    // avoid exponential expansion,
+    // then convert to negation normal form, distribute OR into AND, and convert to clauses.
+    var a = formula.term();
+    defs.clear();
+    a = maybeRename(1, a);
+    a = nnf(Map.of(), true, a);
+    a = distribute(a);
+    clausify(formula, a);
+
+    // Then convert all the definitions created by the renaming process. That process works by
+    // bottom-up recursion, which means
+    // each renamed subformula is simple, so there is no need to put the definitions through the
+    // renaming process again; they
+    // just need to go through the rest of the conversion steps.
+    for (var b : defs) {
+      b = nnf(Map.of(), true, b);
+      b = distribute(b);
+      clausify(formula, b);
+    }
+  }
 }

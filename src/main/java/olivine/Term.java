@@ -596,7 +596,7 @@ public abstract class Term implements Iterable<Term> {
     return free;
   }
 
-  private Term[] toArray() {
+  public Term[] toArray() {
     var v = new Term[size()];
     for (var i = 0; i < v.length; i++) v[i] = get(i);
     return v;
