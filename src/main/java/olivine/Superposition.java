@@ -1,4 +1,3 @@
 package olivine;
 
-public final class Superposition {
-}
+public final class Superposition {}
