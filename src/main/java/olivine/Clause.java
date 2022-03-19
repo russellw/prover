@@ -9,6 +9,11 @@ public final class Clause extends AbstractFormula {
   final int negativeSize;
   final AbstractFormula[] from;
 
+  @Override
+  public String toString() {
+    return String.format("%s => %s", Arrays.toString(negative()), Arrays.toString(positive()));
+  }
+
   public Clause(List<Term> negative, List<Term> positive, AbstractFormula... from) {
     this.from = from;
 
