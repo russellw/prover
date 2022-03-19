@@ -61,4 +61,18 @@ public final class Clause extends AbstractFormula {
     for (var a : negative) if (positive.contains(a)) return true;
     return false;
   }
+
+  public Term term() {
+    var v = new Term[literals.length];
+    for (var i = 0; i < literals.length; i++) {
+      var a = literals[i];
+      if (i < negativeSize) a = Term.of(Tag.NOT, a);
+      v[i] = a;
+    }
+    return switch (v.length) {
+      case 0 -> Term.FALSE;
+      case 1 -> v[0];
+      default -> Term.of(Tag.OR, v);
+    };
+  }
 }

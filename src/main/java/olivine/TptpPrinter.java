@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class TptpPrinter {
-  private Map<Term, Integer> vars = new HashMap<>();
+  private final Map<Term, Integer> vars = new HashMap<>();
+  private final Map<AbstractFormula, Integer> formulas = new HashMap<>();
 
   private static boolean isWord(String s) {
     if (s.isEmpty()) return false;
@@ -191,17 +192,59 @@ public final class TptpPrinter {
   }
 
   // formulas
-  private static boolean isInteger(String s) {
-    if (s.isEmpty()) return false;
-    for (var i = 0; i < s.length(); i++) if (!Etc.isDigit(s.charAt(i))) return false;
-    return true;
-  }
-
-  private static boolean isFormulaName(String s) {
-    return isWord(s);
+  private void id(AbstractFormula formula) {
+    var i = formulas.get(formula);
+    if (i == null) {
+      i = formulas.size();
+      formulas.put(formula, i);
+    }
+    System.out.print(i);
   }
 
   public void print(Formula formula) {
     System.out.print("tff(");
+
+    // name
+    id(formula);
+
+    // role
+    System.out.print(formula.negatedConjecture ? ", negated_conjecture, " : ", axiom, ");
+
+    // formula
+    print(formula.term);
+    System.out.print(", ");
+
+    // source
+    if (formula.negatedConjecture) System.out.print("inference(negate,[status(ceq)],[");
+    System.out.print("file(");
+    quote('\'', formula.file);
+    System.out.print(',');
+    maybeQuote(formula.name);
+    if (formula.negatedConjecture) System.out.print(")]");
+    System.out.println(")).");
+  }
+
+  public void print(Clause c) {
+    System.out.print("tcf(");
+
+    // name
+    id(c);
+
+    // role
+    System.out.print(", plain, ");
+
+    // literals
+    print(c.term());
+
+    // source
+    System.out.print(", inference(");
+    var from = c.from;
+    System.out.print(from.length == 1 ? 'o' : 's');
+    System.out.print(",[status(thm)],[");
+    for (var i = 0; i < from.length; i++) {
+      if (i > 0) System.out.print(',');
+      id(from[i]);
+    }
+    System.out.println("])).");
   }
 }
