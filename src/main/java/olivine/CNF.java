@@ -1,10 +1,20 @@
 package olivine;
 
-
 import java.util.*;
 
 public final class CNF {
+  private static final int MANY = 50;
   public final List<Clause> clauses = new ArrayList<>();
+
+  // How many clauses a term will expand into, for the purpose of deciding when subformulas need to
+  // be renamed. The answer could
+  // exceed the range of a fixed-size integer, but then we don't actually need the number, we only
+  // need to know whether it went over
+  // the threshold.
+  private static int clauseCountAdd(boolean pol, Term a) {
+    var n = 0;
+    return n;
+  }
 
   // Skolem functions replace existentially quantified variables, also formulas that are renamed to
   // avoid exponential expansion.
