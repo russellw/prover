@@ -239,36 +239,40 @@ public final class CNF {
   // Negation normal form consists of several transformations that are as easy to do at the same
   // time: Move NOTs inward to the
   // literal layer, flipping things around on the way, while simultaneously resolving quantifiers.
+  private Term[] nnf1(Map<Term, Term> map, boolean pol, Term a) {
+    var v = new Term[a.size()];
+    for (var i = 0; i < v.length; i++) v[i] = nnf(map, pol, a.get(i));
+    return v;
+  }
+
   private Term nnf(Map<Term, Term> map, boolean pol, Term a) {
     switch (a.tag()) {
-        // Boolean constants and operators can be inverted by downward-sinking NOTs.
       case FALSE -> {
         return Term.of(!pol);
       }
       case TRUE -> {
         return Term.of(pol);
       }
-
+      case AND -> {
+        return Term.of(pol ? Tag.AND : Tag.OR, nnf1(map, pol, a));
+      }
+      case OR -> {
+        return Term.of(pol ? Tag.OR : Tag.AND, nnf1(map, pol, a));
+      }
       case NOT -> {
         return nnf(map, !pol, a.get(0));
       }
-
-        // Variables are mapped to new variables or Skolem functions.
       case VAR -> {
         a = map.get(a);
         assert a != null;
         return a;
       }
-
-        // According to whether they are bound by universal or existential quantifiers.
       case ALL -> {
         return nnf(pol ? all(map, a) : exists(map, a), pol, a.get(0));
       }
       case EXISTS -> {
         return nnf(pol ? exists(map, a) : all(map, a), pol, a.get(0));
       }
-
-        // Equivalence is the most difficult operator to deal with.
       case EQV -> {
         var x = a.get(0);
         var y = a.get(1);
