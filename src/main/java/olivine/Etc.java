@@ -83,18 +83,6 @@ public final class Etc {
     return a.subtract(divideFloor(a, b).multiply(b));
   }
 
-  public static String quote(char q, String s) {
-    var sb = new StringBuilder();
-    sb.append(q);
-    for (var i = 0; i < s.length(); i++) {
-      var c = s.charAt(i);
-      if (c == q || c == '\\') sb.append('\\');
-      sb.append(c);
-    }
-    sb.append(q);
-    return sb.toString();
-  }
-
   public static String version() throws IOException {
     var properties = new Properties();
     var stream =
