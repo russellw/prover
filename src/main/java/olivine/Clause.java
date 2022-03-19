@@ -70,6 +70,7 @@ public final class Clause extends AbstractFormula {
     proof.add(this);
   }
 
+  @Override
   public Term term() {
     var v = new Term[literals.length];
     for (var i = 0; i < literals.length; i++) {

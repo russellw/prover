@@ -1,7 +1,6 @@
 package olivine;
 
-public final class GlobalVar extends Term {
-  final String name;
+public final class GlobalVar extends Global {
   private Type type;
 
   @Override
@@ -16,22 +15,17 @@ public final class GlobalVar extends Term {
   }
 
   public GlobalVar(String name) {
-    this.name = name;
+    super(name);
   }
 
   public GlobalVar(String name, Type type) {
-    this.name = name;
+    super(name);
     this.type = type;
   }
 
   @Override
   public Type type() {
     return type;
-  }
-
-  @Override
-  public String toString() {
-    return name;
   }
 
   @Override

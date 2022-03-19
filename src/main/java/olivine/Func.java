@@ -1,12 +1,11 @@
 package olivine;
 
-public final class Func extends Term {
-  final String name;
+public final class Func extends Global {
   Type returnType;
   Type[] params;
 
   public Func(String name) {
-    this.name = name;
+    super(name);
   }
 
   @Override
@@ -20,7 +19,7 @@ public final class Func extends Term {
   }
 
   public Func(String name, Type returnType, Type... params) {
-    this.name = name;
+    super(name);
     this.returnType = returnType;
     this.params = params;
   }
@@ -31,11 +30,6 @@ public final class Func extends Term {
     v[0] = returnType;
     System.arraycopy(params, 0, v, 1, params.length);
     return Type.of(Kind.FUNC, v);
-  }
-
-  @Override
-  public String toString() {
-    return name;
   }
 
   @Override

@@ -16,4 +16,6 @@ public abstract class AbstractFormula {
     if (!visited.add(this)) return;
     proof.add(this);
   }
+
+  abstract Term term();
 }

@@ -3,7 +3,7 @@ package olivine;
 public final class Formula extends AbstractFormula {
   final String name;
   final boolean negatedConjecture;
-  final Term term;
+  private final Term term;
   final String file;
 
   public Formula(String name, boolean negatedConjecture, Term term, String file) {
@@ -11,5 +11,10 @@ public final class Formula extends AbstractFormula {
     this.negatedConjecture = negatedConjecture;
     this.term = term;
     this.file = file;
+  }
+
+  @Override
+  Term term() {
+    return term;
   }
 }

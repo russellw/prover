@@ -26,7 +26,7 @@ public final class TptpParser {
   final CNF cnf;
   final Map<String, OpaqueType> types;
   final Map<String, DistinctObject> distinctObjects;
-  final Map<String, Term> globals;
+  final Map<String, Global> globals;
 
   // File state
   private final String file;
@@ -649,7 +649,7 @@ public final class TptpParser {
       CNF cnf,
       Map<String, OpaqueType> types,
       Map<String, DistinctObject> distinctObjects,
-      Map<String, Term> globals,
+      Map<String, Global> globals,
       Set<String> select)
       throws IOException {
     this.file = file;

@@ -211,7 +211,7 @@ public final class TptpPrinter {
     System.out.print(formula.negatedConjecture ? ", negated_conjecture, " : ", axiom, ");
 
     // formula
-    print(formula.term);
+    print(formula.term());
     System.out.print(", ");
 
     // source
@@ -242,7 +242,7 @@ public final class TptpPrinter {
     System.out.print(", plain, ");
 
     // literals
-    print(c.term());
+    print(c.term().quantify());
 
     // source
     var from = c.from;
@@ -273,6 +273,54 @@ public final class TptpPrinter {
   public void proof(Clause c) {
     System.out.println("% SZS output start CNFRefutation");
     var proof = c.proof();
+
+    // Skolem symbols that ended up being used in the proof, need to be assigned names
+    // before printing. These consist of a string prefix and an integer sequence,
+    // which is straightforward enough. The complication is that the input formulas might also
+    // contain
+    // symbols of this pattern, so we need to check for existing symbols to avoid duplicates.
+    // The easiest way to do this is to check for the largest existing number of that pattern
+    // and start our sequence at that point
+    final long[] i = {-1};
+    for (var formula : proof) {
+      formula
+          .term()
+          .walk(
+              a -> {
+                if (!(a instanceof Global a1)) return;
+                var s = a1.name;
+                if (s == null) return;
+                if (s.length() < 3) return;
+                if (s.charAt(0) != 's') return;
+                if (s.charAt(1) != 'K') return;
+                var i1 = 0L;
+                for (var j = 2; j < s.length(); j++) {
+                  var ch = s.charAt(j);
+                  if (!Etc.isDigit(ch)) return;
+                  i1 = i1 * 10 + ch;
+                }
+                // integer overflow could have occurred, if the existing name was long enough.
+                // That's okay. If the overflowed number was negative, it will be effectively
+                // ignored.
+                // If it wrapped around all the way to positive again,
+                // avoiding that number will constitute erring on the side of safety.
+                // in any case, we will never print incorrect output
+                i[0] = Math.max(i[0], i1);
+              });
+    }
+    for (var formula : proof) {
+      formula
+          .term()
+          .walk(
+              a -> {
+                if (!(a instanceof Global a1)) return;
+                var s = a1.name;
+                if (s != null) return;
+                i[0] = Math.addExact(i[0], 1);
+                a1.name = String.format("sK%d", i[0]);
+              });
+    }
+
     for (var formula : proof) println(formula);
     System.out.println("% SZS output end CNFRefutation");
   }
