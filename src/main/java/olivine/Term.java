@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class Term {
+public abstract class Term implements Iterable<Term> {
   public abstract Tag tag();
 
   public int size() {
@@ -194,6 +194,24 @@ public abstract class Term {
 
   public static Term of(Tag tag, Term a) {
     return new Term1(tag, a);
+  }
+
+  @Override
+  public final Iterator<Term> iterator() {
+    // TODO: check existing usage
+    return new Iterator<>() {
+      private int i;
+
+      @Override
+      public boolean hasNext() {
+        return i < size();
+      }
+
+      @Override
+      public Term next() {
+        return get(i++);
+      }
+    };
   }
 
   public static Term of(Tag tag, Term a, Term b) {
