@@ -2,6 +2,7 @@ package olivine;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Term {
@@ -524,8 +525,14 @@ public abstract class Term {
     return of(Tag.CALL, this, args);
   }
 
+  public void walk(Consumer<Term> f) {
+    f.accept(this);
+    var n = size();
+    for (var i = 0; i < n; i++) get(i).walk(f);
+  }
+
   public Term map(Function<Term, Term> f) {
-    int n = size();
+    var n = size();
     if (n == 0) return this;
     var v = new Term[n];
     for (var i = 0; i < n; i++) v[i] = f.apply(get(i));

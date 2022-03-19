@@ -201,7 +201,7 @@ public final class TptpPrinter {
     System.out.print(i);
   }
 
-  public void print(Formula formula) {
+  private void println(Formula formula) {
     System.out.print("tff(");
 
     // name
@@ -215,16 +215,24 @@ public final class TptpPrinter {
     System.out.print(", ");
 
     // source
-    if (formula.negatedConjecture) System.out.print("inference(negate,[status(ceq)],[");
-    System.out.print("file(");
-    quote('\'', formula.file);
-    System.out.print(',');
-    maybeQuote(formula.name);
-    if (formula.negatedConjecture) System.out.print(")]");
-    System.out.println(")).");
+    if (formula.file == null) System.out.print("introduced(definition)");
+    else if (formula.negatedConjecture) {
+      System.out.print("inference(negate,[status(ceq)],[file(");
+      quote('\'', formula.file);
+      System.out.print(',');
+      maybeQuote(formula.name);
+      System.out.print(")])");
+    } else {
+      System.out.print("file(");
+      quote('\'', formula.file);
+      System.out.print(',');
+      maybeQuote(formula.name);
+      System.out.print(')');
+    }
+    System.out.println(").");
   }
 
-  public void print(Clause c) {
+  private void println(Clause c) {
     System.out.print("tcf(");
 
     // name
@@ -237,14 +245,35 @@ public final class TptpPrinter {
     print(c.term());
 
     // source
-    System.out.print(", inference(");
     var from = c.from;
-    System.out.print(from.length == 1 ? 'o' : 's');
-    System.out.print(",[status(thm)],[");
+
+    String rule;
+    var status = "thm";
+    if (from.length > 1) rule = "s";
+    else if (from[0] instanceof Clause) rule = "o";
+    else {
+      rule = "cnf";
+      status = "esa";
+    }
+
+    System.out.printf(", inference(%s,[status(%s)],[", rule, status);
     for (var i = 0; i < from.length; i++) {
       if (i > 0) System.out.print(',');
       id(from[i]);
     }
     System.out.println("])).");
+  }
+
+  public void println(AbstractFormula formula) {
+    vars.clear();
+    if (formula instanceof Formula) println((Formula) formula);
+    else println((Clause) formula);
+  }
+
+  public void proof(Clause c) {
+    System.out.println("% SZS output start CNFRefutation");
+    var proof = c.proof();
+    for (var formula : proof) println(formula);
+    System.out.println("% SZS output end CNFRefutation");
   }
 }

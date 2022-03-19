@@ -2,6 +2,7 @@ package olivine;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public final class Clause extends AbstractFormula {
   final Term[] literals;
@@ -60,6 +61,13 @@ public final class Clause extends AbstractFormula {
     if (positive.contains(Term.TRUE)) return true;
     for (var a : negative) if (positive.contains(a)) return true;
     return false;
+  }
+
+  @Override
+  protected void getProof(Set<AbstractFormula> visited, List<AbstractFormula> proof) {
+    if (!visited.add(this)) return;
+    for (var formula : from) formula.getProof(visited, proof);
+    proof.add(this);
   }
 
   public Term term() {
