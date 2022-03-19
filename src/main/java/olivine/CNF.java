@@ -250,7 +250,7 @@ public final class CNF {
       }
 
       case NOT -> {
-        return nnf(map, !pol, a);
+        return nnf(map, !pol, a.get(0));
       }
 
         // Variables are mapped to new variables or Skolem functions.
