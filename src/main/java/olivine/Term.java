@@ -501,10 +501,11 @@ public abstract class Term {
     return of(tag, w);
   }
 
-  public static Term of(Tag tag, Term a, List<Term> v) {
+  public static Term of(Tag tag, Term a, Collection<Term> v) {
     var w = new Term[1 + v.size()];
     w[0] = a;
-    for (var i = 0; i < v.size(); i++) w[1 + i] = v.get(i);
+    var i = 1;
+    for (var b : v) w[i++] = b;
     return of(tag, w);
   }
 
@@ -520,9 +521,13 @@ public abstract class Term {
     return of(Tag.CALL, this, args);
   }
 
-  public final Term call(List<Term> args) {
+  public final Term call(Collection<Term> args) {
     assert args.size() > 0;
     return of(Tag.CALL, this, args);
+  }
+
+  public static Term of(boolean b) {
+    return b ? TRUE : FALSE;
   }
 
   public void walk(Consumer<Term> f) {

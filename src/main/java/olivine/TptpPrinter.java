@@ -273,6 +273,7 @@ public final class TptpPrinter {
   public void proof(Clause c) {
     System.out.println("% SZS output start CNFRefutation");
     var proof = c.proof();
+    // TODO: print types
 
     // Skolem symbols that ended up being used in the proof, need to be assigned names
     // before printing. These consist of a string prefix and an integer sequence,

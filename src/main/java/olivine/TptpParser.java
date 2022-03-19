@@ -369,6 +369,7 @@ public final class TptpParser {
       case '[':
         throw new InappropriateException();
       case DEFINED_WORD:
+        // TODO: new-style switch?
         switch (s) {
           case "ceiling":
             return definedAtomicTerm(bound, Tag.CEILING, 1);
