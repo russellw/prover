@@ -6,5 +6,18 @@ public enum SZS {
   Unsatisfiable,
   Timeout,
   GaveUp,
-  ResourceOut,
+  ResourceOut;
+
+  public String string(boolean conjecture) {
+    if (conjecture)
+      switch (this) {
+        case Satisfiable -> {
+          return "CounterSatisfiable";
+        }
+        case Unsatisfiable -> {
+          return "Theorem";
+        }
+      }
+    return toString();
+  }
 }

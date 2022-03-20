@@ -100,6 +100,11 @@ final class Test {
       var cnf = new CNF();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
         TptpParser.parse(file, stream, cnf);
+        var answer = new Superposition(cnf.clauses, 10_000_000).answer;
+
+        System.out.print("% SZS status ");
+        System.out.println(answer.szs.string(cnf.conjecture));
+        if (answer.proof != null) new TptpPrinter().proof(answer.proof);
       } catch (InappropriateException e) {
         System.out.println("% SZS status Inappropriate");
       }

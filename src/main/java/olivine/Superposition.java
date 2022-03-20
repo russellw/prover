@@ -39,7 +39,7 @@ public final class Superposition {
   // the problem is satisfiable. In practice, this is rare but can occasionally happen,
   // and is a good way to detect some kinds of incompleteness errors in the prover
   private SZS defaultAnswer = SZS.Satisfiable;
-  private final Answer answer;
+  public final Answer answer;
 
   private void clause(Clause c) {
     if (c.isTrue()) return;

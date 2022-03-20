@@ -9,6 +9,12 @@ public final class CNF {
   private final List<Term> positive = new ArrayList<>();
   public final List<Clause> clauses = new ArrayList<>();
 
+  // record whether at least one input formula had the TPTP role 'conjecture' because this
+  // makes a difference to the exact format of SZS output. This is ancillary data,
+  // not related to the process of CNF conversion, but stored here because it is required
+  // alongside the clauses
+  public boolean conjecture;
+
   // How many clauses a term will expand into, for the purpose of deciding when subformulas need to
   // be renamed. The answer could
   // exceed the range of a fixed-size integer, but then we don't actually need the number, we only

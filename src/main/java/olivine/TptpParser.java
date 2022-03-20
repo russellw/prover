@@ -698,7 +698,6 @@ public final class TptpParser {
                 if (tok == '>')
                   // this is some higher-order construct that Olivine doesn't understand
                   throw new InappropriateException();
-
                 // Otherwise, the symbol will be simply used as the name of a type. No particular
                 // action is
                 // required at this point, so accept this and move on.
@@ -721,6 +720,7 @@ public final class TptpParser {
               if (role.equals("conjecture")) {
                 negatedConjecture = true;
                 a = Term.of(Tag.NOT, a);
+                cnf.conjecture = true;
               }
               collect(name, negatedConjecture, a);
             }

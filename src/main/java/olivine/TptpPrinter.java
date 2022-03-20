@@ -246,6 +246,7 @@ public final class TptpPrinter {
 
     // source
     var from = c.from;
+    assert from != null;
 
     String rule;
     var status = "thm";
