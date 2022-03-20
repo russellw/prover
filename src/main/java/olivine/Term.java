@@ -582,7 +582,7 @@ public abstract class Term implements Iterable<Term> {
           var b = map.get(a);
           assert !Objects.equals(a, b);
           if (b == null) return a;
-          return b;
+          return b.replace(map);
         });
   }
 
