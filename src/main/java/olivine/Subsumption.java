@@ -1,5 +1,7 @@
 package olivine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public final class Subsumption {
@@ -59,6 +61,7 @@ public final class Subsumption {
   }
 
   public boolean subsumes(Clause c, Clause d) {
+    // TODO: check disjoint free variables
     // Negative and positive literals must subsume separately
     var c1 = c.negative();
     var c2 = c.positive();
@@ -88,5 +91,17 @@ public final class Subsumption {
     } catch (TimeoutException e) {
       return false;
     }
+  }
+
+  public boolean subsumesForward(List<Clause> clauses, Clause c) {
+    // TODO: Collections.emptyMap()
+    for (var d : clauses) if (subsumes(d, c)) return true;
+    return false;
+  }
+
+  public List<Clause> subsumeBackward(Clause c, List<Clause> clauses) {
+    var v = new ArrayList<Clause>(clauses.size());
+    for (var d : clauses) if (!subsumes(c, d)) v.add(d);
+    return v;
   }
 }

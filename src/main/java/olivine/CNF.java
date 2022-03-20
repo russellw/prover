@@ -307,6 +307,7 @@ public final class CNF {
     return pol ? a : Term.of(Tag.NOT, a);
   }
 
+  // TODO: move to Term?
   private static void flatten(Tag tag, Term a, List<Term> v) {
     if (a.tag() == tag) {
       var n = a.size();

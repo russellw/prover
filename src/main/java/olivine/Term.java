@@ -345,11 +345,6 @@ public abstract class Term implements Iterable<Term> {
     final Term a;
 
     @Override
-    public Term map(Function<Term, Term> f) {
-      return new Cast(type, f.apply(a));
-    }
-
-    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -381,6 +376,12 @@ public abstract class Term implements Iterable<Term> {
     @Override
     public int size() {
       return 1;
+    }
+
+    @Override
+    public Term remake(Term[] v) {
+      assert v.length == 1;
+      return new Cast(type, v[0]);
     }
 
     @Override
@@ -554,22 +555,31 @@ public abstract class Term implements Iterable<Term> {
     for (var i = 0; i < n; i++) get(i).walk(f);
   }
 
-  public Term map(Function<Term, Term> f) {
+  public final Term mapLeaves(Function<Term, Term> f) {
+    var n = size();
+    if (n == 0) return f.apply(this);
+    var v = new Term[n];
+    for (var i = 0; i < n; i++) v[i] = get(i).mapLeaves(f);
+    return remake(v);
+  }
+
+  public final Term map(Function<Term, Term> f) {
     var n = size();
     if (n == 0) return this;
     var v = new Term[n];
     for (var i = 0; i < n; i++) v[i] = f.apply(get(i));
-    return of(tag(), v);
+    return remake(v);
   }
 
+  // TODO: rename MapTerm
   public final Term replace(MapTerm map) {
-    if (size() == 0) {
-      var a = map.get(this);
-      assert !Objects.equals(a, this);
-      if (a == null) return this;
-      return a.replace(map);
-    }
-    return map(a -> a.replace(map));
+    return mapLeaves(
+        a -> {
+          var b = map.get(a);
+          assert !Objects.equals(a, b);
+          if (b == null) return a;
+          return b;
+        });
   }
 
   // TODO: SetTerm might not be worth using
@@ -596,7 +606,7 @@ public abstract class Term implements Iterable<Term> {
     return free;
   }
 
-  public Term[] toArray() {
+  public final Term[] toArray() {
     var v = new Term[size()];
     for (var i = 0; i < v.length; i++) v[i] = get(i);
     return v;
@@ -618,5 +628,18 @@ public abstract class Term implements Iterable<Term> {
 
   public final Term simplify() {
     return this;
+  }
+
+  // TODO: Should this be used in other cases?
+  public Term remake(Term[] v) {
+    return of(tag(), v);
+  }
+
+  public final Term splice(List<Integer> position, int i, Term b) {
+    if (i == position.size()) return b;
+    var v = toArray();
+    var j = position.get(i);
+    v[j] = v[j].splice(position, i + 1, b);
+    return remake(v);
   }
 }

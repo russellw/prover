@@ -1,17 +1,66 @@
 package olivine;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public final class Clause extends AbstractFormula {
+public class Clause extends AbstractFormula {
   final Term[] literals;
   final int negativeSize;
   final AbstractFormula[] from;
 
+  private Clause(Term[] literals, int negativeSize) {
+    this.literals = literals;
+    this.negativeSize = negativeSize;
+    this.from = null;
+  }
+
+  public Clause original() {
+    return this;
+  }
+
+  public final Clause renameVars() {
+    var map = new HashMap<Term, Term>();
+    var v = new Term[literals.length];
+    for (var i = 0; i < v.length; i++) {
+      v[i] =
+          literals[i].mapLeaves(
+              a -> {
+                if (a instanceof Var) {
+                  var b = map.get(a);
+                  if (b == null) {
+                    b = new Var(a.type());
+                    map.put(a, b);
+                  }
+                  return b;
+                }
+                return a;
+              });
+    }
+    return new ClauseRenamed(v, negativeSize, this);
+  }
+
+  private static final class ClauseRenamed extends Clause {
+    private final Clause original;
+
+    ClauseRenamed(Term[] literals, int negativeSize, Clause original) {
+      super(literals, negativeSize);
+      this.original = original;
+    }
+
+    @Override
+    public Clause original() {
+      return original;
+    }
+  }
+
   @Override
   public String toString() {
     return String.format("%s => %s", Arrays.toString(negative()), Arrays.toString(positive()));
+  }
+
+  public long volume() {
+    final long[] n = {literals.length};
+    for (var a : literals) a.walk(b -> n[0]++);
+    return n[0];
   }
 
   public Clause(List<Term> negative, List<Term> positive, AbstractFormula... from) {
