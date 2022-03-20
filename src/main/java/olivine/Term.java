@@ -240,6 +240,10 @@ public abstract class Term implements Iterable<Term> {
     return new Cast(type, a);
   }
 
+  public static Term integer(long value) {
+    return new IntegerTerm(BigInteger.valueOf(value));
+  }
+
   public static Term integer(BigInteger value) {
     return new IntegerTerm(value);
   }
