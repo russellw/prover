@@ -76,6 +76,10 @@ public class TermTest {
     var map = MapTerm.EMPTY;
     map = map.add(x, Term.integer(10));
     map = map.add(y, Term.integer(20));
+
+    assertEquals(x.replace(map), Term.integer(10));
+    assertEquals(y.replace(map), Term.integer(20));
+
     var a = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, x, y), Term.integer(30));
     var b =
         Term.of(
