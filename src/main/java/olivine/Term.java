@@ -900,6 +900,54 @@ public abstract class Term implements Iterable<Term> {
           if (yr != null) return of(x.type(), xr.divideTruncate(yr));
         }
       }
+      case REMAINDER_EUCLIDEAN -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(Etc.remainderEuclidean(xi, yi));
+        }
+
+        var xr = x.rationalValue();
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.remainderEuclidean(yr));
+        }
+      }
+      case REMAINDER_FLOOR -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(Etc.remainderFloor(xi, yi));
+        }
+
+        var xr = x.rationalValue();
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.remainderFloor(yr));
+        }
+      }
+      case REMAINDER_TRUNCATE -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(xi.remainder(yi));
+        }
+
+        var xr = x.rationalValue();
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.remainderTruncate(yr));
+        }
+      }
     }
     return a;
   }
