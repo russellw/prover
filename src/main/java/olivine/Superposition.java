@@ -56,7 +56,7 @@ public final class Superposition {
   }
 
   // Substitute and make new clause
-  private void resolve(Clause c, int i, MapTerm map) {
+  private void resolve(Clause c, int i, FMap map) {
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize - 1);
     for (var j = 0; j < c.negativeSize; j++) if (j != i) negative.add(c.literals[j].replace(map));
@@ -74,7 +74,7 @@ public final class Superposition {
   private void resolve(Clause c) {
     for (var i = 0; i < c.negativeSize; i++) {
       var e = new Equation(c.literals[i]);
-      var map = Unification.unify(MapTerm.EMPTY, e.left, e.right);
+      var map = Unification.unify(FMap.EMPTY, e.left, e.right);
       if (map != null) resolve(c, i, map);
     }
   }
@@ -87,7 +87,7 @@ public final class Superposition {
     if (!Equation.equatable(c1, c3)) return;
 
     // unify
-    var map = Unification.unify(MapTerm.EMPTY, c0, c2);
+    var map = Unification.unify(FMap.EMPTY, c0, c2);
     if (map == null) return;
 
     // Negative literals
@@ -139,7 +139,7 @@ public final class Superposition {
       Term d1,
       List<Integer> position,
       Term a) {
-    var map = Unification.unify(MapTerm.EMPTY, c0, a);
+    var map = Unification.unify(FMap.EMPTY, c0, a);
     if (map == null) return;
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;

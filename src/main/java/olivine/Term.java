@@ -594,8 +594,7 @@ public abstract class Term implements Iterable<Term> {
     return remake(v);
   }
 
-  // TODO: rename MapTerm
-  public final Term replace(MapTerm map) {
+  public final Term replace(FMap map) {
     return mapLeaves(
         a -> {
           var b = map.get(a);

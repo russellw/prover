@@ -73,7 +73,7 @@ public class TermTest {
   public void replace() {
     var x = new Var(Type.INTEGER);
     var y = new Var(Type.INTEGER);
-    var map = MapTerm.EMPTY;
+    var map = FMap.EMPTY;
     map = map.add(x, Term.integer(10));
     map = map.add(y, Term.integer(20));
 

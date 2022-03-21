@@ -8,8 +8,7 @@ public final class Subsumption {
   // Time limit
   private int steps;
 
-  private MapTerm search(MapTerm map, Term[] c, Term[] c2, Term[] d, Term[] d2)
-      throws TimeoutException {
+  private FMap search(FMap map, Term[] c, Term[] c2, Term[] d, Term[] d2) throws TimeoutException {
     if (steps-- == 0) throw new TimeoutException();
 
     // Matched everything in one polarity
@@ -85,7 +84,7 @@ public final class Subsumption {
       // Worst-case time is exponential,
       // so give up if taking too long
       steps = 1000;
-      var map = search(MapTerm.EMPTY, c1, c2, d1, d2);
+      var map = search(FMap.EMPTY, c1, c2, d1, d2);
       return map != null;
     } catch (TimeoutException e) {
       return false;

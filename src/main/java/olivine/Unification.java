@@ -3,7 +3,7 @@ package olivine;
 public final class Unification {
   private Unification() {}
 
-  public static MapTerm match(MapTerm map, Term a, Term b) {
+  public static FMap match(FMap map, Term a, Term b) {
     assert map != null;
     if (a.equals(b)) return map;
     if (!a.type().equals(b.type())) return null;
@@ -23,7 +23,7 @@ public final class Unification {
     return map;
   }
 
-  private static boolean occurs(MapTerm map, Term a, Term b) {
+  private static boolean occurs(FMap map, Term a, Term b) {
     assert a.tag() == Tag.VAR;
     if (b.tag() == Tag.VAR) {
       if (a == b) return true;
@@ -36,7 +36,7 @@ public final class Unification {
     return false;
   }
 
-  public static MapTerm unifyVar(MapTerm map, Term a, Term b) {
+  public static FMap unifyVar(FMap map, Term a, Term b) {
     assert a.tag() == Tag.VAR;
 
     var a1 = map.get(a);
@@ -49,7 +49,7 @@ public final class Unification {
     return map.add(a, b);
   }
 
-  public static MapTerm unify(MapTerm map, Term a, Term b) {
+  public static FMap unify(FMap map, Term a, Term b) {
     assert map != null;
     if (a.equals(b)) return map;
     if (!a.type().equals(b.type())) return null;
