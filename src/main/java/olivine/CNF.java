@@ -29,7 +29,7 @@ public final class CNF {
     return n;
   }
 
-  private static int clauseCountMul(boolean pol, Term a) {
+  private static int clauseCountMultiply(boolean pol, Term a) {
     var n = 1;
     for (var b : a) {
       n *= clauseCount(pol, b);
@@ -47,10 +47,10 @@ public final class CNF {
         return clauseCount(!pol, a.get(0));
       }
       case OR -> {
-        return pol ? clauseCountMul(pol, a) : clauseCountAdd(pol, a);
+        return pol ? clauseCountMultiply(pol, a) : clauseCountAdd(pol, a);
       }
       case AND -> {
-        return pol ? clauseCountAdd(pol, a) : clauseCountMul(pol, a);
+        return pol ? clauseCountAdd(pol, a) : clauseCountMultiply(pol, a);
       }
       case EQV -> {
         var x = a.get(0);
@@ -194,7 +194,7 @@ public final class CNF {
         var x = maybeRename(0, a.get(0));
         var y = maybeRename(0, a.get(1));
         if (clauseCountApprox(0, x) >= MANY) x = rename(0, x);
-        if (clauseCountApprox(0, y) >= MANY) x = rename(0, y);
+        if (clauseCountApprox(0, y) >= MANY) y = rename(0, y);
         return Term.of(Tag.EQV, x, y);
       }
       default -> {
