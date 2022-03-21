@@ -31,7 +31,7 @@ public final class Unification {
       if (b1 != null) return occurs(map, a, b1);
       return false;
     }
-    for (var bi:b) if (occurs(map, a, bi)) return true;
+    for (var bi : b) if (occurs(map, a, bi)) return true;
     return false;
   }
 

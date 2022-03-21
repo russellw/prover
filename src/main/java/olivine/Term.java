@@ -19,7 +19,7 @@ public abstract class Term implements Iterable<Term> {
   private void flatten(Tag tag, List<Term> v) {
     if (tag() == tag) {
       var n = size();
-      for (var a:this) a.flatten(tag, v);
+      for (var a : this) a.flatten(tag, v);
       return;
     }
     v.add(this);
@@ -75,10 +75,10 @@ public abstract class Term implements Iterable<Term> {
       }
       case EQV -> {
         checkArity(2);
-        for (var a:this) a.check(Type.BOOLEAN);
+        for (var a : this) a.check(Type.BOOLEAN);
       }
       case AND, OR -> {
-        for (var a:this) a.check(Type.BOOLEAN);
+        for (var a : this) a.check(Type.BOOLEAN);
       }
       case RATIONAL -> {
         assert n == 0;
@@ -118,7 +118,7 @@ public abstract class Term implements Iterable<Term> {
           case BOOLEAN, FUNC -> throw new TypeException(
               String.format("%s: type error: %s", this, type));
         }
-        for (var a:this) a.check(type);
+        for (var a : this) a.check(type);
       }
       case ALL, EXISTS -> {
         for (var i = 1; i < n; i++) get(i).check(get(i).type());
@@ -161,7 +161,7 @@ public abstract class Term implements Iterable<Term> {
         type = get(0).type();
         if (!type.isNumeric())
           throw new TypeException(String.format("%s: type error: %s is not numeric", this, type));
-        for (var a:this) a.check(type);
+        for (var a : this) a.check(type);
       }
     }
   }

@@ -365,130 +365,101 @@ public final class TptpParser {
         throw new InappropriateException();
       case DEFINED_WORD:
         switch (s) {
-          case "ceiling":
-            {
-              return definedAtomicTerm(bound, Tag.CEILING);
-            }
-          case "difference":
-            {
-              return definedAtomicTerm(bound, Tag.SUBTRACT);
-            }
-          case "distinct":
-            {
-              var v = args(bound);
-              for (var a : v) a.defaultType(Type.INDIVIDUAL);
-              var inequalities = new ArrayList<Term>();
-              for (var i = 0; i < v.size(); i++)
-                for (var j = 0; j < v.size(); j++)
-                  if (i != j)
-                    inequalities.add(Term.of(Tag.NOT, Term.of(Tag.EQUALS, v.get(i), v.get(j))));
-              return Term.of(Tag.AND, inequalities);
-            }
-          case "false":
-            {
-              return Term.FALSE;
-            }
-          case "floor":
-            {
-              return definedAtomicTerm(bound, Tag.FLOOR);
-            }
-          case "greater":
-            {
-              var v = args(bound);
-              return Term.of(Tag.LESS, v.get(1), v.get(0));
-            }
-          case "greatereq":
-            {
-              var v = args(bound);
-              return Term.of(Tag.LESS_EQUALS, v.get(1), v.get(0));
-            }
-          case "is_int":
-            {
-              return definedAtomicTerm(bound, Tag.IS_INTEGER);
-            }
-          case "is_rat":
-            {
-              return definedAtomicTerm(bound, Tag.IS_RATIONAL);
-            }
-          case "less":
-            {
-              return definedAtomicTerm(bound, Tag.LESS);
-            }
-          case "lesseq":
-            {
-              return definedAtomicTerm(bound, Tag.LESS_EQUALS);
-            }
-          case "product":
-            {
-              return definedAtomicTerm(bound, Tag.MULTIPLY);
-            }
-          case "quotient":
-            {
-              return definedAtomicTerm(bound, Tag.DIVIDE);
-            }
-          case "quotient_e":
-            {
-              return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN);
-            }
-          case "quotient_f":
-            {
-              return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR);
-            }
-          case "quotient_t":
-            {
-              return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE);
-            }
-          case "remainder_e":
-            {
-              return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN);
-            }
-          case "remainder_f":
-            {
-              return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR);
-            }
-          case "remainder_t":
-            {
-              return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE);
-            }
-          case "round":
-            {
-              return definedAtomicTerm(bound, Tag.ROUND);
-            }
-          case "sum":
-            {
-              return definedAtomicTerm(bound, Tag.ADD);
-            }
-          case "to_int":
-            {
-              var v = args(bound);
-              return Term.cast(Type.INTEGER, v.get(0));
-            }
-          case "to_rat":
-            {
-              var v = args(bound);
-              return Term.cast(Type.RATIONAL, v.get(0));
-            }
-          case "to_real":
-            {
-              var v = args(bound);
-              return Term.cast(Type.REAL, v.get(0));
-            }
-          case "true":
-            {
-              return Term.TRUE;
-            }
-          case "truncate":
-            {
-              return definedAtomicTerm(bound, Tag.TRUNCATE);
-            }
-          case "uminus":
-            {
-              return definedAtomicTerm(bound, Tag.NEGATE);
-            }
-          case "ite":
-            throw new InappropriateException();
-          default:
-            throw err(String.format("'$%s': unknown word", s));
+          case "ceiling" -> {
+            return definedAtomicTerm(bound, Tag.CEILING);
+          }
+          case "difference" -> {
+            return definedAtomicTerm(bound, Tag.SUBTRACT);
+          }
+          case "distinct" -> {
+            var v = args(bound);
+            for (var a : v) a.defaultType(Type.INDIVIDUAL);
+            var inequalities = new ArrayList<Term>();
+            for (var i = 0; i < v.size(); i++)
+              for (var j = 0; j < v.size(); j++)
+                if (i != j)
+                  inequalities.add(Term.of(Tag.NOT, Term.of(Tag.EQUALS, v.get(i), v.get(j))));
+            return Term.of(Tag.AND, inequalities);
+          }
+          case "false" -> {
+            return Term.FALSE;
+          }
+          case "floor" -> {
+            return definedAtomicTerm(bound, Tag.FLOOR);
+          }
+          case "greater" -> {
+            var v = args(bound);
+            return Term.of(Tag.LESS, v.get(1), v.get(0));
+          }
+          case "greatereq" -> {
+            var v = args(bound);
+            return Term.of(Tag.LESS_EQUALS, v.get(1), v.get(0));
+          }
+          case "is_int" -> {
+            return definedAtomicTerm(bound, Tag.IS_INTEGER);
+          }
+          case "is_rat" -> {
+            return definedAtomicTerm(bound, Tag.IS_RATIONAL);
+          }
+          case "less" -> {
+            return definedAtomicTerm(bound, Tag.LESS);
+          }
+          case "lesseq" -> {
+            return definedAtomicTerm(bound, Tag.LESS_EQUALS);
+          }
+          case "product" -> {
+            return definedAtomicTerm(bound, Tag.MULTIPLY);
+          }
+          case "quotient" -> {
+            return definedAtomicTerm(bound, Tag.DIVIDE);
+          }
+          case "quotient_e" -> {
+            return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN);
+          }
+          case "quotient_f" -> {
+            return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR);
+          }
+          case "quotient_t" -> {
+            return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE);
+          }
+          case "remainder_e" -> {
+            return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN);
+          }
+          case "remainder_f" -> {
+            return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR);
+          }
+          case "remainder_t" -> {
+            return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE);
+          }
+          case "round" -> {
+            return definedAtomicTerm(bound, Tag.ROUND);
+          }
+          case "sum" -> {
+            return definedAtomicTerm(bound, Tag.ADD);
+          }
+          case "to_int" -> {
+            var v = args(bound);
+            return Term.cast(Type.INTEGER, v.get(0));
+          }
+          case "to_rat" -> {
+            var v = args(bound);
+            return Term.cast(Type.RATIONAL, v.get(0));
+          }
+          case "to_real" -> {
+            var v = args(bound);
+            return Term.cast(Type.REAL, v.get(0));
+          }
+          case "true" -> {
+            return Term.TRUE;
+          }
+          case "truncate" -> {
+            return definedAtomicTerm(bound, Tag.TRUNCATE);
+          }
+          case "uminus" -> {
+            return definedAtomicTerm(bound, Tag.NEGATE);
+          }
+          case "ite" -> throw new InappropriateException();
+          default -> throw err(String.format("'$%s': unknown word", s));
         }
       case DISTINCT_OBJECT:
         {
@@ -500,11 +471,17 @@ public final class TptpParser {
           return a;
         }
       case INTEGER:
-        return Term.of(new BigInteger(s));
+        {
+          return Term.of(new BigInteger(s));
+        }
       case RATIONAL:
-        return Term.of(Type.RATIONAL, BigRational.of(s));
+        {
+          return Term.of(Type.RATIONAL, BigRational.of(s));
+        }
       case REAL:
-        return Term.of(Type.REAL, BigRational.ofDecimal(s));
+        {
+          return Term.of(Type.REAL, BigRational.ofDecimal(s));
+        }
       case VAR:
         {
           if (bound == null) {
@@ -640,15 +617,13 @@ public final class TptpParser {
   // top level
   private String formulaName() throws IOException {
     switch (tok) {
-      case WORD:
-      case INTEGER:
-        {
-          var s = tokString;
-          lex();
-          return s;
-        }
+      case WORD, INTEGER -> {
+        var s = tokString;
+        lex();
+        return s;
+      }
+      default -> throw err("expected formula name");
     }
-    throw err("expected formula name");
   }
 
   private boolean selecting(String name) {
@@ -664,14 +639,13 @@ public final class TptpParser {
 
   private void skip() throws IOException {
     switch (tok) {
-      case '(':
+      case '(' -> {
         lex();
         while (!eat(')')) skip();
-        return;
-      case -1:
-        throw err("unclosed '('");
+      }
+      case -1 -> throw err("unclosed '('");
+      default -> lex();
     }
-    lex();
   }
 
   private TptpParser(
