@@ -689,7 +689,6 @@ public abstract class Term implements Iterable<Term> {
     return a;
   }
 
-  // TODO: Should this be used in other cases?
   public Term remake(Term[] v) {
     return of(tag(), v);
   }
