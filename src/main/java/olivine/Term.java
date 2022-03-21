@@ -649,8 +649,25 @@ public abstract class Term implements Iterable<Term> {
     return of(Tag.ALL, this, free.toArray(new Term[0]));
   }
 
+  public final boolean isConst() {
+    return switch (tag()) {
+      case DISTINCT_OBJECT, INTEGER, RATIONAL, TRUE, FALSE -> true;
+      default -> false;
+    };
+  }
+
   public final Term simplify() {
-    return this;
+    var a = map(Term::simplify);
+    // TODO: implement the rest
+    switch (a.tag()) {
+      case EQUALS -> {
+        var x = a.get(0);
+        var y = a.get(1);
+        if (x.equals(y)) return TRUE;
+        if (x.isConst() && y.isConst()) return FALSE;
+      }
+    }
+    return a;
   }
 
   // TODO: Should this be used in other cases?

@@ -103,7 +103,7 @@ final class Test {
         TptpParser.parse(file, stream, cnf);
 
         // solve
-        var answer = new Superposition(cnf.clauses, 10_000_000, 100_000).answer;
+        var answer = new Superposition(cnf.clauses, 10_000_000, 10_000).answer;
 
         // output
         System.out.print("% SZS status ");
