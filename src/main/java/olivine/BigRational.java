@@ -75,7 +75,6 @@ public final class BigRational extends Number implements Comparable<BigRational>
   // https://stackoverflow.com/questions/33623875/converting-an-arbitrary-precision-rational-number-ocaml-zarith-to-an-approxim
   @Override
   public double doubleValue() {
-    // TODO: can we do better using BigDecimal?
     return num.doubleValue() / den.doubleValue();
   }
 
