@@ -81,4 +81,137 @@ public class TermTest {
     var b = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, Term.of(10), Term.of(20)), Term.of(30));
     assertEquals(a.replace(map), b);
   }
+
+  @Test
+  public void simplify() {
+    var x = new Var(Type.INTEGER);
+    var y = new Var(Type.INTEGER);
+    var x1 = new Var(Type.RATIONAL);
+    var y1 = new Var(Type.RATIONAL);
+    Term a, b;
+
+    a = Term.of(Tag.EQUALS, x, x);
+    b = Term.TRUE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.EQUALS, x, y);
+    b = Term.of(Tag.EQUALS, x, y);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.EQUALS, Term.of(5), Term.of(6));
+    b = Term.FALSE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, Term.of(Tag.ADD, Term.of(1), Term.of(2)), Term.of(7));
+    b = Term.of(10);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, Term.of(0), x);
+    b = x;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, x, Term.of(0));
+    //noinspection ConstantConditions
+    b = x;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, Term.of(Tag.ADD, rational(1, 10), rational(2, 10)), rational(4, 10));
+    b = rational(7, 10);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, Term.of(Tag.ADD, real(1, 10), real(2, 10)), real(4, 10));
+    b = real(7, 10);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, rational(0, 1), x1);
+    b = x1;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.ADD, x1, rational(0, 1));
+    //noinspection ConstantConditions
+    b = x1;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.SUBTRACT, Term.of(Tag.SUBTRACT, Term.of(1), Term.of(2)), Term.of(7));
+    b = Term.of(-8);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.SUBTRACT, Term.of(0), x);
+    b = Term.of(Tag.NEGATE, x);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.SUBTRACT, x, Term.of(0));
+    b = x;
+    assertEquals(a.simplify(), b);
+
+    a =
+        Term.of(
+            Tag.SUBTRACT, Term.of(Tag.SUBTRACT, rational(1, 10), rational(2, 10)), rational(4, 10));
+    b = rational(-5, 10);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.SUBTRACT, Term.of(Tag.SUBTRACT, real(1, 10), real(2, 10)), real(4, 10));
+    b = real(-5, 10);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.SUBTRACT, rational(0, 1), x1);
+    b = Term.of(Tag.NEGATE, x1);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.SUBTRACT, x1, rational(0, 1));
+    b = x1;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, Term.of(Tag.MULTIPLY, Term.of(1), Term.of(2)), Term.of(7));
+    b = Term.of(14);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, Term.of(0), x);
+    b = Term.of(0);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, x, Term.of(0));
+    b = Term.of(0);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, Term.of(1), x);
+    b = x;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, x, Term.of(1));
+    //noinspection ConstantConditions
+    b = x;
+    assertEquals(a.simplify(), b);
+
+    a =
+        Term.of(
+            Tag.MULTIPLY, Term.of(Tag.MULTIPLY, rational(1, 10), rational(2, 10)), rational(4, 10));
+    b = rational(8, 1000);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, rational(0, 1), x1);
+    b = rational(0, 1);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, x1, rational(0, 1));
+    b = rational(0, 1);
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, rational(1, 1), x1);
+    b = x1;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.MULTIPLY, x1, rational(1, 1));
+    //noinspection ConstantConditions
+    b = x1;
+    assertEquals(a.simplify(), b);
+  }
+
+  private static Term rational(long num, long den) {
+    return Term.of(Type.RATIONAL, BigRational.of(num, den));
+  }
+
+  private static Term real(long num, long den) {
+    return Term.of(Type.REAL, BigRational.of(num, den));
+  }
 }

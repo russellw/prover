@@ -292,11 +292,11 @@ public abstract class Term implements Iterable<Term> {
   }
 
   public BigInteger integerValue() {
-    throw new UnsupportedOperationException(tag().toString());
+    return null;
   }
 
   public BigRational rationalValue() {
-    throw new UnsupportedOperationException(tag().toString());
+    return null;
   }
 
   private static final class IntegerTerm extends Term {
@@ -687,6 +687,70 @@ public abstract class Term implements Iterable<Term> {
         var y = a.get(1);
         if (x.equals(y)) return TRUE;
         if (x.isConst() && y.isConst()) return FALSE;
+      }
+      case ADD -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        var yi = y.integerValue();
+        if (xi != null) {
+          if (yi != null) return of(xi.add(yi));
+          if (xi.signum() == 0) return y;
+        }
+        if (Objects.equals(yi, BigInteger.ZERO)) return x;
+
+        var xr = x.rationalValue();
+        var yr = y.rationalValue();
+        if (xr != null) {
+          if (yr != null) return of(x.type(), xr.add(yr));
+          if (xr.signum() == 0) return y;
+        }
+        if (Objects.equals(yr, BigRational.ZERO)) return x;
+      }
+      case SUBTRACT -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        var yi = y.integerValue();
+        if (xi != null) {
+          if (yi != null) return of(xi.subtract(yi));
+          if (xi.signum() == 0) return Term.of(Tag.NEGATE, y);
+        }
+        if (Objects.equals(yi, BigInteger.ZERO)) return x;
+
+        var xr = x.rationalValue();
+        var yr = y.rationalValue();
+        if (xr != null) {
+          if (yr != null) return of(x.type(), xr.subtract(yr));
+          if (xr.signum() == 0) return Term.of(Tag.NEGATE, y);
+        }
+        if (Objects.equals(yr, BigRational.ZERO)) return x;
+      }
+      case MULTIPLY -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        var yi = y.integerValue();
+        if (xi != null) {
+          if (yi != null) return of(xi.multiply(yi));
+          if (xi.signum() == 0) return x;
+          if (xi.equals(BigInteger.ONE)) return y;
+        }
+        if (Objects.equals(yi, BigInteger.ZERO)) return y;
+        if (Objects.equals(yi, BigInteger.ONE)) return x;
+
+        var xr = x.rationalValue();
+        var yr = y.rationalValue();
+        if (xr != null) {
+          if (yr != null) return of(x.type(), xr.multiply(yr));
+          if (xr.signum() == 0) return x;
+          if (xr.equals(BigRational.ONE)) return y;
+        }
+        if (Objects.equals(yr, BigRational.ZERO)) return y;
+        if (Objects.equals(yr, BigRational.ONE)) return x;
       }
     }
     return a;
