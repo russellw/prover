@@ -345,6 +345,7 @@ public abstract class Term implements Iterable<Term> {
     final BigRational value;
 
     RationalTerm(Type type, BigRational value) {
+      assert type == Type.RATIONAL || type == Type.REAL;
       this.type = type;
       this.value = value;
     }
@@ -711,6 +712,43 @@ public abstract class Term implements Iterable<Term> {
         var xr = x.rationalValue();
         var yr = y.rationalValue();
         if (xr != null && yr != null) return of(xr.compareTo(yr) <= 0);
+      }
+      case NEGATE -> {
+        var x = a.get(0);
+
+        var xi = x.integerValue();
+        if (xi != null) return of(xi.negate());
+
+        var xr = x.rationalValue();
+        if (xr != null) return of(x.type(), xr.negate());
+      }
+      case CEILING -> {
+        var x = a.get(0);
+        if (x.type() == Type.INTEGER) return x;
+
+        var xr = x.rationalValue();
+        if (xr != null) return of(x.type(), BigRational.of(xr.ceiling()));
+      }
+      case FLOOR -> {
+        var x = a.get(0);
+        if (x.type() == Type.INTEGER) return x;
+
+        var xr = x.rationalValue();
+        if (xr != null) return of(x.type(), BigRational.of(xr.floor()));
+      }
+      case ROUND -> {
+        var x = a.get(0);
+        if (x.type() == Type.INTEGER) return x;
+
+        var xr = x.rationalValue();
+        if (xr != null) return of(x.type(), BigRational.of(xr.round()));
+      }
+      case TRUNCATE -> {
+        var x = a.get(0);
+        if (x.type() == Type.INTEGER) return x;
+
+        var xr = x.rationalValue();
+        if (xr != null) return of(x.type(), BigRational.of(xr.truncate()));
       }
       case ADD -> {
         var x = a.get(0);

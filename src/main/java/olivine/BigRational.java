@@ -33,7 +33,7 @@ public final class BigRational extends Number implements Comparable<BigRational>
     return new BigRational(num.multiply(b.den).add(b.num.multiply(den)), den.multiply(b.den));
   }
 
-  public BigInteger ceil() {
+  public BigInteger ceiling() {
     return Etc.divideFloor(num.add(den.subtract(BigInteger.ONE)), den);
   }
 

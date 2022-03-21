@@ -128,6 +128,10 @@ public class TermTest {
     b = Term.FALSE;
     assertEquals(a.simplify(), b);
 
+    a = Term.of(Tag.NEGATE, rational(-3, 7));
+    b = rational(3, 7);
+    assertEquals(a.simplify(), b);
+
     a = Term.of(Tag.ADD, Term.of(Tag.ADD, Term.of(1), Term.of(2)), Term.of(7));
     b = Term.of(10);
     assertEquals(a.simplify(), b);
@@ -231,6 +235,38 @@ public class TermTest {
     //noinspection ConstantConditions
     b = x1;
     assertEquals(a.simplify(), b);
+
+    assertSimplify(Term.of(Tag.CEILING, rational(0, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.CEILING, rational(1, 10)), rational(1, 1));
+    assertSimplify(Term.of(Tag.CEILING, rational(5, 10)), rational(1, 1));
+    assertSimplify(Term.of(Tag.CEILING, rational(9, 10)), rational(1, 1));
+    assertSimplify(Term.of(Tag.CEILING, rational(-1, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.CEILING, rational(-5, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.CEILING, rational(-9, 10)), rational(0, 1));
+
+    assertSimplify(Term.of(Tag.FLOOR, rational(0, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.FLOOR, rational(1, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.FLOOR, rational(5, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.FLOOR, rational(9, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.FLOOR, rational(-1, 10)), rational(-1, 1));
+    assertSimplify(Term.of(Tag.FLOOR, rational(-5, 10)), rational(-1, 1));
+    assertSimplify(Term.of(Tag.FLOOR, rational(-9, 10)), rational(-1, 1));
+
+    assertSimplify(Term.of(Tag.ROUND, rational(0, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.ROUND, rational(1, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.ROUND, rational(5, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.ROUND, rational(9, 10)), rational(1, 1));
+    assertSimplify(Term.of(Tag.ROUND, rational(-1, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.ROUND, rational(-5, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.ROUND, rational(-9, 10)), rational(-1, 1));
+
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(0, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(1, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(5, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(9, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(-1, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(-5, 10)), rational(0, 1));
+    assertSimplify(Term.of(Tag.TRUNCATE, rational(-9, 10)), rational(0, 1));
   }
 
   private static Term rational(long num, long den) {
@@ -239,5 +275,9 @@ public class TermTest {
 
   private static Term real(long num, long den) {
     return Term.of(Type.REAL, BigRational.of(num, den));
+  }
+
+  private static void assertSimplify(Term a, Term b) {
+    assertEquals(a.simplify(), b);
   }
 }
