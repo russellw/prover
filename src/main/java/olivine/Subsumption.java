@@ -1,6 +1,7 @@
 package olivine;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -59,7 +60,8 @@ public final class Subsumption {
   }
 
   public boolean subsumes(Clause c, Clause d) {
-    // TODO: check disjoint free variables
+    assert Collections.disjoint(c.freeVars(), d.freeVars());
+
     // Negative and positive literals must subsume separately
     var c1 = c.negative();
     var c2 = c.positive();

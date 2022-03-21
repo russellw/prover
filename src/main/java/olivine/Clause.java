@@ -57,10 +57,16 @@ public class Clause extends AbstractFormula {
     return String.format("%s => %s", Arrays.toString(negative()), Arrays.toString(positive()));
   }
 
-  public long volume() {
+  public final long volume() {
     final long[] n = {literals.length};
     for (var a : literals) a.walk(b -> n[0]++);
     return n[0];
+  }
+
+  public final Set<Term> freeVars() {
+    var free = new LinkedHashSet<Term>();
+    for (var a : literals) a.freeVars(Set.of(), free);
+    return free;
   }
 
   public Clause(List<Term> negative, List<Term> positive, AbstractFormula... from) {
@@ -88,23 +94,23 @@ public class Clause extends AbstractFormula {
     for (var i = 0; i < positive.size(); i++) literals[negativeSize + i] = positive.get(i);
   }
 
-  public Term[] negative() {
+  public final Term[] negative() {
     return Arrays.copyOf(literals, negativeSize);
   }
 
-  public Term[] positive() {
+  public final Term[] positive() {
     return Arrays.copyOfRange(literals, negativeSize, literals.length);
   }
 
-  public int positiveSize() {
+  public final int positiveSize() {
     return literals.length - negativeSize;
   }
 
-  public boolean isFalse() {
+  public final boolean isFalse() {
     return literals.length == 0;
   }
 
-  public boolean isTrue() {
+  public final boolean isTrue() {
     if (literals.length == 1 && literals[0] == Term.TRUE) {
       assert negativeSize == 0;
       return true;

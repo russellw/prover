@@ -605,7 +605,7 @@ public abstract class Term implements Iterable<Term> {
         });
   }
 
-  private void freeVars(Set<Term> bound, Set<Term> free) {
+  public final void freeVars(Set<Term> bound, Set<Term> free) {
     switch (tag()) {
       case VAR -> {
         if (!bound.contains(this)) free.add(this);

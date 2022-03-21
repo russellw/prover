@@ -26,6 +26,7 @@ public class SubsumptionTest {
     var q2 = new Func("q2", Type.BOOLEAN, Type.INTEGER, Type.INTEGER);
     var x = new Var(Type.INTEGER);
     var y = new Var(Type.INTEGER);
+    var z = new Var(Type.INTEGER);
     var negative = new ArrayList<Term>();
     var positive = new ArrayList<Term>();
     Clause c, d;
@@ -357,7 +358,7 @@ public class SubsumptionTest {
     assertTrue(subsumption.subsumes(c, d));
     assertFalse(subsumption.subsumes(d, c));
 
-    // (x = a) | (1 = y) !<= (1 = a) | (x = 0)
+    // (x = a) | (1 = y) !<= (1 = a) | (z = 0)
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, x, a));
@@ -367,7 +368,7 @@ public class SubsumptionTest {
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, ofInt(1), a));
-    positive.add(Term.of(Tag.EQUALS, x, ofInt(0)));
+    positive.add(Term.of(Tag.EQUALS, z, ofInt(0)));
     d = new Clause(negative, positive);
     typeCheck(d);
     assertFalse(subsumption.subsumes(c, d));
