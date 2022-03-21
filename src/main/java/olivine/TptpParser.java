@@ -128,15 +128,18 @@ public final class TptpParser {
         }
         case '/' -> {
           c = stream.read();
-          if (c != '*') throw err("'*' expected");
-          do {
-            do {
-              if (c < 0) throw err("unclosed block comment");
-              c = stream.read();
-            } while (c != '*');
-            // TODO: fix
-            c = stream.read();
-          } while (c != '/');
+          if (c != '*') throw err("expected '*'");
+          c = stream.read();
+          for (; ; ) {
+            switch (c) {
+              case -1 -> throw err("unclosed block comment");
+              case '*' -> c = stream.read();
+              default -> {
+                continue;
+              }
+            }
+            if (c == '/') break;
+          }
           c = stream.read();
           continue;
         }

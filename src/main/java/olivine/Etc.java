@@ -1,7 +1,10 @@
 package olivine;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,6 +84,10 @@ public final class Etc {
 
   public static BigInteger remainderFloor(BigInteger a, BigInteger b) {
     return a.subtract(divideFloor(a, b).multiply(b));
+  }
+
+  public static InputStream stringInputStream(String s) {
+    return new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
   }
 
   public static String version() throws IOException {
