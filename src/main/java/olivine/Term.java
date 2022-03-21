@@ -150,7 +150,6 @@ public abstract class Term implements Iterable<Term> {
           ADD,
           SUBTRACT,
           MULTIPLY,
-          DIVIDE,
           DIVIDE_EUCLIDEAN,
           DIVIDE_FLOOR,
           DIVIDE_TRUNCATE,
@@ -161,6 +160,13 @@ public abstract class Term implements Iterable<Term> {
         type = get(0).type();
         if (!type.isNumeric())
           throw new TypeException(String.format("%s: type error: %s is not numeric", this, type));
+        for (var a : this) a.check(type);
+      }
+      case DIVIDE -> {
+        checkArity(2);
+        type = get(0).type();
+        if (type != Type.RATIONAL && type != Type.REAL)
+          throw new TypeException(String.format("%s: type error: %s", this, type));
         for (var a : this) a.check(type);
       }
     }
@@ -827,6 +833,15 @@ public abstract class Term implements Iterable<Term> {
           if (xr.equals(BigRational.ONE)) return y;
         }
         if (Objects.equals(yr, BigRational.ZERO)) return y;
+        if (Objects.equals(yr, BigRational.ONE)) return x;
+      }
+      case DIVIDE -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xr = x.rationalValue();
+        var yr = y.rationalValue();
+        if (xr != null && yr != null) return of(x.type(), xr.divide(yr));
         if (Objects.equals(yr, BigRational.ONE)) return x;
       }
     }

@@ -236,6 +236,9 @@ public class TermTest {
     b = x1;
     assertEquals(a.simplify(), b);
 
+    assertSimplify(Term.of(Tag.DIVIDE, rational(1, 1), rational(-17, 1)), rational(-1, 17));
+    assertSimplify(Term.of(Tag.DIVIDE, x1, rational(1, 1)), x1);
+
     assertSimplify(Term.of(Tag.IS_INTEGER, x), Term.TRUE);
     assertSimplify(Term.of(Tag.IS_INTEGER, Term.of(3)), Term.TRUE);
     assertSimplify(Term.of(Tag.IS_INTEGER, rational(3, 3)), Term.TRUE);
