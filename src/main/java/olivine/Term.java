@@ -280,15 +280,15 @@ public abstract class Term implements Iterable<Term> {
     return new Cast(type, a);
   }
 
-  public static Term integer(long value) {
+  public static Term of(long value) {
     return new IntegerTerm(BigInteger.valueOf(value));
   }
 
-  public static Term integer(BigInteger value) {
+  public static Term of(BigInteger value) {
     return new IntegerTerm(value);
   }
 
-  public static Term rational(Type type, BigRational value) {
+  public static Term of(Type type, BigRational value) {
     return new RationalTerm(type, value);
   }
 

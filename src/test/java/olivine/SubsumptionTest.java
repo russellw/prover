@@ -10,7 +10,7 @@ public class SubsumptionTest {
   private void typeCheck(Clause c) {}
 
   private Term ofInt(int n) {
-    return Term.integer(BigInteger.valueOf(n));
+    return Term.of(BigInteger.valueOf(n));
   }
 
   @Test

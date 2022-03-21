@@ -41,21 +41,18 @@ public class TermTest {
 
   @Test
   public void mapLeaves() {
-    var a =
-        Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, Term.integer(1), Term.integer(2)), Term.integer(3));
+    var a = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, Term.of(1), Term.of(2)), Term.of(3));
     var a1 =
         a.mapLeaves(
             x -> {
               if (x.tag() == Tag.INTEGER) {
                 var n = x.integerValue();
                 n = n.multiply(BigInteger.TEN);
-                return Term.integer(n);
+                return Term.of(n);
               }
               return x;
             });
-    var b =
-        Term.of(
-            Tag.ADD, Term.of(Tag.MULTIPLY, Term.integer(10), Term.integer(20)), Term.integer(30));
+    var b = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, Term.of(10), Term.of(20)), Term.of(30));
     assertEquals(a1, b);
   }
 
@@ -74,16 +71,14 @@ public class TermTest {
     var x = new Var(Type.INTEGER);
     var y = new Var(Type.INTEGER);
     var map = FMap.EMPTY;
-    map = map.add(x, Term.integer(10));
-    map = map.add(y, Term.integer(20));
+    map = map.add(x, Term.of(10));
+    map = map.add(y, Term.of(20));
 
-    assertEquals(x.replace(map), Term.integer(10));
-    assertEquals(y.replace(map), Term.integer(20));
+    assertEquals(x.replace(map), Term.of(10));
+    assertEquals(y.replace(map), Term.of(20));
 
-    var a = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, x, y), Term.integer(30));
-    var b =
-        Term.of(
-            Tag.ADD, Term.of(Tag.MULTIPLY, Term.integer(10), Term.integer(20)), Term.integer(30));
+    var a = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, x, y), Term.of(30));
+    var b = Term.of(Tag.ADD, Term.of(Tag.MULTIPLY, Term.of(10), Term.of(20)), Term.of(30));
     assertEquals(a.replace(map), b);
   }
 }

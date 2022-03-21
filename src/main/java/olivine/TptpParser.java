@@ -500,11 +500,11 @@ public final class TptpParser {
           return a;
         }
       case INTEGER:
-        return Term.integer(new BigInteger(s));
+        return Term.of(new BigInteger(s));
       case RATIONAL:
-        return Term.rational(Type.RATIONAL, BigRational.of(s));
+        return Term.of(Type.RATIONAL, BigRational.of(s));
       case REAL:
-        return Term.rational(Type.REAL, BigRational.ofDecimal(s));
+        return Term.of(Type.REAL, BigRational.ofDecimal(s));
       case VAR:
         {
           if (bound == null) {
