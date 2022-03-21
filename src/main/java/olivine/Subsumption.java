@@ -92,7 +92,6 @@ public final class Subsumption {
   }
 
   public boolean subsumesForward(List<Clause> clauses, Clause c) {
-    // TODO: Collections.emptyMap()
     for (var d : clauses) if (subsumes(d, c)) return true;
     return false;
   }

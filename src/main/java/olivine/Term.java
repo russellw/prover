@@ -624,7 +624,7 @@ public abstract class Term implements Iterable<Term> {
 
   public final Set<Term> freeVars() {
     var free = new LinkedHashSet<Term>();
-    freeVars(Collections.emptySet(), free);
+    freeVars(Set.of(), free);
     return free;
   }
 
