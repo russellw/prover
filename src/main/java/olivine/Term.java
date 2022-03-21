@@ -750,6 +750,21 @@ public abstract class Term implements Iterable<Term> {
         var xr = x.rationalValue();
         if (xr != null) return of(x.type(), BigRational.of(xr.truncate()));
       }
+      case IS_INTEGER -> {
+        var x = a.get(0);
+        if (x.type() == Type.INTEGER) return TRUE;
+
+        var xr = x.rationalValue();
+        if (xr != null) return of(xr.den.equals(BigInteger.ONE));
+      }
+      case IS_RATIONAL -> {
+        var x = a.get(0);
+        var xtype = x.type();
+        if (xtype == Type.INTEGER || xtype == Type.RATIONAL) return TRUE;
+
+        var xr = x.rationalValue();
+        if (xr != null) return TRUE;
+      }
       case ADD -> {
         var x = a.get(0);
         var y = a.get(1);

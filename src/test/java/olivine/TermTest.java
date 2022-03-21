@@ -236,6 +236,17 @@ public class TermTest {
     b = x1;
     assertEquals(a.simplify(), b);
 
+    assertSimplify(Term.of(Tag.IS_INTEGER, x), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_INTEGER, Term.of(3)), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_INTEGER, rational(3, 3)), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_INTEGER, rational(1, 3)), Term.FALSE);
+
+    assertSimplify(Term.of(Tag.IS_RATIONAL, x), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_RATIONAL, x1), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_RATIONAL, Term.of(3)), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_RATIONAL, rational(3, 3)), Term.TRUE);
+    assertSimplify(Term.of(Tag.IS_RATIONAL, rational(1, 3)), Term.TRUE);
+
     assertSimplify(Term.of(Tag.CEILING, rational(0, 10)), rational(0, 1));
     assertSimplify(Term.of(Tag.CEILING, rational(1, 10)), rational(1, 1));
     assertSimplify(Term.of(Tag.CEILING, rational(5, 10)), rational(1, 1));
