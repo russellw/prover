@@ -326,8 +326,7 @@ public final class CNF {
       case OR -> {
         // Flat layer of ANDs
         var ands = new ArrayList<List<Term>>(a.size());
-        var n = a.size();
-        for (var i = 0; i < n; i++) ands.add(distribute(a.get(i)).flatten(Tag.AND));
+        for (var b:a) ands.add(distribute(b).flatten(Tag.AND));
 
         // OR distributes over AND by Cartesian product.
         var ors = Etc.cartesianProduct(ands);

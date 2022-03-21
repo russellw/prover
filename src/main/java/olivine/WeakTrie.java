@@ -41,7 +41,7 @@ public final class WeakTrie<T> {
     }
     var v = (Object[]) node;
     if (v == null) return null;
-    for (var k = 0; (k <= key[i]) && (k < v.length); k++) {
+    for (var k = 0; k <= key[i] && k < v.length; k++) {
       var value = findLessEqual(key, f, i + 1, v[k]);
       if (value != null) return value;
     }
