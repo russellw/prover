@@ -315,26 +315,6 @@ public final class CNF {
     return pol ? a : Term.of(Tag.NOT, a);
   }
 
-  // TODO: move to Term?
-  private static void flatten(Tag tag, Term a, List<Term> v) {
-    if (a.tag() == tag) {
-      var n = a.size();
-      for (var i = 0; i < n; i++) flatten(tag, a.get(i), v);
-      return;
-    }
-    v.add(a);
-  }
-
-  private static List<Term> flatten(Tag tag, Term a) {
-    // optimize for the common special  case
-    if (a.tag() != tag) return Collections.singletonList(a);
-
-    // general case
-    var v = new ArrayList<Term>();
-    flatten(tag, a, v);
-    return v;
-  }
-
   // Distribute OR down into AND, completing the layering of the operators for CNF. This is the
   // second place where exponential
   // expansion would occur, had selected formulas not already been renamed.
@@ -347,7 +327,7 @@ public final class CNF {
         // Flat layer of ANDs
         var ands = new ArrayList<List<Term>>(a.size());
         var n = a.size();
-        for (var i = 0; i < n; i++) ands.add(flatten(Tag.AND, distribute(a.get(i))));
+        for (var i = 0; i < n; i++) ands.add(distribute(a.get(i)).flatten(Tag.AND));
 
         // OR distributes over AND by Cartesian product.
         var ors = Etc.cartesianProduct(ands);

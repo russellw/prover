@@ -6,6 +6,25 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Term implements Iterable<Term> {
+  public final List<Term> flatten(Tag tag) {
+    // optimize for the common special  case
+    if (tag() != tag) return Collections.singletonList(this);
+
+    // general case
+    var v = new ArrayList<Term>();
+    flatten(tag, v);
+    return v;
+  }
+
+  private void flatten(Tag tag, List<Term> v) {
+    if (tag() == tag) {
+      var n = size();
+      for (var i = 0; i < n; i++) get(i).flatten(tag, v);
+      return;
+    }
+    v.add(this);
+  }
+
   public abstract Tag tag();
 
   public int size() {
