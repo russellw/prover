@@ -104,7 +104,7 @@ final class Test {
         TptpParser.parse(file, stream, cnf);
 
         // solve
-        var answer = new Superposition(cnf.clauses, 10_000_000, 1000).answer;
+        var answer = new Superposition(cnf.clauses, 10_000_000, 10_000).answer;
 
         // output
         System.out.print("% SZS status ");
@@ -131,7 +131,7 @@ final class Test {
       System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start1) / 1000.0);
       System.out.println();
     }
-    System.out.printf("Solved %d/%d", solved, files.size());
+    System.out.printf("Solved %d/%d\n", solved, files.size());
     System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start) / 1000.0);
   }
 }
