@@ -102,6 +102,32 @@ public class TermTest {
     b = Term.FALSE;
     assertEquals(a.simplify(), b);
 
+    a = Term.of(Tag.LESS, Term.of(5), Term.of(6));
+    b = Term.TRUE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.LESS, Term.of(6), Term.of(6));
+    b = Term.FALSE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.LESS, Term.of(6), Term.of(5));
+    //noinspection ConstantConditions
+    b = Term.FALSE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.LESS_EQUALS, Term.of(5), Term.of(6));
+    b = Term.TRUE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.LESS_EQUALS, Term.of(6), Term.of(6));
+    //noinspection ConstantConditions
+    b = Term.TRUE;
+    assertEquals(a.simplify(), b);
+
+    a = Term.of(Tag.LESS_EQUALS, Term.of(6), Term.of(5));
+    b = Term.FALSE;
+    assertEquals(a.simplify(), b);
+
     a = Term.of(Tag.ADD, Term.of(Tag.ADD, Term.of(1), Term.of(2)), Term.of(7));
     b = Term.of(10);
     assertEquals(a.simplify(), b);

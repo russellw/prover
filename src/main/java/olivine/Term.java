@@ -688,6 +688,30 @@ public abstract class Term implements Iterable<Term> {
         if (x.equals(y)) return TRUE;
         if (x.isConst() && y.isConst()) return FALSE;
       }
+      case LESS -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        var yi = y.integerValue();
+        if (xi != null && yi != null) return of(xi.compareTo(yi) < 0);
+
+        var xr = x.rationalValue();
+        var yr = y.rationalValue();
+        if (xr != null && yr != null) return of(xr.compareTo(yr) < 0);
+      }
+      case LESS_EQUALS -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        var yi = y.integerValue();
+        if (xi != null && yi != null) return of(xi.compareTo(yi) <= 0);
+
+        var xr = x.rationalValue();
+        var yr = y.rationalValue();
+        if (xr != null && yr != null) return of(xr.compareTo(yr) <= 0);
+      }
       case ADD -> {
         var x = a.get(0);
         var y = a.get(1);
