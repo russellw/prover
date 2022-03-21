@@ -604,16 +604,16 @@ public abstract class Term implements Iterable<Term> {
         });
   }
 
-  // TODO: SetTerm might not be worth using
-  private void freeVars(SetTerm bound, Set<Term> free) {
+  private void freeVars(Set<Term> bound, Set<Term> free) {
     switch (tag()) {
       case VAR -> {
         if (!bound.contains(this)) free.add(this);
         return;
       }
       case ALL, EXISTS -> {
+        bound = new HashSet<>(bound);
         var n = size();
-        for (var i = 1; i < n; i++) bound = bound.add(get(i));
+        for (var i = 1; i < n; i++) bound.add(get(i));
         get(0).freeVars(bound, free);
         return;
       }
@@ -624,7 +624,7 @@ public abstract class Term implements Iterable<Term> {
 
   public final Set<Term> freeVars() {
     var free = new LinkedHashSet<Term>();
-    freeVars(SetTerm.EMPTY, free);
+    freeVars(Collections.emptySet(), free);
     return free;
   }
 
