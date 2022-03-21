@@ -95,7 +95,6 @@ final class Test {
     var start = System.currentTimeMillis();
     for (var file : files) {
       var expected = header(file);
-      if (expected != null) System.out.printf("%% %s expected\n", expected);
       var start1 = System.currentTimeMillis();
 
       var cnf = new CNF();
@@ -104,7 +103,7 @@ final class Test {
         TptpParser.parse(file, stream, cnf);
 
         // solve
-        var answer = new Superposition(cnf.clauses, 10_000_000, 10_000).answer;
+        var answer = new Superposition(cnf.clauses, 10_000_000, 100_000).answer;
 
         // output
         System.out.print("% SZS status ");

@@ -203,8 +203,7 @@ public final class CNF {
         return a;
       }
     }
-    // TODO: use remake
-    return Term.of(a.tag(), v);
+    return a.remake(v);
   }
 
   // For-all doesn't need much work to convert. Clauses contain variables with implied for-all. The
