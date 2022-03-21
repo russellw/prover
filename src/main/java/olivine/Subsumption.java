@@ -10,8 +10,7 @@ public final class Subsumption {
 
   private MapTerm search(MapTerm map, Term[] c, Term[] c2, Term[] d, Term[] d2)
       throws TimeoutException {
-    if (steps == 0) throw new TimeoutException();
-    steps--;
+    if (steps-- == 0) throw new TimeoutException();
 
     // Matched everything in one polarity
     if (c.length == 0) {

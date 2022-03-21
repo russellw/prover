@@ -91,6 +91,7 @@ final class Test {
     }
     if (maxFiles >= 0 && files.size() > maxFiles) files = files.subList(0, maxFiles);
 
+    var solved = 0;
     var start = System.currentTimeMillis();
     for (var file : files) {
       var expected = header(file);
@@ -99,12 +100,30 @@ final class Test {
 
       var cnf = new CNF();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
+        // read
         TptpParser.parse(file, stream, cnf);
-        var answer = new Superposition(cnf.clauses, 10_000_000).answer;
 
+        // solve
+        var answer = new Superposition(cnf.clauses, 10_000_000, 1000).answer;
+
+        // output
         System.out.print("% SZS status ");
-        System.out.println(answer.szs.string(cnf.conjecture));
+        var answerString = answer.szs.string(cnf.conjecture);
+        System.out.println(answerString);
         if (answer.proof != null) new TptpPrinter().proof(answer.proof);
+
+        // check
+        switch (answer.szs) {
+          case Satisfiable -> {
+            if (!answerString.equals(expected)) throw new IllegalStateException(answerString);
+            solved++;
+          }
+          case Unsatisfiable -> {
+            if (!answerString.equals(expected) && !"ContradictoryAxioms".equals(expected))
+              throw new IllegalStateException(answerString);
+            solved++;
+          }
+        }
       } catch (InappropriateException e) {
         System.out.println("% SZS status Inappropriate");
       }
@@ -112,6 +131,7 @@ final class Test {
       System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start1) / 1000.0);
       System.out.println();
     }
+    System.out.printf("Solved %d/%d", solved, files.size());
     System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start) / 1000.0);
   }
 }

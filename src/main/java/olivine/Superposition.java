@@ -142,6 +142,7 @@ public final class Superposition {
     var map = Unification.unify(MapTerm.EMPTY, c0, a);
     if (map == null) return;
     var d0c1 = d0.splice(position, 0, c1);
+    if (!Equation.equatable(d0c1, d1)) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
@@ -209,9 +210,9 @@ public final class Superposition {
     }
   }
 
-  public Superposition(List<Clause> clauses, int clauseLimit) {
+  public Superposition(List<Clause> clauses, int clauseLimit, long steps) {
     this.clauseLimit = clauseLimit;
-    var active = new ArrayList<Clause>();
+    List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
     for (var c : clauses) {
       // add the initial clauses to the passive queue
@@ -244,7 +245,7 @@ public final class Superposition {
       // Discount loop performed slightly better in tests
       // Otter loop would also subsume against passive clauses
       if (subsumption.subsumesForward(active, g1)) continue;
-      subsumption.subsumeBackward(g1, active);
+      active = subsumption.subsumeBackward(g1, active);
 
       // Infer from one clause
       resolve(g);
@@ -255,6 +256,10 @@ public final class Superposition {
 
       // Infer from two clauses
       for (var c : active) {
+        if (steps-- == 0) {
+          answer = new Answer(SZS.Timeout);
+          return;
+        }
         superposition(c, g1);
         superposition(g1, c);
       }

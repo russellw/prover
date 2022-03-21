@@ -168,7 +168,7 @@ public final class TptpPrinter {
           vars.put(a, i);
         }
         if (i < 26) {
-          System.out.print('A' + i);
+          System.out.print((char) ('A' + i));
           return;
         }
         System.out.print('Z');
