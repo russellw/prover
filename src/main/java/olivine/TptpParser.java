@@ -364,12 +364,15 @@ public final class TptpParser {
       case '[':
         throw new InappropriateException();
       case DEFINED_WORD:
-        // TODO: new-style switch?
         switch (s) {
           case "ceiling":
-            return definedAtomicTerm(bound, Tag.CEILING);
+            {
+              return definedAtomicTerm(bound, Tag.CEILING);
+            }
           case "difference":
-            return definedAtomicTerm(bound, Tag.SUBTRACT);
+            {
+              return definedAtomicTerm(bound, Tag.SUBTRACT);
+            }
           case "distinct":
             {
               var v = args(bound);
@@ -382,9 +385,13 @@ public final class TptpParser {
               return Term.of(Tag.AND, inequalities);
             }
           case "false":
-            return Term.FALSE;
+            {
+              return Term.FALSE;
+            }
           case "floor":
-            return definedAtomicTerm(bound, Tag.FLOOR);
+            {
+              return definedAtomicTerm(bound, Tag.FLOOR);
+            }
           case "greater":
             {
               var v = args(bound);
@@ -396,33 +403,61 @@ public final class TptpParser {
               return Term.of(Tag.LESS_EQUALS, v.get(1), v.get(0));
             }
           case "is_int":
-            return definedAtomicTerm(bound, Tag.IS_INTEGER);
+            {
+              return definedAtomicTerm(bound, Tag.IS_INTEGER);
+            }
           case "is_rat":
-            return definedAtomicTerm(bound, Tag.IS_RATIONAL);
+            {
+              return definedAtomicTerm(bound, Tag.IS_RATIONAL);
+            }
           case "less":
-            return definedAtomicTerm(bound, Tag.LESS);
+            {
+              return definedAtomicTerm(bound, Tag.LESS);
+            }
           case "lesseq":
-            return definedAtomicTerm(bound, Tag.LESS_EQUALS);
+            {
+              return definedAtomicTerm(bound, Tag.LESS_EQUALS);
+            }
           case "product":
-            return definedAtomicTerm(bound, Tag.MULTIPLY);
+            {
+              return definedAtomicTerm(bound, Tag.MULTIPLY);
+            }
           case "quotient":
-            return definedAtomicTerm(bound, Tag.DIVIDE);
+            {
+              return definedAtomicTerm(bound, Tag.DIVIDE);
+            }
           case "quotient_e":
-            return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN);
+            {
+              return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN);
+            }
           case "quotient_f":
-            return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR);
+            {
+              return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR);
+            }
           case "quotient_t":
-            return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE);
+            {
+              return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE);
+            }
           case "remainder_e":
-            return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN);
+            {
+              return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN);
+            }
           case "remainder_f":
-            return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR);
+            {
+              return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR);
+            }
           case "remainder_t":
-            return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE);
+            {
+              return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE);
+            }
           case "round":
-            return definedAtomicTerm(bound, Tag.ROUND);
+            {
+              return definedAtomicTerm(bound, Tag.ROUND);
+            }
           case "sum":
-            return definedAtomicTerm(bound, Tag.ADD);
+            {
+              return definedAtomicTerm(bound, Tag.ADD);
+            }
           case "to_int":
             {
               var v = args(bound);
@@ -439,11 +474,17 @@ public final class TptpParser {
               return Term.cast(Type.REAL, v.get(0));
             }
           case "true":
-            return Term.TRUE;
+            {
+              return Term.TRUE;
+            }
           case "truncate":
-            return definedAtomicTerm(bound, Tag.TRUNCATE);
+            {
+              return definedAtomicTerm(bound, Tag.TRUNCATE);
+            }
           case "uminus":
-            return definedAtomicTerm(bound, Tag.NEGATE);
+            {
+              return definedAtomicTerm(bound, Tag.NEGATE);
+            }
           case "ite":
             throw new InappropriateException();
           default:
