@@ -62,6 +62,7 @@ public abstract class Term implements Iterable<Term> {
     if (!type.equals(expected))
       throw new TypeException(String.format("%s: type error: %s != %s", this, type, expected));
 
+    // TODO: check arity
     var n = size();
     switch (tag()) {
       case NOT, AND, OR, EQV -> {

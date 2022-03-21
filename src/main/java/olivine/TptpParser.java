@@ -338,25 +338,17 @@ public final class TptpParser {
     return a;
   }
 
-  private void args(Map<String, Var> bound, List<Term> v) throws IOException {
+  private List<Term> args(Map<String, Var> bound) throws IOException {
     expect('(');
+    var v = new ArrayList<Term>();
     do v.add(atomicTerm(bound));
     while (eat(','));
     expect(')');
+    return v;
   }
 
-  private void args(Map<String, Var> bound, List<Term> v, int arity) throws IOException {
-    // TODO: necessary?
-    int n = v.size();
-    args(bound, v);
-    n = v.size() - n;
-    if (n != arity) throw err(String.format("arg count: %d != %d", n, arity));
-  }
-
-  private Term definedAtomicTerm(Map<String, Var> bound, Tag tag, int arity) throws IOException {
-    var r = new ArrayList<Term>();
-    args(bound, r, arity);
-    return Term.of(tag, r);
+  private Term definedAtomicTerm(Map<String, Var> bound, Tag tag) throws IOException {
+    return Term.of(tag, args(bound));
   }
 
   private Term atomicTerm(Map<String, Var> bound) throws IOException {
@@ -372,13 +364,12 @@ public final class TptpParser {
         // TODO: new-style switch?
         switch (s) {
           case "ceiling":
-            return definedAtomicTerm(bound, Tag.CEILING, 1);
+            return definedAtomicTerm(bound, Tag.CEILING);
           case "difference":
-            return definedAtomicTerm(bound, Tag.SUBTRACT, 2);
+            return definedAtomicTerm(bound, Tag.SUBTRACT);
           case "distinct":
             {
-              var v = new ArrayList<Term>();
-              args(bound, v);
+              var v = args(bound);
               for (var a : v) a.defaultType(Type.INDIVIDUAL);
               var inequalities = new ArrayList<Term>();
               for (var i = 0; i < v.size(); i++)
@@ -390,71 +381,66 @@ public final class TptpParser {
           case "false":
             return Term.FALSE;
           case "floor":
-            return definedAtomicTerm(bound, Tag.FLOOR, 1);
+            return definedAtomicTerm(bound, Tag.FLOOR);
           case "greater":
             {
-              var v = new ArrayList<Term>();
-              args(bound, v, 2);
+              var v = args(bound);
               return Term.of(Tag.LESS, v.get(1), v.get(0));
             }
           case "greatereq":
             {
-              var v = new ArrayList<Term>();
-              args(bound, v, 2);
+              var v = args(bound);
               return Term.of(Tag.LESS_EQUALS, v.get(1), v.get(0));
             }
           case "is_int":
-            return definedAtomicTerm(bound, Tag.IS_INTEGER, 1);
+            return definedAtomicTerm(bound, Tag.IS_INTEGER);
           case "is_rat":
-            return definedAtomicTerm(bound, Tag.IS_RATIONAL, 1);
+            return definedAtomicTerm(bound, Tag.IS_RATIONAL);
           case "less":
-            return definedAtomicTerm(bound, Tag.LESS, 2);
+            return definedAtomicTerm(bound, Tag.LESS);
           case "lesseq":
-            return definedAtomicTerm(bound, Tag.LESS_EQUALS, 2);
+            return definedAtomicTerm(bound, Tag.LESS_EQUALS);
           case "product":
-            return definedAtomicTerm(bound, Tag.MULTIPLY, 2);
+            return definedAtomicTerm(bound, Tag.MULTIPLY);
           case "quotient":
-            return definedAtomicTerm(bound, Tag.DIVIDE, 2);
+            return definedAtomicTerm(bound, Tag.DIVIDE);
           case "quotient_e":
-            return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN, 2);
+            return definedAtomicTerm(bound, Tag.DIVIDE_EUCLIDEAN);
           case "quotient_f":
-            return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR, 2);
+            return definedAtomicTerm(bound, Tag.DIVIDE_FLOOR);
           case "quotient_t":
-            return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE, 2);
+            return definedAtomicTerm(bound, Tag.DIVIDE_TRUNCATE);
           case "remainder_e":
-            return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN, 2);
+            return definedAtomicTerm(bound, Tag.REMAINDER_EUCLIDEAN);
           case "remainder_f":
-            return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR, 2);
+            return definedAtomicTerm(bound, Tag.REMAINDER_FLOOR);
           case "remainder_t":
-            return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE, 2);
+            return definedAtomicTerm(bound, Tag.REMAINDER_TRUNCATE);
           case "round":
-            return definedAtomicTerm(bound, Tag.ROUND, 1);
+            return definedAtomicTerm(bound, Tag.ROUND);
           case "sum":
-            return definedAtomicTerm(bound, Tag.ADD, 2);
+            return definedAtomicTerm(bound, Tag.ADD);
           case "to_int":
             {
-              var v = new ArrayList<Term>();
-              args(bound, v, 1);
+              var v = args(bound);
               return Term.cast(Type.INTEGER, v.get(0));
             }
           case "to_rat":
             {
-              var v = new ArrayList<Term>();
-              args(bound, v, 1);
+              var v = args(bound);
               return Term.cast(Type.RATIONAL, v.get(0));
             }
           case "to_real":
             {
-              var v = new ArrayList<Term>();
-              args(bound, v, 1);
+              var v = args(bound);
               return Term.cast(Type.REAL, v.get(0));
             }
           case "true":
             return Term.TRUE;
           case "truncate":
-            return definedAtomicTerm(bound, Tag.TRUNCATE, 1);
+            return definedAtomicTerm(bound, Tag.TRUNCATE);
           case "uminus":
-            return definedAtomicTerm(bound, Tag.NEGATE, 1);
+            return definedAtomicTerm(bound, Tag.NEGATE);
           case "ite":
             throw new InappropriateException();
           default:
