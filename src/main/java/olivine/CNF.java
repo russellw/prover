@@ -47,10 +47,10 @@ public final class CNF {
         return clauseCount(!pol, a.get(0));
       }
       case OR -> {
-        return pol ? clauseCountMultiply(pol, a) : clauseCountAdd(pol, a);
+        return pol ? clauseCountMultiply(true, a) : clauseCountAdd(false, a);
       }
       case AND -> {
-        return pol ? clauseCountAdd(pol, a) : clauseCountMultiply(pol, a);
+        return pol ? clauseCountAdd(true, a) : clauseCountMultiply(false, a);
       }
       case EQV -> {
         var x = a.get(0);
@@ -174,7 +174,8 @@ public final class CNF {
       }
 
       case OR -> {
-        v = a.toArray();
+        v = new Term[a.size()];
+        for (var i = 0; i < v.length; i++) v[i] = maybeRename(pol, a.get(i));
 
         // If this formula will be used with positive polarity (including the case where it will be
         // used both ways), we are
@@ -184,7 +185,8 @@ public final class CNF {
         if (pol >= 0) maybeRename(pol, v);
       }
       case AND -> {
-        v = a.toArray();
+        v = new Term[a.size()];
+        for (var i = 0; i < v.length; i++) v[i] = maybeRename(pol, a.get(i));
 
         // NOT-AND yields OR, so mirror the OR case.
         if (pol <= 0) maybeRename(pol, v);
@@ -201,6 +203,7 @@ public final class CNF {
         return a;
       }
     }
+    // TODO: use remake
     return Term.of(a.tag(), v);
   }
 
