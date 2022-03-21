@@ -9,7 +9,7 @@ public class UnificationTest {
   public void match() {
     // Subset of unify.
     // Gives different results in several cases;
-    // in particular, has no notion of an occurs check
+    // in particular, has no notion of an occurs check.
     // Assumes the inputs have disjoint variables
     var a = new GlobalVar("a", Type.INDIVIDUAL);
     var b = new GlobalVar("b", Type.INDIVIDUAL);
@@ -35,7 +35,7 @@ public class UnificationTest {
     assertNotNull(map);
     assertEquals(map, FMap.EMPTY);
 
-    // x is unified with the constant a
+    // a and x do not match
     map = Unification.match(FMap.EMPTY, a, x);
     assertNull(map);
 
@@ -59,7 +59,7 @@ public class UnificationTest {
     map = Unification.match(FMap.EMPTY, f1.call(x), f1.call(y));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
-    assertEquals(x.replace(map), y.replace(map));
+    assertEquals(x.replace(map), y);
 
     // f and g do not match
     map = Unification.match(FMap.EMPTY, f1.call(x), g1.call(y));
@@ -69,35 +69,12 @@ public class UnificationTest {
     map = Unification.match(FMap.EMPTY, f1.call(x), f2.call(y, z));
     assertNull(map);
 
-    // Unifies y with the term g(x)
+    // g(x) and y do not match
     map = Unification.match(FMap.EMPTY, f1.call(g1.call(x)), f1.call(y));
     assertNull(map);
 
-    // Unifies x with constant a, and y with the term g(a)
+    // g(x) and y do not match
     map = Unification.match(FMap.EMPTY, f2.call(g1.call(x), x), f2.call(y, a));
-    assertNull(map);
-
-    // Returns false in first-order logic and many modern Prolog dialects (enforced by the occurs
-    // check).
-    map = Unification.match(FMap.EMPTY, x, f1.call(x));
-    assertNotNull(map);
-
-    // Both x and y are unified with the constant a
-    map = Unification.match(FMap.EMPTY, x, y);
-    map = Unification.match(map, y, a);
-    assertNotNull(map);
-    assertNotEquals(map, FMap.EMPTY);
-    assertEquals(x.replace(map), a);
-    assertEquals(y.replace(map), a);
-
-    // As above (order of equations in set doesn't matter)
-    map = Unification.match(FMap.EMPTY, a, y);
-    assertNull(map);
-
-    // Fails. a and b do not match, so x can't be unified with both
-    map = Unification.match(FMap.EMPTY, x, a);
-    assertNotNull(map);
-    map = Unification.match(map, b, x);
     assertNull(map);
   }
 
