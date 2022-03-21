@@ -592,10 +592,13 @@ public abstract class Term implements Iterable<Term> {
     return b ? TRUE : FALSE;
   }
 
-  public void walk(Consumer<Term> f) {
+  public final void walk(Consumer<Term> f) {
     f.accept(this);
-    var n = size();
-    for (var i = 0; i < n; i++) get(i).walk(f);
+    for (var a : this) a.walk(f);
+  }
+
+  public void walkGlobals(Consumer<Global> f) {
+    for (var a : this) a.walkGlobals(f);
   }
 
   public final Term mapLeaves(Function<Term, Term> f) {

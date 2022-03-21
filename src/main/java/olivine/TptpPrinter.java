@@ -287,10 +287,9 @@ public final class TptpPrinter {
     for (var formula : proof) {
       formula
           .term()
-          .walk(
+          .walkGlobals(
               a -> {
-                if (!(a instanceof Global a1)) return;
-                var s = a1.name;
+                var s = a.name;
                 if (s == null) return;
                 if (s.length() < 3) return;
                 if (s.charAt(0) != 's') return;
@@ -313,16 +312,18 @@ public final class TptpPrinter {
     for (var formula : proof) {
       formula
           .term()
-          .walk(
+          .walkGlobals(
               a -> {
-                if (!(a instanceof Global a1)) return;
-                var s = a1.name;
+                var s = a.name;
                 if (s != null) return;
                 i[0] = Math.addExact(i[0], 1);
-                a1.name = String.format("sK%d", i[0]);
+                a.name = String.format("sK%d", i[0]);
               });
     }
 
+    // print type declarations for all symbols
+
+    // print formulas and clauses
     for (var formula : proof) println(formula);
     System.out.println("% SZS output end CNFRefutation");
   }
