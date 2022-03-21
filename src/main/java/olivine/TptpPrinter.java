@@ -1,6 +1,7 @@
 package olivine;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 public final class TptpPrinter {
@@ -274,7 +275,6 @@ public final class TptpPrinter {
   public void proof(Clause c) {
     System.out.println("% SZS output start CNFRefutation");
     var proof = c.proof();
-    // TODO: print types
 
     // Skolem symbols that ended up being used in the proof, need to be assigned names
     // before printing. These consist of a string prefix and an integer sequence,
@@ -284,7 +284,7 @@ public final class TptpPrinter {
     // The easiest way to do this is to check for the largest existing number of that pattern
     // and start our sequence at that point
     final long[] i = {-1};
-    for (var formula : proof) {
+    for (var formula : proof)
       formula
           .term()
           .walkGlobals(
@@ -308,8 +308,7 @@ public final class TptpPrinter {
                 // in any case, we will never print incorrect output
                 i[0] = Math.max(i[0], i1);
               });
-    }
-    for (var formula : proof) {
+    for (var formula : proof)
       formula
           .term()
           .walkGlobals(
@@ -319,9 +318,17 @@ public final class TptpPrinter {
                 i[0] = Math.addExact(i[0], 1);
                 a.name = String.format("sK%d", i[0]);
               });
-    }
 
     // print type declarations for all symbols
+    var globals = new LinkedHashSet<Global>();
+    for (var formula : proof) formula.term().walkGlobals(globals::add);
+    for (var a : globals) {
+      System.out.print("tff(t, type, ");
+      print(a);
+      System.out.print(": ");
+      print(a.type());
+      System.out.println(").");
+    }
 
     // print formulas and clauses
     for (var formula : proof) println(formula);
