@@ -29,11 +29,11 @@ public final class Option {
 
     // -opt=arg
     switch (s.charAt(j)) {
-      case ':':
-      case '=':
+      case ':', '=' -> {
         option = s.substring(0, j);
         arg = s.substring(j + 1);
         return;
+      }
     }
 
     // -opt?

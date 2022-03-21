@@ -60,26 +60,25 @@ public class GraphTest {
     for (var b : s) {
       var a = g.idom(entry, b);
       switch (b) {
-        case 'f':
-        case 'g':
+        case 'f', 'g' -> {
           assert a != null;
           assertEquals(a.charValue(), 'c');
-          break;
-        case 'j':
+        }
+        case 'j' -> {
           assert a != null;
           assertEquals(a.charValue(), 'g');
-          break;
-        case 'l':
+        }
+        case 'l' -> {
           assert a != null;
           assertEquals(a.charValue(), 'd');
-          break;
-        case 'r':
+        }
+        case 'r' -> {
           assert a == null;
-          break;
-        default:
+        }
+        default -> {
           assert a != null;
           assertEquals(a.charValue(), 'r');
-          break;
+        }
       }
     }
   }

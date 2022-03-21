@@ -557,24 +557,28 @@ public final class TptpParser {
 
   private Term unary(Map<String, Var> bound) throws IOException {
     switch (tok) {
-      case '(':
-        {
-          lex();
-          var a = logicFormula(bound);
-          expect(')');
-          return a;
-        }
-      case '~':
+      case '(' -> {
+        lex();
+        var a = logicFormula(bound);
+        expect(')');
+        return a;
+      }
+      case '~' -> {
         lex();
         return Term.of(Tag.NOT, unary(bound));
-      case '!':
+      }
+      case '!' -> {
         return quant(bound, Tag.ALL);
-      case '?':
+      }
+      case '?' -> {
         return quant(bound, Tag.EXISTS);
+      }
+      default -> {
+        var a = infixUnary(bound);
+        a.setType(Type.BOOLEAN);
+        return a;
+      }
     }
-    var a = infixUnary(bound);
-    a.setType(Type.BOOLEAN);
-    return a;
   }
 
   private Term logicFormula1(Map<String, Var> bound, Tag tag, Term a) throws IOException {
@@ -588,30 +592,40 @@ public final class TptpParser {
   private Term logicFormula(Map<String, Var> bound) throws IOException {
     var a = unary(bound);
     switch (tok) {
-      case '&':
+      case '&' -> {
         return logicFormula1(bound, Tag.AND, a);
-      case '|':
+      }
+      case '|' -> {
         return logicFormula1(bound, Tag.OR, a);
-      case EQV:
+      }
+      case EQV -> {
         lex();
         return Term.of(Tag.EQV, a, unary(bound));
-      case IMPLIES:
+      }
+      case IMPLIES -> {
         lex();
         return a.implies(unary(bound));
-      case IMPLIESR:
+      }
+      case IMPLIESR -> {
         lex();
         return unary(bound).implies(a);
-      case NAND:
+      }
+      case NAND -> {
         lex();
         return Term.of(Tag.NOT, Term.of(Tag.AND, a, unary(bound)));
-      case NOR:
+      }
+      case NOR -> {
         lex();
         return Term.of(Tag.NOT, Term.of(Tag.OR, a, unary(bound)));
-      case XOR:
+      }
+      case XOR -> {
         lex();
         return Term.of(Tag.NOT, Term.of(Tag.EQV, a, unary(bound)));
+      }
+      default -> {
+        return a;
+      }
     }
-    return a;
   }
 
   // top level
