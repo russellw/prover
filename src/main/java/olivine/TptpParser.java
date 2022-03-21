@@ -359,11 +359,8 @@ public final class TptpParser {
     var s = tokString;
     lex();
     switch (k) {
-      case '!':
-      case '?':
-      case '[':
-        throw new InappropriateException();
-      case DEFINED_WORD:
+      case '!', '?', '[' -> throw new InappropriateException();
+      case DEFINED_WORD -> {
         switch (s) {
           case "ceiling" -> {
             return definedAtomicTerm(bound, Tag.CEILING);
@@ -461,59 +458,53 @@ public final class TptpParser {
           case "ite" -> throw new InappropriateException();
           default -> throw err(String.format("'$%s': unknown word", s));
         }
-      case DISTINCT_OBJECT:
-        {
-          var a = distinctObjects.get(s);
+      }
+      case DISTINCT_OBJECT -> {
+        var a = distinctObjects.get(s);
+        if (a == null) {
+          a = new DistinctObject(s);
+          distinctObjects.put(s, a);
+        }
+        return a;
+      }
+      case INTEGER -> {
+        return Term.of(new BigInteger(s));
+      }
+      case RATIONAL -> {
+        return Term.of(Type.RATIONAL, BigRational.of(s));
+      }
+      case REAL -> {
+        return Term.of(Type.REAL, BigRational.ofDecimal(s));
+      }
+      case VAR -> {
+        if (bound == null) {
+          var a = free.get(s);
           if (a == null) {
-            a = new DistinctObject(s);
-            distinctObjects.put(s, a);
+            a = new Var(Type.INDIVIDUAL);
+            free.put(s, a);
           }
           return a;
         }
-      case INTEGER:
-        {
-          return Term.of(new BigInteger(s));
+        var a = bound.get(s);
+        if (a == null) throw err(String.format("'%s': unknown variable", s));
+        return a;
+      }
+      case WORD -> {
+        var a = global(s, tok == '(');
+        if (eat('(')) {
+          var v = new ArrayList<Term>();
+          v.add(a);
+          do {
+            var b = atomicTerm(bound);
+            b.defaultType(Type.INDIVIDUAL);
+            v.add(b);
+          } while (eat(','));
+          expect(')');
+          return Term.of(Tag.CALL, v);
         }
-      case RATIONAL:
-        {
-          return Term.of(Type.RATIONAL, BigRational.of(s));
-        }
-      case REAL:
-        {
-          return Term.of(Type.REAL, BigRational.ofDecimal(s));
-        }
-      case VAR:
-        {
-          if (bound == null) {
-            var a = free.get(s);
-            if (a == null) {
-              a = new Var(Type.INDIVIDUAL);
-              free.put(s, a);
-            }
-            return a;
-          }
-          var a = bound.get(s);
-          if (a == null) throw err(String.format("'%s': unknown variable", s));
-          return a;
-        }
-      case WORD:
-        {
-          var a = global(s, tok == '(');
-          if (eat('(')) {
-            var v = new ArrayList<Term>();
-            v.add(a);
-            do {
-              var b = atomicTerm(bound);
-              b.defaultType(Type.INDIVIDUAL);
-              v.add(b);
-            } while (eat(','));
-            expect(')');
-            return Term.of(Tag.CALL, v);
-          }
-          return a;
-        }
-      default:
-        throw err("expected term");
+        return a;
+      }
+      default -> throw err("expected term");
     }
   }
 
