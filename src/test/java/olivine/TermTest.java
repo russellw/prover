@@ -281,6 +281,39 @@ public class TermTest {
     assertSimplify(Term.of(Tag.TRUNCATE, rational(-1, 10)), rational(0, 1));
     assertSimplify(Term.of(Tag.TRUNCATE, rational(-5, 10)), rational(0, 1));
     assertSimplify(Term.of(Tag.TRUNCATE, rational(-9, 10)), rational(0, 1));
+
+    assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(7), Term.of(3)), Term.of(2));
+    assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(7), Term.of(-3)), Term.of(-2));
+    assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(-7), Term.of(3)), Term.of(-3));
+    assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(-7), Term.of(-3)), Term.of(3));
+    assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, rational(7, 19), rational(3, 19)), rational(2, 1));
+    assertSimplify(
+        Term.of(Tag.DIVIDE_EUCLIDEAN, rational(7, 19), rational(-3, 19)), rational(-2, 1));
+    assertSimplify(
+        Term.of(Tag.DIVIDE_EUCLIDEAN, rational(-7, 19), rational(3, 19)), rational(-3, 1));
+    assertSimplify(
+        Term.of(Tag.DIVIDE_EUCLIDEAN, rational(-7, 19), rational(-3, 19)), rational(3, 1));
+
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(5), Term.of(3)), Term.of(1));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(5), Term.of(-3)), Term.of(-2));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(-5), Term.of(3)), Term.of(-2));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(-5), Term.of(-3)), Term.of(1));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(5, 19), rational(3, 19)), rational(1, 1));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(5, 19), rational(-3, 19)), rational(-2, 1));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(-5, 19), rational(3, 19)), rational(-2, 1));
+    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(-5, 19), rational(-3, 19)), rational(1, 1));
+
+    assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(5), Term.of(3)), Term.of(1));
+    assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(5), Term.of(-3)), Term.of(-1));
+    assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(-5), Term.of(3)), Term.of(-1));
+    assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(-5), Term.of(-3)), Term.of(1));
+    assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, rational(5, 19), rational(3, 19)), rational(1, 1));
+    assertSimplify(
+        Term.of(Tag.DIVIDE_TRUNCATE, rational(5, 19), rational(-3, 19)), rational(-1, 1));
+    assertSimplify(
+        Term.of(Tag.DIVIDE_TRUNCATE, rational(-5, 19), rational(3, 19)), rational(-1, 1));
+    assertSimplify(
+        Term.of(Tag.DIVIDE_TRUNCATE, rational(-5, 19), rational(-3, 19)), rational(1, 1));
   }
 
   private static Term rational(long num, long den) {

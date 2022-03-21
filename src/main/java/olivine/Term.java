@@ -700,24 +700,32 @@ public abstract class Term implements Iterable<Term> {
         var y = a.get(1);
 
         var xi = x.integerValue();
-        var yi = y.integerValue();
-        if (xi != null && yi != null) return of(xi.compareTo(yi) < 0);
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(xi.compareTo(yi) < 0);
+        }
 
         var xr = x.rationalValue();
-        var yr = y.rationalValue();
-        if (xr != null && yr != null) return of(xr.compareTo(yr) < 0);
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(xr.compareTo(yr) < 0);
+        }
       }
       case LESS_EQUALS -> {
         var x = a.get(0);
         var y = a.get(1);
 
         var xi = x.integerValue();
-        var yi = y.integerValue();
-        if (xi != null && yi != null) return of(xi.compareTo(yi) <= 0);
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(xi.compareTo(yi) <= 0);
+        }
 
         var xr = x.rationalValue();
-        var yr = y.rationalValue();
-        if (xr != null && yr != null) return of(xr.compareTo(yr) <= 0);
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(xr.compareTo(yr) <= 0);
+        }
       }
       case NEGATE -> {
         var x = a.get(0);
@@ -843,6 +851,54 @@ public abstract class Term implements Iterable<Term> {
         var yr = y.rationalValue();
         if (xr != null && yr != null) return of(x.type(), xr.divide(yr));
         if (Objects.equals(yr, BigRational.ONE)) return x;
+      }
+      case DIVIDE_EUCLIDEAN -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(Etc.divideEuclidean(xi, yi));
+        }
+
+        var xr = x.rationalValue();
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.divideEuclidean(yr));
+        }
+      }
+      case DIVIDE_FLOOR -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(Etc.divideFloor(xi, yi));
+        }
+
+        var xr = x.rationalValue();
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.divideFloor(yr));
+        }
+      }
+      case DIVIDE_TRUNCATE -> {
+        var x = a.get(0);
+        var y = a.get(1);
+
+        var xi = x.integerValue();
+        if (xi != null) {
+          var yi = y.integerValue();
+          if (yi != null) return of(xi.divide(yi));
+        }
+
+        var xr = x.rationalValue();
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.divideTruncate(yr));
+        }
       }
     }
     return a;
