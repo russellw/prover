@@ -66,7 +66,9 @@ public final class Etc {
   }
 
   public static BigInteger divideEuclidean(BigInteger a, BigInteger b) {
-    return a.subtract(remainderEuclidean(a, b)).divide(b);
+    var q = a.divide(b);
+    if (a.signum() < 0 && !q.multiply(b).equals(a)) q = q.subtract(BigInteger.valueOf(b.signum()));
+    return q;
   }
 
   public static BigInteger divideFloor(BigInteger a, BigInteger b) {
