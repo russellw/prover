@@ -41,15 +41,15 @@ public final class Superposition {
   */
 
   // Substitute and make new clause
-  private void resolve(Clause c, int i, FMap map) {
+  private void resolve(Clause c, int ci, FMap map) {
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize - 1);
-    for (var j = 0; j < c.negativeSize; j++) if (j != i) negative.add(c.literals[j].replace(map));
+    for (var i = 0; i < c.negativeSize; i++) if (i != ci) negative.add(c.literals[i].replace(map));
 
     // Positive literals
     var positive = new ArrayList<Term>(c.positiveSize());
-    for (var j = c.negativeSize; j < c.literals.length; j++)
-      positive.add(c.literals[j].replace(map));
+    for (var i = c.negativeSize; i < c.literals.length; i++)
+      positive.add(c.literals[i].replace(map));
 
     // Make new clause
     clause(new Clause(negative, positive, c));
@@ -57,10 +57,10 @@ public final class Superposition {
 
   // For each negative equation
   private void resolve(Clause c) {
-    for (var i = 0; i < c.negativeSize; i++) {
-      var e = new Equation(c.literals[i]);
+    for (var ci = 0; ci < c.negativeSize; ci++) {
+      var e = new Equation(c.literals[ci]);
       var map = Unification.unify(FMap.EMPTY, e.left, e.right);
-      if (map != null) resolve(c, i, map);
+      if (map != null) resolve(c, ci, map);
     }
   }
 
@@ -74,7 +74,7 @@ public final class Superposition {
   */
 
   // Substitute and make new clause
-  private void factor(Clause c, Term c0, Term c1, int i, Term c2, Term c3) {
+  private void factor(Clause c, Term c0, Term c1, int cj, Term c2, Term c3) {
     // If these two terms are not equatable (for which the types must match, and predicates can only
     // be equated with True),
     // substituting terms for variables would not make them become so.
@@ -86,38 +86,38 @@ public final class Superposition {
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
-    for (var j = 0; j < c.negativeSize; j++) negative.add(c.literals[j].replace(map));
+    for (var i = 0; i < c.negativeSize; i++) negative.add(c.literals[i].replace(map));
     negative.add(new Equation(c1, c3).term().replace(map));
 
     // Positive literals
     var positive = new ArrayList<Term>(c.positiveSize() - 1);
-    for (var j = c.negativeSize; j < c.literals.length; j++)
-      if (j != i) positive.add(c.literals[j].replace(map));
+    for (var i = c.negativeSize; i < c.literals.length; i++)
+      if (i != cj) positive.add(c.literals[i].replace(map));
 
     // Make new clause
     clause(new Clause(negative, positive, c));
   }
 
   // For each positive equation (both directions) again
-  private void factor(Clause c, int i, Term c0, Term c1) {
-    for (var j = c.negativeSize; j < c.literals.length; j++) {
-      if (j == i) continue;
-      var e = new Equation(c.literals[j]);
+  private void factor(Clause c, int ci, Term c0, Term c1) {
+    for (var cj = c.negativeSize; cj < c.literals.length; cj++) {
+      if (cj == ci) continue;
+      var e = new Equation(c.literals[cj]);
       var c2 = e.left;
       var c3 = e.right;
-      factor(c, c0, c1, j, c2, c3);
-      factor(c, c0, c1, j, c3, c2);
+      factor(c, c0, c1, cj, c2, c3);
+      factor(c, c0, c1, cj, c3, c2);
     }
   }
 
   // For each positive equation (both directions)
   private void factor(Clause c) {
-    for (var i = c.negativeSize; i < c.literals.length; i++) {
-      var e = new Equation(c.literals[i]);
+    for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
+      var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
-      factor(c, i, c0, c1);
-      factor(c, i, c1, c0);
+      factor(c, ci, c0, c1);
+      factor(c, ci, c1, c0);
     }
   }
 
@@ -194,23 +194,23 @@ public final class Superposition {
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
     // TODO: explain why this is a valid optimization
     if (c0 == Term.TRUE) return;
-    for (var i = 0; i < d.literals.length; i++) {
-      var e = new Equation(d.literals[i]);
+    for (var di = 0; di < d.literals.length; di++) {
+      var e = new Equation(d.literals[di]);
       var d0 = e.left;
       var d1 = e.right;
-      superposition(c, d, ci, c0, c1, i, d0, d1, new ArrayList<>(), d0);
-      superposition(c, d, ci, c0, c1, i, d1, d0, new ArrayList<>(), d1);
+      superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
+      superposition(c, d, ci, c0, c1, di, d1, d0, new ArrayList<>(), d1);
     }
   }
 
   // For each positive equation in c (both directions)
   private void superposition(Clause c, Clause d) {
-    for (var i = c.negativeSize; i < c.literals.length; i++) {
-      var e = new Equation(c.literals[i]);
+    for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
+      var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
-      superposition(c, d, i, c0, c1);
-      superposition(c, d, i, c1, c0);
+      superposition(c, d, ci, c0, c1);
+      superposition(c, d, ci, c1, c0);
     }
   }
 
@@ -241,11 +241,13 @@ public final class Superposition {
         return;
       }
 
-      // Rename variables for subsumption and subsequent inference
+      // Rename variables, because subsumption and superposition both assume
+      // clauses have disjoint variable names
       var g1 = g.renameVars();
 
-      // Discount loop performed slightly better in tests.
-      // Otter loop would also subsume against passive clauses
+      // Discount loop, which only subsumes against active clauses, performed slightly better in
+      // tests.
+      // The alternative Otter loop would also subsume against passive clauses
       if (subsumption.subsumesForward(active, g1)) continue;
       active = subsumption.subsumeBackward(g1, active);
 
