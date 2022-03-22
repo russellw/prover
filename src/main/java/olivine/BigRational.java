@@ -46,10 +46,6 @@ public final class BigRational extends Number implements Comparable<BigRational>
     return new BigRational(num.multiply(b.den), den.multiply(b.num));
   }
 
-  public BigRational divideEuclidean(BigRational b) {
-    return new BigRational(Etc.divideEuclidean(num.multiply(b.den), den.multiply(b.num)));
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -63,18 +59,10 @@ public final class BigRational extends Number implements Comparable<BigRational>
     return Objects.hash(num, den);
   }
 
-  public BigRational divideFloor(BigRational b) {
-    return new BigRational(Etc.divideFloor(num.multiply(b.den), den.multiply(b.num)));
-  }
-
-  public BigRational divideTruncate(BigRational b) {
-    return new BigRational(num.multiply(b.den).divide(den.multiply(b.num)));
-  }
-
-  // Potential better algorithm:
-  // https://stackoverflow.com/questions/33623875/converting-an-arbitrary-precision-rational-number-ocaml-zarith-to-an-approxim
   @Override
   public double doubleValue() {
+    // Potential better algorithm:
+    // https://stackoverflow.com/questions/33623875/converting-an-arbitrary-precision-rational-number-ocaml-zarith-to-an-approxim
     return num.doubleValue() / den.doubleValue();
   }
 
@@ -147,18 +135,6 @@ public final class BigRational extends Number implements Comparable<BigRational>
     return of(new BigDecimal(s));
   }
 
-  public BigRational remainderEuclidean(BigRational b) {
-    return new BigRational(Etc.remainderEuclidean(num.multiply(b.den), den.multiply(b.num)));
-  }
-
-  public BigRational remainderFloor(BigRational b) {
-    return new BigRational(Etc.remainderFloor(num.multiply(b.den), den.multiply(b.num)));
-  }
-
-  public BigRational remainderTruncate(BigRational b) {
-    return new BigRational(num.multiply(b.den).remainder(den.multiply(b.num)));
-  }
-
   public BigInteger round() {
     var n = num.shiftLeft(1).add(den);
     var d = den.shiftLeft(1);
@@ -167,10 +143,6 @@ public final class BigRational extends Number implements Comparable<BigRational>
       n = n.subtract(BigInteger.ONE);
     }
     return n;
-  }
-
-  public int signum() {
-    return num.signum();
   }
 
   public BigRational subtract(BigRational b) {

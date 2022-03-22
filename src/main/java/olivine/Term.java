@@ -738,28 +738,24 @@ public abstract class Term implements Iterable<Term> {
       }
       case CEILING -> {
         var x = a.get(0);
-        if (x.type() == Type.INTEGER) return x;
 
         var xr = x.rationalValue();
         if (xr != null) return of(x.type(), BigRational.of(xr.ceiling()));
       }
       case FLOOR -> {
         var x = a.get(0);
-        if (x.type() == Type.INTEGER) return x;
 
         var xr = x.rationalValue();
         if (xr != null) return of(x.type(), BigRational.of(xr.floor()));
       }
       case ROUND -> {
         var x = a.get(0);
-        if (x.type() == Type.INTEGER) return x;
 
         var xr = x.rationalValue();
         if (xr != null) return of(x.type(), BigRational.of(xr.round()));
       }
       case TRUNCATE -> {
         var x = a.get(0);
-        if (x.type() == Type.INTEGER) return x;
 
         var xr = x.rationalValue();
         if (xr != null) return of(x.type(), BigRational.of(xr.truncate()));
@@ -784,73 +780,58 @@ public abstract class Term implements Iterable<Term> {
         var y = a.get(1);
 
         var xi = x.integerValue();
-        var yi = y.integerValue();
         if (xi != null) {
+          var yi = y.integerValue();
           if (yi != null) return of(xi.add(yi));
-          if (xi.signum() == 0) return y;
         }
-        if (Objects.equals(yi, BigInteger.ZERO)) return x;
 
         var xr = x.rationalValue();
-        var yr = y.rationalValue();
         if (xr != null) {
+          var yr = y.rationalValue();
           if (yr != null) return of(x.type(), xr.add(yr));
-          if (xr.signum() == 0) return y;
         }
-        if (Objects.equals(yr, BigRational.ZERO)) return x;
       }
       case SUBTRACT -> {
         var x = a.get(0);
         var y = a.get(1);
 
         var xi = x.integerValue();
-        var yi = y.integerValue();
         if (xi != null) {
+          var yi = y.integerValue();
           if (yi != null) return of(xi.subtract(yi));
-          if (xi.signum() == 0) return Term.of(Tag.NEGATE, y);
         }
-        if (Objects.equals(yi, BigInteger.ZERO)) return x;
 
         var xr = x.rationalValue();
-        var yr = y.rationalValue();
         if (xr != null) {
+          var yr = y.rationalValue();
           if (yr != null) return of(x.type(), xr.subtract(yr));
-          if (xr.signum() == 0) return Term.of(Tag.NEGATE, y);
         }
-        if (Objects.equals(yr, BigRational.ZERO)) return x;
       }
       case MULTIPLY -> {
         var x = a.get(0);
         var y = a.get(1);
 
         var xi = x.integerValue();
-        var yi = y.integerValue();
         if (xi != null) {
+          var yi = y.integerValue();
           if (yi != null) return of(xi.multiply(yi));
-          if (xi.signum() == 0) return x;
-          if (xi.equals(BigInteger.ONE)) return y;
         }
-        if (Objects.equals(yi, BigInteger.ZERO)) return y;
-        if (Objects.equals(yi, BigInteger.ONE)) return x;
 
         var xr = x.rationalValue();
-        var yr = y.rationalValue();
         if (xr != null) {
+          var yr = y.rationalValue();
           if (yr != null) return of(x.type(), xr.multiply(yr));
-          if (xr.signum() == 0) return x;
-          if (xr.equals(BigRational.ONE)) return y;
         }
-        if (Objects.equals(yr, BigRational.ZERO)) return y;
-        if (Objects.equals(yr, BigRational.ONE)) return x;
       }
       case DIVIDE -> {
         var x = a.get(0);
         var y = a.get(1);
 
         var xr = x.rationalValue();
-        var yr = y.rationalValue();
-        if (xr != null && yr != null) return of(x.type(), xr.divide(yr));
-        if (Objects.equals(yr, BigRational.ONE)) return x;
+        if (xr != null) {
+          var yr = y.rationalValue();
+          if (yr != null) return of(x.type(), xr.divide(yr));
+        }
       }
       case DIVIDE_EUCLIDEAN -> {
         var x = a.get(0);
@@ -860,12 +841,6 @@ public abstract class Term implements Iterable<Term> {
         if (xi != null) {
           var yi = y.integerValue();
           if (yi != null) return of(Etc.divideEuclidean(xi, yi));
-        }
-
-        var xr = x.rationalValue();
-        if (xr != null) {
-          var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.divideEuclidean(yr));
         }
       }
       case DIVIDE_FLOOR -> {
@@ -877,12 +852,6 @@ public abstract class Term implements Iterable<Term> {
           var yi = y.integerValue();
           if (yi != null) return of(Etc.divideFloor(xi, yi));
         }
-
-        var xr = x.rationalValue();
-        if (xr != null) {
-          var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.divideFloor(yr));
-        }
       }
       case DIVIDE_TRUNCATE -> {
         var x = a.get(0);
@@ -892,12 +861,6 @@ public abstract class Term implements Iterable<Term> {
         if (xi != null) {
           var yi = y.integerValue();
           if (yi != null) return of(xi.divide(yi));
-        }
-
-        var xr = x.rationalValue();
-        if (xr != null) {
-          var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.divideTruncate(yr));
         }
       }
       case REMAINDER_EUCLIDEAN -> {
@@ -909,12 +872,6 @@ public abstract class Term implements Iterable<Term> {
           var yi = y.integerValue();
           if (yi != null) return of(Etc.remainderEuclidean(xi, yi));
         }
-
-        var xr = x.rationalValue();
-        if (xr != null) {
-          var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.remainderEuclidean(yr));
-        }
       }
       case REMAINDER_FLOOR -> {
         var x = a.get(0);
@@ -925,12 +882,6 @@ public abstract class Term implements Iterable<Term> {
           var yi = y.integerValue();
           if (yi != null) return of(Etc.remainderFloor(xi, yi));
         }
-
-        var xr = x.rationalValue();
-        if (xr != null) {
-          var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.remainderFloor(yr));
-        }
       }
       case REMAINDER_TRUNCATE -> {
         var x = a.get(0);
@@ -940,12 +891,6 @@ public abstract class Term implements Iterable<Term> {
         if (xi != null) {
           var yi = y.integerValue();
           if (yi != null) return of(xi.remainder(yi));
-        }
-
-        var xr = x.rationalValue();
-        if (xr != null) {
-          var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.remainderTruncate(yr));
         }
       }
     }

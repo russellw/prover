@@ -136,15 +136,6 @@ public class TermTest {
     b = Term.of(10);
     assertEquals(a.simplify(), b);
 
-    a = Term.of(Tag.ADD, Term.of(0), x);
-    b = x;
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.ADD, x, Term.of(0));
-    //noinspection ConstantConditions
-    b = x;
-    assertEquals(a.simplify(), b);
-
     a = Term.of(Tag.ADD, Term.of(Tag.ADD, rational(1, 10), rational(2, 10)), rational(4, 10));
     b = rational(7, 10);
     assertEquals(a.simplify(), b);
@@ -153,25 +144,8 @@ public class TermTest {
     b = real(7, 10);
     assertEquals(a.simplify(), b);
 
-    a = Term.of(Tag.ADD, rational(0, 1), x1);
-    b = x1;
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.ADD, x1, rational(0, 1));
-    //noinspection ConstantConditions
-    b = x1;
-    assertEquals(a.simplify(), b);
-
     a = Term.of(Tag.SUBTRACT, Term.of(Tag.SUBTRACT, Term.of(1), Term.of(2)), Term.of(7));
     b = Term.of(-8);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.SUBTRACT, Term.of(0), x);
-    b = Term.of(Tag.NEGATE, x);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.SUBTRACT, x, Term.of(0));
-    b = x;
     assertEquals(a.simplify(), b);
 
     a =
@@ -184,33 +158,8 @@ public class TermTest {
     b = real(-5, 10);
     assertEquals(a.simplify(), b);
 
-    a = Term.of(Tag.SUBTRACT, rational(0, 1), x1);
-    b = Term.of(Tag.NEGATE, x1);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.SUBTRACT, x1, rational(0, 1));
-    b = x1;
-    assertEquals(a.simplify(), b);
-
     a = Term.of(Tag.MULTIPLY, Term.of(Tag.MULTIPLY, Term.of(1), Term.of(2)), Term.of(7));
     b = Term.of(14);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, Term.of(0), x);
-    b = Term.of(0);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, x, Term.of(0));
-    b = Term.of(0);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, Term.of(1), x);
-    b = x;
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, x, Term.of(1));
-    //noinspection ConstantConditions
-    b = x;
     assertEquals(a.simplify(), b);
 
     a =
@@ -219,25 +168,7 @@ public class TermTest {
     b = rational(8, 1000);
     assertEquals(a.simplify(), b);
 
-    a = Term.of(Tag.MULTIPLY, rational(0, 1), x1);
-    b = rational(0, 1);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, x1, rational(0, 1));
-    b = rational(0, 1);
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, rational(1, 1), x1);
-    b = x1;
-    assertEquals(a.simplify(), b);
-
-    a = Term.of(Tag.MULTIPLY, x1, rational(1, 1));
-    //noinspection ConstantConditions
-    b = x1;
-    assertEquals(a.simplify(), b);
-
     assertSimplify(Term.of(Tag.DIVIDE, rational(1, 1), rational(-17, 1)), rational(-1, 17));
-    assertSimplify(Term.of(Tag.DIVIDE, x1, rational(1, 1)), x1);
 
     assertSimplify(Term.of(Tag.IS_INTEGER, x), Term.TRUE);
     assertSimplify(Term.of(Tag.IS_INTEGER, Term.of(3)), Term.TRUE);
@@ -286,74 +217,31 @@ public class TermTest {
     assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(7), Term.of(-3)), Term.of(-2));
     assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(-7), Term.of(3)), Term.of(-3));
     assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, Term.of(-7), Term.of(-3)), Term.of(3));
-    assertSimplify(Term.of(Tag.DIVIDE_EUCLIDEAN, rational(7, 19), rational(3, 19)), rational(2, 1));
-    assertSimplify(
-        Term.of(Tag.DIVIDE_EUCLIDEAN, rational(7, 19), rational(-3, 19)), rational(-2, 1));
-    assertSimplify(
-        Term.of(Tag.DIVIDE_EUCLIDEAN, rational(-7, 19), rational(3, 19)), rational(-3, 1));
-    assertSimplify(
-        Term.of(Tag.DIVIDE_EUCLIDEAN, rational(-7, 19), rational(-3, 19)), rational(3, 1));
 
     assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(5), Term.of(3)), Term.of(1));
     assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(5), Term.of(-3)), Term.of(-2));
     assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(-5), Term.of(3)), Term.of(-2));
     assertSimplify(Term.of(Tag.DIVIDE_FLOOR, Term.of(-5), Term.of(-3)), Term.of(1));
-    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(5, 19), rational(3, 19)), rational(1, 1));
-    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(5, 19), rational(-3, 19)), rational(-2, 1));
-    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(-5, 19), rational(3, 19)), rational(-2, 1));
-    assertSimplify(Term.of(Tag.DIVIDE_FLOOR, rational(-5, 19), rational(-3, 19)), rational(1, 1));
 
     assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(5), Term.of(3)), Term.of(1));
     assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(5), Term.of(-3)), Term.of(-1));
     assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(-5), Term.of(3)), Term.of(-1));
     assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, Term.of(-5), Term.of(-3)), Term.of(1));
-    assertSimplify(Term.of(Tag.DIVIDE_TRUNCATE, rational(5, 19), rational(3, 19)), rational(1, 1));
-    assertSimplify(
-        Term.of(Tag.DIVIDE_TRUNCATE, rational(5, 19), rational(-3, 19)), rational(-1, 1));
-    assertSimplify(
-        Term.of(Tag.DIVIDE_TRUNCATE, rational(-5, 19), rational(3, 19)), rational(-1, 1));
-    assertSimplify(
-        Term.of(Tag.DIVIDE_TRUNCATE, rational(-5, 19), rational(-3, 19)), rational(1, 1));
 
     assertSimplify(Term.of(Tag.REMAINDER_EUCLIDEAN, Term.of(7), Term.of(3)), Term.of(1));
     assertSimplify(Term.of(Tag.REMAINDER_EUCLIDEAN, Term.of(7), Term.of(-3)), Term.of(1));
     assertSimplify(Term.of(Tag.REMAINDER_EUCLIDEAN, Term.of(-7), Term.of(3)), Term.of(2));
     assertSimplify(Term.of(Tag.REMAINDER_EUCLIDEAN, Term.of(-7), Term.of(-3)), Term.of(2));
-    //TODO: check exactly what the remainder for rational numbers should be
-/*
-    assertSimplify(Term.of(Tag.REMAINDER_EUCLIDEAN, rational(7, 19), rational(3, 19)), rational(1, 1));
-    assertSimplify(
-            Term.of(Tag.REMAINDER_EUCLIDEAN, rational(7, 19), rational(-3, 19)), rational(1, 1));
-    assertSimplify(
-            Term.of(Tag.REMAINDER_EUCLIDEAN, rational(-7, 19), rational(3, 19)), rational(2, 1));
-    assertSimplify(
-            Term.of(Tag.REMAINDER_EUCLIDEAN, rational(-7, 19), rational(-3, 19)), rational(2, 1));
-*/
 
     assertSimplify(Term.of(Tag.REMAINDER_FLOOR, Term.of(5), Term.of(3)), Term.of(2));
     assertSimplify(Term.of(Tag.REMAINDER_FLOOR, Term.of(5), Term.of(-3)), Term.of(-1));
     assertSimplify(Term.of(Tag.REMAINDER_FLOOR, Term.of(-5), Term.of(3)), Term.of(1));
     assertSimplify(Term.of(Tag.REMAINDER_FLOOR, Term.of(-5), Term.of(-3)), Term.of(-2));
-/*
-    assertSimplify(Term.of(Tag.REMAINDER_FLOOR, rational(5, 19), rational(3, 19)), rational(1, 1));
-    assertSimplify(Term.of(Tag.REMAINDER_FLOOR, rational(5, 19), rational(-3, 19)), rational(-2, 1));
-    assertSimplify(Term.of(Tag.REMAINDER_FLOOR, rational(-5, 19), rational(3, 19)), rational(-2, 1));
-    assertSimplify(Term.of(Tag.REMAINDER_FLOOR, rational(-5, 19), rational(-3, 19)), rational(1, 1));
-*/
 
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(5), Term.of(3)), Term.of(2));
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(5), Term.of(-3)), Term.of(2));
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(-5), Term.of(3)), Term.of(-2));
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(-5), Term.of(-3)), Term.of(-2));
-/*
-    assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, rational(5, 19), rational(3, 19)), rational(1, 1));
-    assertSimplify(
-            Term.of(Tag.REMAINDER_TRUNCATE, rational(5, 19), rational(-3, 19)), rational(-1, 1));
-    assertSimplify(
-            Term.of(Tag.REMAINDER_TRUNCATE, rational(-5, 19), rational(3, 19)), rational(-1, 1));
-    assertSimplify(
-            Term.of(Tag.REMAINDER_TRUNCATE, rational(-5, 19), rational(-3, 19)), rational(1, 1));
-*/
   }
 
   private static Term rational(long num, long den) {
