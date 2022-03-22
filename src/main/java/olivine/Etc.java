@@ -70,10 +70,10 @@ public final class Etc {
   }
 
   public static BigInteger divideFloor(BigInteger a, BigInteger b) {
-    var r = a.divideAndRemainder(b);
-    if (a.signum() < 0 != b.signum() < 0 && r[1].signum() != 0)
-      r[0] = r[0].subtract(BigInteger.ONE);
-    return r[0];
+    var qr = a.divideAndRemainder(b);
+    var q = qr[0];
+    if (a.signum() < 0 != b.signum() < 0 && qr[1].signum() != 0) q = q.subtract(BigInteger.ONE);
+    return q;
   }
 
   public static BigInteger remainderEuclidean(BigInteger a, BigInteger b) {
