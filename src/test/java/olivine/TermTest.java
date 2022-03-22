@@ -242,6 +242,12 @@ public class TermTest {
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(5), Term.of(-3)), Term.of(2));
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(-5), Term.of(3)), Term.of(-2));
     assertSimplify(Term.of(Tag.REMAINDER_TRUNCATE, Term.of(-5), Term.of(-3)), Term.of(-2));
+
+    assertSimplify(Term.cast(Type.INTEGER, x), x);
+    assertSimplify(Term.cast(Type.INTEGER, rational(4, 3)), Term.of(1));
+    assertSimplify(Term.cast(Type.RATIONAL, Term.of(20)), rational(20, 1));
+    assertSimplify(Term.cast(Type.RATIONAL, real(-99, 5)), rational(-99, 5));
+    assertSimplify(Term.cast(Type.REAL, rational(-99, 5)), real(-99, 5));
   }
 
   private static Term rational(long num, long den) {

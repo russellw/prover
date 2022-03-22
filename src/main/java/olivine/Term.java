@@ -687,7 +687,6 @@ public abstract class Term implements Iterable<Term> {
 
   public final Term simplify() {
     var a = map(Term::simplify);
-    // TODO: implement the rest
     switch (a.tag()) {
       case EQUALS -> {
         var x = a.get(0);
@@ -735,6 +734,29 @@ public abstract class Term implements Iterable<Term> {
 
         var xr = x.rationalValue();
         if (xr != null) return of(x.type(), xr.negate());
+      }
+      case CAST -> {
+        var x = a.get(0);
+        var type = type();
+        if (type == x.type()) return x;
+        switch (type.kind()) {
+          case RATIONAL, REAL -> {
+            BigRational r;
+            var xi = x.integerValue();
+            if (xi != null) r = BigRational.of(xi);
+            else r = x.rationalValue();
+            if (r != null) return of(type, r);
+          }
+          case INTEGER -> {
+            var xr = x.rationalValue();
+            // Different languages have different conventions on the default rounding mode for
+            // converting fractions to integers. TPTP
+            // defines it as floor, so that is used here. To use a different rounding mode,
+            // explicity round the rational number first,
+            // and then convert to integer.
+            if (xr != null) return of(Etc.divideFloor(xr.num, xr.den));
+          }
+        }
       }
       case CEILING -> {
         var x = a.get(0);
