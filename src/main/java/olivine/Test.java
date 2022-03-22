@@ -22,7 +22,7 @@ final class Test {
 
   private static void addFile(String s) {
     if (s.contains("^")) return;
-    if (s.endsWith(".rm")) return;
+    if (!s.endsWith(".p")) return;
     files.add(s);
   }
 
@@ -103,7 +103,7 @@ final class Test {
         TptpParser.parse(file, stream, cnf);
 
         // solve
-        var answer = new Superposition(cnf.clauses, 10_000_000, 10_000).answer;
+        var answer = new Superposition(cnf.clauses, 10000000, 10000).answer;
 
         // output
         System.out.print("% SZS status ");
