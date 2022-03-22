@@ -135,6 +135,7 @@ public final class TptpParser {
               case -1 -> throw err("unclosed block comment");
               case '*' -> c = stream.read();
               default -> {
+                c = stream.read();
                 continue;
               }
             }
