@@ -19,9 +19,9 @@ public final class Stats {
 
   public static void print() {
     if (stats.isEmpty()) return;
-    System.out.println();
     var df = new DecimalFormat("#,###");
     for (var kv : stats.entrySet())
       System.out.printf("%20s  %s\n", df.format(kv.getValue()), kv.getKey());
+    System.out.println();
   }
 }

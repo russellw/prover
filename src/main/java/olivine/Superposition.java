@@ -73,15 +73,15 @@ public final class Superposition {
 
   // Substitute and make new clause
   private void factor(Clause c, Term c0, Term c1, int cj, Term c2, Term c3) {
+    // in tests, the unification check failed more often than the equatable
+    // check,  so putting it first may save a little time
+    var map = Unification.unify(FMap.EMPTY, c0, c2);
+    if (map == null) return;
+
     // If these two terms are not equatable (for which the types must match, and predicates can only
     // be equated with True),
     // substituting terms for variables would not make them become so.
     if (!Equation.equatable(c1, c3)) return;
-
-    // unify
-    // TODO: measure which of the two checks fails more often
-    var map = Unification.unify(FMap.EMPTY, c0, c2);
-    if (map == null) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
