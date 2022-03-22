@@ -77,6 +77,7 @@ public final class Etc {
   }
 
   public static BigInteger remainderEuclidean(BigInteger a, BigInteger b) {
+    // The BigInteger 'mod' function cannot be used, as it rejects negative inputs
     var r = a.remainder(b);
     if (r.signum() < 0) r = r.add(b.abs());
     return r;
