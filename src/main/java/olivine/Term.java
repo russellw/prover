@@ -604,6 +604,14 @@ public abstract class Term implements Iterable<Term> {
     for (var a : this) a.walk(f);
   }
 
+  public final void walkLeaves(Consumer<Term> f) {
+    if (size() == 0) {
+      f.accept(this);
+      return;
+    }
+    for (var a : this) a.walk(f);
+  }
+
   public void walkGlobals(Consumer<Global> f) {
     for (var a : this) a.walkGlobals(f);
   }
@@ -683,6 +691,11 @@ public abstract class Term implements Iterable<Term> {
       case DISTINCT_OBJECT, INTEGER, RATIONAL, TRUE, FALSE -> true;
       default -> false;
     };
+  }
+
+  public boolean contains(Var b) {
+    for (var a : this) if (a.contains(b)) return true;
+    return false;
   }
 
   public final Term simplify() {

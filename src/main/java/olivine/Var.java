@@ -8,6 +8,11 @@ public final class Var extends Term {
   }
 
   @Override
+  public boolean contains(Var b) {
+    return this == b;
+  }
+
+  @Override
   public Type type() {
     return type;
   }

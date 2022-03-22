@@ -23,6 +23,7 @@ public final class Unification {
     return map;
   }
 
+  // TODO: rearrange?
   private static boolean occurs(FMap map, Term a, Term b) {
     assert a instanceof Var;
     if (b instanceof Var) {

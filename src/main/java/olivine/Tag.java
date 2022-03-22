@@ -8,7 +8,6 @@ public enum Tag {
   GLOBAL_VAR,
   CAST,
   CALL,
-  // TODO: should the different kinds of numbers be separate tags?
   INTEGER,
   RATIONAL,
   ALL,

@@ -2,11 +2,9 @@ package olivine;
 
 import java.util.*;
 
-// This is a partial implementation of the superposition calculus.
-// A full implementation would also implement an order on equations,
-// e.g. lexicographic path ordering or Knuth-Bendix ordering
 public final class Superposition {
   private final int clauseLimit;
+  private final LexicographicPathOrder order;
   private PriorityQueue<Clause> passive =
       new PriorityQueue<>(Comparator.comparingLong(Clause::volume));
 
@@ -34,10 +32,10 @@ public final class Superposition {
   /*
   Equality resolution
     c | c0 != c1
+  and
+    map = unify(c0, c1)
   ->
     c/map
-  where
-    map = unify(c0, c1)
   */
 
   // Substitute and make new clause
@@ -67,10 +65,10 @@ public final class Superposition {
   /*
   Equality factoring
     c | c0 = c1 | c2 = c3
+  and
+    map = unify(c0, c2)
   ->
     (c | c0 = c1 | c1 != c3)/map
-  where
-    map = unify(c0, c2)
   */
 
   // Substitute and make new clause
@@ -81,6 +79,7 @@ public final class Superposition {
     if (!Equation.equatable(c1, c3)) return;
 
     // unify
+    // TODO: measure which of the two checks fails more often
     var map = Unification.unify(FMap.EMPTY, c0, c2);
     if (map == null) return;
 
@@ -124,11 +123,11 @@ public final class Superposition {
   /*
   Superposition
     c | c0 = c1, d | d0(a) ?= d1
-  ->
-    (c | d | d0(c1) ?= d1)/map
-  where
+  and
     map = unify(c0, a)
     a not variable
+  ->
+    (c | d | d0(c1) ?= d1)/map
   */
 
   // Check this subterm, substitute and make new clause
@@ -216,6 +215,7 @@ public final class Superposition {
 
   public Superposition(List<Clause> clauses, int clauseLimit, long steps) {
     this.clauseLimit = clauseLimit;
+    order = new LexicographicPathOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
     for (var c : clauses) {
@@ -226,7 +226,7 @@ public final class Superposition {
       // arithmetic;
       // if it does, running out of inferences will not prove anything
       for (var a : c.literals)
-        a.walk(
+        a.walkLeaves(
             b -> {
               if (b.type().isNumeric()) defaultAnswer = SZS.GaveUp;
             });
