@@ -130,6 +130,7 @@ final class Test {
       System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start1) / 1000.0);
       System.out.println();
     }
+    Stats.print();
     System.out.printf("Solved %d/%d\n", solved, files.size());
     System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start) / 1000.0);
   }
