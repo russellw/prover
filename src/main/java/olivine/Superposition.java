@@ -2,32 +2,8 @@ package olivine;
 
 import java.util.*;
 
-// The superposition calculus generates new clauses by three rules:
-//
-// Equality resolution
-// c | c0 != c1
-// ->
-// c/map
-// where
-// map = unify(c0, c1)
-//
-// Equality factoring
-// c | c0 = c1 | c2 = c3
-// ->
-// (c | c0 = c1 | c1 != c3)/map
-// where
-// map = unify(c0, c2)
-//
-// Superposition
-// c | c0 = c1, d | d0(a) ?= d1
-// ->
-// (c | d | d0(c1) ?= d1)/map
-// where
-// map = unify(c0, a)
-// a not variable
-//
-// This is a partial implementation of the superposition calculus
-// A full implementation would also implement an order on equations
+// This is a partial implementation of the superposition calculus.
+// A full implementation would also implement an order on equations,
 // e.g. lexicographic path ordering or Knuth-Bendix ordering
 public final class Superposition {
   private final int clauseLimit;
@@ -55,6 +31,15 @@ public final class Superposition {
     passive.add(c);
   }
 
+  /*
+  Equality resolution
+    c | c0 != c1
+  ->
+    c/map
+  where
+    map = unify(c0, c1)
+  */
+
   // Substitute and make new clause
   private void resolve(Clause c, int i, FMap map) {
     // Negative literals
@@ -78,6 +63,15 @@ public final class Superposition {
       if (map != null) resolve(c, i, map);
     }
   }
+
+  /*
+  Equality factoring
+    c | c0 = c1 | c2 = c3
+  ->
+    (c | c0 = c1 | c1 != c3)/map
+  where
+    map = unify(c0, c2)
+  */
 
   // Substitute and make new clause
   private void factor(Clause c, Term c0, Term c1, int i, Term c2, Term c3) {
@@ -126,6 +120,16 @@ public final class Superposition {
       factor(c, i, c1, c0);
     }
   }
+
+  /*
+  Superposition
+    c | c0 = c1, d | d0(a) ?= d1
+  ->
+    (c | d | d0(c1) ?= d1)/map
+  where
+    map = unify(c0, a)
+    a not variable
+  */
 
   // Check this subterm, substitute and make new clause
   private void superposition1(
@@ -228,9 +232,7 @@ public final class Superposition {
             });
     }
     while (!passive.isEmpty()) {
-      // Given clause
-      // Discount loop, given clause cannot have already been subsumed
-      // Otter loop would check it for subsumption here
+      // Given clause.
       var g = passive.poll();
 
       // Solved
@@ -242,7 +244,7 @@ public final class Superposition {
       // Rename variables for subsumption and subsequent inference
       var g1 = g.renameVars();
 
-      // Discount loop performed slightly better in tests
+      // Discount loop performed slightly better in tests.
       // Otter loop would also subsume against passive clauses
       if (subsumption.subsumesForward(active, g1)) continue;
       active = subsumption.subsumeBackward(g1, active);
