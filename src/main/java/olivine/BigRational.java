@@ -114,12 +114,15 @@ public final class BigRational extends Number implements Comparable<BigRational>
   }
 
   public static BigRational of(String s) {
-    var t = s.split("/");
-    var num = new BigInteger(t[0]);
-    if (t.length == 1) {
-      return of(num);
+    BigInteger num, den;
+    var i = s.indexOf('/');
+    if (i < 0) {
+      num = new BigInteger(s);
+      den = BigInteger.ONE;
+    } else {
+      num = new BigInteger(s.substring(0, i));
+      den = new BigInteger(s.substring(i + 1));
     }
-    var den = new BigInteger(t[1]);
     return of(num, den);
   }
 
