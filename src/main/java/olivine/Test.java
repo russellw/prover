@@ -114,11 +114,14 @@ final class Test {
         // check
         switch (answer.szs) {
           case Satisfiable -> {
-            if (!answerString.equals(expected)) throw new IllegalStateException(answerString);
+            if (expected != null && !answerString.equals(expected))
+              throw new IllegalStateException(answerString);
             solved++;
           }
           case Unsatisfiable -> {
-            if (!answerString.equals(expected) && !"ContradictoryAxioms".equals(expected))
+            if (expected != null
+                && !answerString.equals(expected)
+                && !expected.equals("ContradictoryAxioms"))
               throw new IllegalStateException(answerString);
             solved++;
           }
