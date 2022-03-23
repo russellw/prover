@@ -216,7 +216,8 @@ public class SuperpositionTest {
     szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
     assertEquals(szs, SZS.Unsatisfiable);
 
-    // !p(a) & (p(x) | p(y))
+    // !p(a) & (p(x) | p(y)). this can be solved with equality factoring,
+    // but does not suffice to test such, because it has an alternative proof
     clauses.clear();
 
     negative.clear();
@@ -233,7 +234,7 @@ public class SuperpositionTest {
     szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
     assertEquals(szs, SZS.Unsatisfiable);
 
-    // (!p(a) | !p(b)) & (p(x) | p(y))
+    // (!p(a) | !p(b)) & (p(x) | p(y)). This is a test of equality factoring
     clauses.clear();
 
     negative.clear();
@@ -246,6 +247,41 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, x));
     positive.add(Term.of(Tag.CALL, p1, y));
+    clauses.add(new Clause(negative, positive));
+
+    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
+    assertEquals(szs, SZS.Unsatisfiable);
+
+    // p(a) & (!p(x) | !p(y))
+    clauses.clear();
+
+    negative.clear();
+    positive.clear();
+    positive.add(Term.of(Tag.CALL, p1, a));
+    clauses.add(new Clause(negative, positive));
+
+    negative.clear();
+    negative.add(Term.of(Tag.CALL, p1, x));
+    negative.add(Term.of(Tag.CALL, p1, y));
+    positive.clear();
+    clauses.add(new Clause(negative, positive));
+
+    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
+    assertEquals(szs, SZS.Unsatisfiable);
+
+    // (p(a) | p(b)) & (!p(x) | !p(y))
+    clauses.clear();
+
+    negative.clear();
+    positive.clear();
+    positive.add(Term.of(Tag.CALL, p1, a));
+    positive.add(Term.of(Tag.CALL, p1, b));
+    clauses.add(new Clause(negative, positive));
+
+    negative.clear();
+    negative.add(Term.of(Tag.CALL, p1, x));
+    negative.add(Term.of(Tag.CALL, p1, y));
+    positive.clear();
     clauses.add(new Clause(negative, positive));
 
     szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
