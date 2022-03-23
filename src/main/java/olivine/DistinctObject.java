@@ -9,6 +9,7 @@ public final class DistinctObject extends Term {
   }
 
   DistinctObject(String name) {
+    assert name != null;
     this.name = name;
   }
 
