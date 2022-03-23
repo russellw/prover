@@ -129,7 +129,14 @@ public class SuperpositionTest {
     szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
     assertEquals(szs, SZS.Satisfiable);
 
-    // x!=y
+    // x!=y. this differs from a!=b; it is unsatisfiable. Semantically because of the difference
+    // between
+    // the implied 'exists' versus 'all' for global versus local variables; there exists an
+    // assignment of global variable values
+    // that makes a!=b, but none that forces x!=y for all x, y. Mechanically because of equality
+    // resolution
+    // (which uses the fact that we are free to substitute terms for variables in an equation).
+    // This is therefore a test that equality resolution (or some equivalent) is implemented
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, x, y));
