@@ -9,7 +9,7 @@ public final class Record {
   public double time;
   public final Map<String, Long> map = new LinkedHashMap<>();
 
-  public static Record current;
+  public static Record current = new Record(null);
   public static final Map<String, Long> total = new LinkedHashMap<>();
 
   private Record(String file) {
