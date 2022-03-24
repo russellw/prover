@@ -8,6 +8,13 @@ public enum SZS {
   GaveUp,
   ResourceOut;
 
+  public boolean success() {
+    return switch (this) {
+      case Satisfiable, Unsatisfiable -> true;
+      default -> false;
+    };
+  }
+
   public String string(boolean conjecture) {
     if (conjecture)
       switch (this) {

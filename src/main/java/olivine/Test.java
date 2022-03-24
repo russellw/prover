@@ -112,19 +112,13 @@ final class Test {
         if (answer.proof != null) new TptpPrinter().proof(answer.proof);
 
         // check
-        switch (answer.szs) {
-          case Satisfiable -> {
-            if (expected != null && !answerString.equals(expected))
-              throw new IllegalStateException(answerString);
-            solved++;
+        if (answer.szs.success()) {
+          if (expected != null) {
+            if (answer.szs == SZS.Unsatisfiable && expected.equals("ContradictoryAxioms"))
+              expected = answerString;
+            if (!answerString.equals(expected)) throw new IllegalStateException(answerString);
           }
-          case Unsatisfiable -> {
-            if (expected != null
-                && !answerString.equals(expected)
-                && !expected.equals("ContradictoryAxioms"))
-              throw new IllegalStateException(answerString);
-            solved++;
-          }
+          solved++;
         }
       } catch (InappropriateException e) {
         System.out.println("% SZS status Inappropriate");
