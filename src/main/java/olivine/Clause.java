@@ -58,7 +58,7 @@ public class Clause extends AbstractFormula {
   }
 
   public final long volume() {
-    final long[] n = {literals.length};
+    final long[] n = {literals.length * 2L};
     for (var a : literals) a.walk(b -> n[0]++);
     return n[0];
   }
