@@ -15,6 +15,7 @@ public class LexicographicPathOrderTest {
     var a = new GlobalVar("a", Type.INDIVIDUAL);
     var b = new GlobalVar("b", Type.INDIVIDUAL);
     var p1 = new Func("p1", Type.BOOLEAN, Type.INDIVIDUAL);
+    var q1 = new Func("q1", Type.BOOLEAN, Type.INDIVIDUAL);
     var x = new Var(Type.INDIVIDUAL);
     var y = new Var(Type.INDIVIDUAL);
     var negative = new ArrayList<Term>();
@@ -25,6 +26,8 @@ public class LexicographicPathOrderTest {
     // it can reasonably expect that all functions and global variables will be shown up front
     positive.add(Term.of(Tag.EQUALS, red, green));
     positive.add(Term.of(Tag.EQUALS, a, b));
+    positive.add(Term.of(Tag.CALL, p1, red));
+    positive.add(Term.of(Tag.CALL, q1, red));
     clauses.add(new Clause(negative, positive));
     order = new LexicographicPathOrder(clauses);
 
@@ -33,6 +36,7 @@ public class LexicographicPathOrderTest {
     checkOrdered(Term.of(1), Term.of(2));
     checkOrdered(red, green);
     checkOrdered(a, b);
+
     checkUnordered(
         Term.of(
             Tag.ADD,
@@ -60,6 +64,14 @@ public class LexicographicPathOrderTest {
             Tag.SUBTRACT,
             Term.of(Type.RATIONAL, BigRational.of(1, 3)),
             Term.of(Type.RATIONAL, BigRational.of(1, 3))));
+
+    checkUnordered(Term.of(Tag.CALL, p1, red), Term.of(Tag.CALL, p1, red));
+    checkOrdered(Term.of(Tag.CALL, p1, red), Term.of(Tag.CALL, p1, green));
+    checkOrdered(Term.of(Tag.CALL, p1, red), Term.of(Tag.CALL, q1, red));
+
+    checkUnordered(Term.of(Tag.CALL, p1, x), Term.of(Tag.CALL, p1, x));
+    checkUnordered(Term.of(Tag.CALL, p1, x), Term.of(Tag.CALL, p1, y));
+    checkOrdered(Term.of(Tag.CALL, p1, x), Term.of(Tag.CALL, q1, x));
   }
 
   private void checkOrdered(Term a, Term b) {
