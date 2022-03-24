@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,7 +84,27 @@ final class Test {
     return expected;
   }
 
+  private static void printBlock(Record record) {
+    if (record.map.isEmpty()) return;
+    System.out.println();
+    var df = new DecimalFormat("#,###");
+    for (var kv : record.map.entrySet())
+      System.out.printf("%20s  %s\n", df.format(kv.getValue()), kv.getKey());
+  }
+
+  private static void writeCSV(List<Record> records, String file) throws FileNotFoundException {
+    try (var writer = new PrintWriter(file + ".csv")) {
+      writer.print("file\tszs\ttime");
+      writer.println();
+      for (var record : records) {
+        writer.printf("%s\t%s\t%.3f", record.file, record.answer, record.time);
+        writer.println();
+      }
+    }
+  }
+
   public static void main(String[] args) throws IOException {
+    // command line
     args(args);
     if (shuffle) {
       var random = randomSeed == -1 ? new Random() : new Random(randomSeed);
@@ -91,12 +112,14 @@ final class Test {
     }
     if (maxFiles >= 0 && files.size() > maxFiles) files = files.subList(0, maxFiles);
 
-    var solved = 0;
+    // attempt problems
+    var solved = new ArrayList<Record>();
+    var unsolved = new ArrayList<Record>();
     var start = System.currentTimeMillis();
     for (var file : files) {
+      Record.init(file);
       var expected = header(file);
       var start1 = System.currentTimeMillis();
-
       var cnf = new CNF();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
         // read
@@ -107,28 +130,39 @@ final class Test {
 
         // output
         System.out.print("% SZS status ");
-        var answerString = answer.szs.string(cnf.conjecture);
-        System.out.println(answerString);
+        Record.current.answer = answer.szs.string(cnf.conjecture);
+        System.out.println(Record.current.answer);
         if (answer.proof != null) new TptpPrinter().proof(answer.proof);
 
-        // check
+        Record.current.time = (System.currentTimeMillis() - start1) / 1000.0;
+        System.out.printf("%.3f seconds\n", Record.current.time);
+        printBlock(Record.current);
+
+        // check and record
         if (answer.szs.success()) {
           if (expected != null) {
             if (answer.szs == SZS.Unsatisfiable && expected.equals("ContradictoryAxioms"))
-              expected = answerString;
-            if (!answerString.equals(expected)) throw new IllegalStateException(answerString);
+              expected = Record.current.answer;
+            if (!Record.current.answer.equals(expected))
+              throw new IllegalStateException(Record.current.answer);
           }
-          solved++;
-        }
+          solved.add(Record.current);
+        } else unsolved.add(Record.current);
       } catch (InappropriateException e) {
         System.out.println("% SZS status Inappropriate");
       }
-
-      System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start1) / 1000.0);
       System.out.println();
     }
-    Stats.print();
-    System.out.printf("Solved %d/%d\n", solved, files.size());
+
+    // print summary
+    System.out.printf(
+        "Solved %d/%d (%.1f%%)\n",
+        solved.size(), files.size(), solved.size() * 100.0 / files.size());
     System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start) / 1000.0);
+    printBlock(Record.total);
+
+    // write summary files
+    writeCSV(solved, "solved");
+    writeCSV(unsolved, "unsolved");
   }
 }
