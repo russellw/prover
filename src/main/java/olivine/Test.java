@@ -81,18 +81,18 @@ final class Test {
     return expected;
   }
 
-  private static void printBlock(Record record) {
-    if (record.map.isEmpty()) return;
+  private static void printBlock(Map<String, Long> map) {
+    if (map.isEmpty()) return;
     System.out.println();
     var df = new DecimalFormat("#,###");
-    for (var kv : record.map.entrySet())
+    for (var kv : map.entrySet())
       System.out.printf("%20s  %s\n", df.format(kv.getValue()), kv.getKey());
   }
 
   private static void writeCSV(List<Record> records, String file) throws FileNotFoundException {
-    var keys = new LinkedHashSet<String>();
-    for (var record : records) keys.addAll(record.map.keySet());
-
+    var keys = Record.total.keySet();
+    var totalTime = 0.0;
+    var total = new LinkedHashMap<String, Long>();
     try (var writer = new PrintWriter(file + ".csv")) {
       writer.print("file\tszs\ttime");
       for (var key : keys) {
@@ -103,12 +103,22 @@ final class Test {
 
       for (var record : records) {
         writer.printf("%s\t%s\t%.3f", record.file, record.answer, record.time);
+        totalTime += record.time;
         for (var key : keys) {
           writer.print('\t');
-          writer.print(record.get(key));
+          var n = record.get(key);
+          writer.print(n);
+          total.put(key, total.getOrDefault(key, 0L) + n);
         }
         writer.println();
       }
+
+      writer.printf("total\t-\t%.3f", totalTime);
+      for (var key : keys) {
+        writer.print('\t');
+        writer.print(total.getOrDefault(key, 0L));
+      }
+      writer.println();
     }
   }
 
@@ -147,7 +157,7 @@ final class Test {
 
         Record.current.time = (System.currentTimeMillis() - start1) / 1000.0;
         System.out.printf("%.3f seconds\n", Record.current.time);
-        printBlock(Record.current);
+        printBlock(Record.current.map);
 
         // check and record
         if (answer.szs.success()) {

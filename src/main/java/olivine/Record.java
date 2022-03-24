@@ -10,7 +10,7 @@ public final class Record {
   public final Map<String, Long> map = new LinkedHashMap<>();
 
   public static Record current;
-  public static final Record total = new Record("total");
+  public static final Map<String, Long> total = new LinkedHashMap<>();
 
   private Record(String file) {
     this.file = file;
@@ -29,11 +29,7 @@ public final class Record {
   }
 
   public static void inc(String key, long n) {
-    current.inc1(key, n);
-    total.inc1(key, n);
-  }
-
-  private void inc1(String key, long n) {
-    map.put(key, get(key) + n);
+    current.map.put(key, current.get(key) + n);
+    total.put(key, total.getOrDefault(key, 0L) + n);
   }
 }
