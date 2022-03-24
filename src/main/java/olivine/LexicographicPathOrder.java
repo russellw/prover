@@ -53,7 +53,7 @@ public final class LexicographicPathOrder {
     // Same weights means similar terms
     assert atag == btag;
     assert an == bn;
-    assert an == 0 || a.get(0).equals(b.get(0));
+    assert atag != Tag.CALL || a.get(0).equals(b.get(0));
 
     // Constants
     switch (atag) {

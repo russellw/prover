@@ -146,6 +146,7 @@ public final class Superposition {
     if (map == null) return;
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;
+    if (order.greater(d1, d0c1)) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
@@ -192,8 +193,6 @@ public final class Superposition {
 
   // For each equation in d (both directions)
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
-    // TODO: explain why this is a valid optimization
-    if (c0 == Term.TRUE) return;
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
       var d0 = e.left;
@@ -209,6 +208,7 @@ public final class Superposition {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
+      if (order.greater(c1, c0)) continue;
       superposition(c, d, ci, c0, c1);
       superposition(c, d, ci, c1, c0);
     }
