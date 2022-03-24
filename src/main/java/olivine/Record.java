@@ -20,16 +20,20 @@ public final class Record {
     current = new Record(file);
   }
 
-  public static void inc(String s) {
-    inc(s, 1);
+  public static void inc(String key) {
+    inc(key, 1);
   }
 
-  public static void inc(String s, long n) {
-    current.inc1(s, n);
-    total.inc1(s, n);
+  public long get(String key) {
+    return map.getOrDefault(key, 0L);
   }
 
-  private void inc1(String s, long n) {
-    map.put(s, map.getOrDefault(s, 0L) + n);
+  public static void inc(String key, long n) {
+    current.inc1(key, n);
+    total.inc1(key, n);
+  }
+
+  private void inc1(String key, long n) {
+    map.put(key, get(key) + n);
   }
 }

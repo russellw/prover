@@ -5,10 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 final class Test {
@@ -93,11 +90,23 @@ final class Test {
   }
 
   private static void writeCSV(List<Record> records, String file) throws FileNotFoundException {
+    var keys = new LinkedHashSet<String>();
+    for (var record : records) keys.addAll(record.map.keySet());
+
     try (var writer = new PrintWriter(file + ".csv")) {
       writer.print("file\tszs\ttime");
+      for (var key : keys) {
+        writer.print('\t');
+        writer.print(key);
+      }
       writer.println();
+
       for (var record : records) {
         writer.printf("%s\t%s\t%.3f", record.file, record.answer, record.time);
+        for (var key : keys) {
+          writer.print('\t');
+          writer.print(record.get(key));
+        }
         writer.println();
       }
     }
@@ -115,12 +124,14 @@ final class Test {
     // attempt problems
     var solved = new ArrayList<Record>();
     var unsolved = new ArrayList<Record>();
+
     var start = System.currentTimeMillis();
     for (var file : files) {
-      Record.init(file);
       var expected = header(file);
-      var start1 = System.currentTimeMillis();
+      Record.init(file);
       var cnf = new CNF();
+
+      var start1 = System.currentTimeMillis();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
         // read
         TptpParser.parse(file, stream, cnf);

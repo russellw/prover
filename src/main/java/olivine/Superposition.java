@@ -163,6 +163,7 @@ public final class Superposition {
     (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
+    Record.inc("sp");
     clause(new Clause(negative, positive, c.original(), d.original()));
   }
 
