@@ -1,9 +1,11 @@
 package olivine;
 
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 public final class Superposition {
   private final int clauseLimit;
+  private long steps;
   private final LexicographicPathOrder order;
   private PriorityQueue<Clause> passive =
       new PriorityQueue<>(Comparator.comparingLong(Clause::volume));
@@ -13,7 +15,7 @@ public final class Superposition {
   // the problem is satisfiable. In practice, this is rare but can occasionally happen,
   // and is a good way to detect some kinds of incompleteness errors in the prover
   private SZS defaultAnswer = SZS.Satisfiable;
-  public final Answer answer;
+  public Answer answer;
 
   private void clause(Clause c) {
     if (c.isTrue()) return;
@@ -179,9 +181,11 @@ public final class Superposition {
       Term d0,
       Term d1,
       List<Integer> position,
-      Term a) {
+      Term a)
+      throws TimeoutException {
     // It is never necessary to paramodulate into variables.
     if (a instanceof Var) return;
+    if (steps-- == 0) throw new TimeoutException();
     superposition1(c, d, ci, c0, c1, di, d0, d1, position, a);
     var n = a.size();
     for (var i = 0; i < n; i++) {
@@ -192,7 +196,7 @@ public final class Superposition {
   }
 
   // For each equation in d (both directions)
-  private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
+  private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) throws TimeoutException {
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
       var d0 = e.left;
@@ -203,7 +207,7 @@ public final class Superposition {
   }
 
   // For each positive equation in c (both directions)
-  private void superposition(Clause c, Clause d) {
+  private void superposition(Clause c, Clause d) throws TimeoutException {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;
@@ -215,6 +219,7 @@ public final class Superposition {
 
   public Superposition(List<Clause> clauses, int clauseLimit, long steps) {
     this.clauseLimit = clauseLimit;
+    this.steps = steps;
     order = new LexicographicPathOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
@@ -231,43 +236,43 @@ public final class Superposition {
               if (b.type().isNumeric()) defaultAnswer = SZS.GaveUp;
             });
     }
-    while (!passive.isEmpty()) {
-      // Given clause.
-      var g = passive.poll();
+    try {
+      while (!passive.isEmpty()) {
+        // Given clause.
+        var g = passive.poll();
 
-      // Solved
-      if (g.isFalse()) {
-        answer = new Answer(SZS.Unsatisfiable, g);
-        return;
-      }
-
-      // Rename variables, because subsumption and superposition both assume
-      // clauses have disjoint variable names
-      var g1 = g.renameVars();
-
-      // Discount loop, which only subsumes against active clauses, performed slightly better in
-      // tests.
-      // The alternative Otter loop would also subsume against passive clauses
-      if (subsumption.subsumesForward(active, g1)) continue;
-      active = subsumption.subsumeBackward(g1, active);
-
-      // Infer from one clause
-      resolve(g);
-      factor(g);
-
-      // Sometimes need to match g with itself
-      active.add(g);
-
-      // Infer from two clauses
-      for (var c : active) {
-        if (steps-- == 0) {
-          answer = new Answer(SZS.Timeout);
+        // Solved
+        if (g.isFalse()) {
+          answer = new Answer(SZS.Unsatisfiable, g);
           return;
         }
-        superposition(c, g1);
-        superposition(g1, c);
+
+        // Rename variables, because subsumption and superposition both assume
+        // clauses have disjoint variable names
+        var g1 = g.renameVars();
+
+        // Discount loop, which only subsumes against active clauses, performed slightly better in
+        // tests.
+        // The alternative Otter loop would also subsume against passive clauses
+        if (subsumption.subsumesForward(active, g1)) continue;
+        active = subsumption.subsumeBackward(g1, active);
+
+        // Infer from one clause
+        resolve(g);
+        factor(g);
+
+        // Sometimes need to match g with itself
+        active.add(g);
+
+        // Infer from two clauses
+        for (var c : active) {
+          superposition(c, g1);
+          superposition(g1, c);
+        }
       }
+      answer = new Answer(defaultAnswer);
+    } catch (TimeoutException e) {
+      answer = new Answer(SZS.Timeout);
     }
-    answer = new Answer(defaultAnswer);
   }
 }
