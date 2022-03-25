@@ -1,7 +1,6 @@
 package olivine;
 
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 
 public final class Superposition {
   private final int clauseLimit;
@@ -166,7 +165,6 @@ public final class Superposition {
     (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
-    Record.inc("sp");
     clause(new Clause(negative, positive, c.original(), d.original()));
   }
 
@@ -181,9 +179,7 @@ public final class Superposition {
       Term d0,
       Term d1,
       List<Integer> position,
-      Term a)
-      throws TimeoutException {
-    // It is never necessary to paramodulate into variables.
+      Term a) {
     if (a instanceof Var) return;
     if (steps-- == 0) throw new TimeoutException();
     superposition1(c, d, ci, c0, c1, di, d0, d1, position, a);
@@ -196,7 +192,7 @@ public final class Superposition {
   }
 
   // For each equation in d (both directions)
-  private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) throws TimeoutException {
+  private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
       var d0 = e.left;
@@ -207,7 +203,7 @@ public final class Superposition {
   }
 
   // For each positive equation in c (both directions)
-  private void superposition(Clause c, Clause d) throws TimeoutException {
+  private void superposition(Clause c, Clause d) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;

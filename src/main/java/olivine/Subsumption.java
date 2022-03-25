@@ -3,13 +3,12 @@ package olivine;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 public final class Subsumption {
   // Time limit
   private int steps;
 
-  private FMap search(FMap map, Term[] c, Term[] c2, Term[] d, Term[] d2) throws TimeoutException {
+  private FMap search(FMap map, Term[] c, Term[] c2, Term[] d, Term[] d2) {
     if (steps-- == 0) throw new TimeoutException();
 
     // Matched everything in one polarity
