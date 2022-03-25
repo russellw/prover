@@ -27,6 +27,10 @@ public final class Superposition {
       // so running out of inferences doesn't prove anything
       defaultAnswer = SZS.ResourceOut;
     }
+    for (var a : c.literals) {
+      steps -= a.symbolCount();
+      if (steps < 0) throw new TimeoutException();
+    }
     passive.add(c);
   }
 
@@ -181,7 +185,6 @@ public final class Superposition {
       List<Integer> position,
       Term a) {
     if (a instanceof Var) return;
-    if (steps-- == 0) throw new TimeoutException();
     superposition1(c, d, ci, c0, c1, di, d0, d1, position, a);
     var n = a.size();
     for (var i = 0; i < n; i++) {
@@ -219,20 +222,20 @@ public final class Superposition {
     order = new LexicographicPathOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
-    for (var c : clauses) {
-      // add the initial clauses to the passive queue
-      clause(c);
-
-      // first-order logic is not complete on arithmetic, so check whether this problem uses
-      // arithmetic;
-      // if it does, running out of inferences will not prove anything
-      for (var a : c.literals)
-        a.walkLeaves(
-            b -> {
-              if (b.type().isNumeric()) defaultAnswer = SZS.GaveUp;
-            });
-    }
     try {
+      for (var c : clauses) {
+        // add the initial clauses to the passive queue
+        clause(c);
+
+        // first-order logic is not complete on arithmetic, so check whether this problem uses
+        // arithmetic;
+        // if it does, running out of inferences will not prove anything
+        for (var a : c.literals)
+          a.walkLeaves(
+              b -> {
+                if (b.type().isNumeric()) defaultAnswer = SZS.GaveUp;
+              });
+      }
       while (!passive.isEmpty()) {
         // Given clause.
         var g = passive.poll();
