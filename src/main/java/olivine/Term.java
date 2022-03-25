@@ -599,9 +599,12 @@ public abstract class Term implements Iterable<Term> {
     return b ? TRUE : FALSE;
   }
 
-  public final void walk(Consumer<Term> f) {
-    f.accept(this);
-    for (var a : this) a.walk(f);
+  public final long symbolCount() {
+    var n = size();
+    if (n == 0) return 1;
+    var r = 1L;
+    for (var i = tag() == Tag.CALL ? 1 : 0; i < n; i++) r += get(i).symbolCount();
+    return r;
   }
 
   public final void walkLeaves(Consumer<Term> f) {
@@ -609,7 +612,7 @@ public abstract class Term implements Iterable<Term> {
       f.accept(this);
       return;
     }
-    for (var a : this) a.walk(f);
+    for (var a : this) a.walkLeaves(f);
   }
 
   public void walkGlobals(Consumer<Global> f) {
