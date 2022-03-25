@@ -146,7 +146,7 @@ public final class Superposition {
     if (map == null) return;
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;
-    // if (order.greater(d1, d0c1)) return;
+    if (order.greater(d1, d0c1)) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
@@ -208,9 +208,8 @@ public final class Superposition {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
-      // if (order.greater(c1, c0)) continue;
-      superposition(c, d, ci, c0, c1);
-      superposition(c, d, ci, c1, c0);
+      if (!order.greater(c1, c0)) superposition(c, d, ci, c0, c1);
+      if (!order.greater(c0, c1)) superposition(c, d, ci, c1, c0);
     }
   }
 
