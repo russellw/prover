@@ -4,6 +4,7 @@ import java.io.IOException;
 
 final class Prover {
   private static String file;
+  private static long steps = Long.MAX_VALUE;
 
   private Prover() {}
 

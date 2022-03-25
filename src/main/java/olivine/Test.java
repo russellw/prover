@@ -15,6 +15,7 @@ final class Test {
   private static boolean shuffle;
   private static int randomSeed = -1;
   private static int maxFiles = -1;
+  private static long steps = 100000;
 
   private Test() {}
 
@@ -33,7 +34,8 @@ final class Test {
             Etc.printVersion();
             System.exit(0);
           }
-          case "n" -> maxFiles = Integer.parseInt(option.getArg());
+          case "b" -> maxFiles = Integer.parseInt(option.getArg());
+          case "n" -> steps = Long.parseLong(option.getArg());
           case "s" -> {
             shuffle = true;
             if (option.arg != null) randomSeed = Integer.parseInt(option.arg);
@@ -147,7 +149,7 @@ final class Test {
         TptpParser.parse(file, stream, cnf);
 
         // solve
-        var answer = new Superposition(cnf.clauses, 10000000, 1000000).answer;
+        var answer = new Superposition(cnf.clauses, 10000000, steps).answer;
 
         // output
         System.out.print("% SZS status ");
