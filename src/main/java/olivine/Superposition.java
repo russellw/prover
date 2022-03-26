@@ -151,7 +151,6 @@ public final class Superposition {
     if (map == null) return;
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;
-    if (order.greater(d1, d0c1)) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
