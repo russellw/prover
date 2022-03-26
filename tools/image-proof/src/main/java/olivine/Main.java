@@ -2,11 +2,11 @@ package olivine;
 
 import java.io.IOException;
 
-final class Prover {
+final class Main {
   private static String file;
   private static long steps = Long.MAX_VALUE;
 
-  private Prover() {}
+  private Main() {}
 
   private static void setFile(String s) {
     if (file != null) {

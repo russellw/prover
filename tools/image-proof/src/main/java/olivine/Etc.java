@@ -96,7 +96,7 @@ public final class Etc {
   public static String version() throws IOException {
     var properties = new Properties();
     var stream =
-        Prover.class
+        Main.class
             .getClassLoader()
             .getResourceAsStream("META-INF/maven/olivine/olivine/pom.properties");
     if (stream == null) return null;
