@@ -868,7 +868,7 @@ public abstract class Term implements Iterable<Term> {
         var xr = x.rationalValue();
         if (xr != null) {
           var yr = y.rationalValue();
-          if (yr != null) return of(x.type(), xr.divide(yr));
+          if (yr != null && yr.signum() != 0) return of(x.type(), xr.divide(yr));
         }
       }
       case DIVIDE_EUCLIDEAN -> {
@@ -878,7 +878,7 @@ public abstract class Term implements Iterable<Term> {
         var xi = x.integerValue();
         if (xi != null) {
           var yi = y.integerValue();
-          if (yi != null) return of(Etc.divideEuclidean(xi, yi));
+          if (yi != null && yi.signum() != 0) return of(Etc.divideEuclidean(xi, yi));
         }
       }
       case DIVIDE_FLOOR -> {
@@ -888,7 +888,7 @@ public abstract class Term implements Iterable<Term> {
         var xi = x.integerValue();
         if (xi != null) {
           var yi = y.integerValue();
-          if (yi != null) return of(Etc.divideFloor(xi, yi));
+          if (yi != null && yi.signum() != 0) return of(Etc.divideFloor(xi, yi));
         }
       }
       case DIVIDE_TRUNCATE -> {
@@ -898,7 +898,7 @@ public abstract class Term implements Iterable<Term> {
         var xi = x.integerValue();
         if (xi != null) {
           var yi = y.integerValue();
-          if (yi != null) return of(xi.divide(yi));
+          if (yi != null && yi.signum() != 0) return of(xi.divide(yi));
         }
       }
       case REMAINDER_EUCLIDEAN -> {
@@ -908,7 +908,7 @@ public abstract class Term implements Iterable<Term> {
         var xi = x.integerValue();
         if (xi != null) {
           var yi = y.integerValue();
-          if (yi != null) return of(Etc.remainderEuclidean(xi, yi));
+          if (yi != null && yi.signum() != 0) return of(Etc.remainderEuclidean(xi, yi));
         }
       }
       case REMAINDER_FLOOR -> {
@@ -918,7 +918,7 @@ public abstract class Term implements Iterable<Term> {
         var xi = x.integerValue();
         if (xi != null) {
           var yi = y.integerValue();
-          if (yi != null) return of(Etc.remainderFloor(xi, yi));
+          if (yi != null && yi.signum() != 0) return of(Etc.remainderFloor(xi, yi));
         }
       }
       case REMAINDER_TRUNCATE -> {
@@ -928,7 +928,7 @@ public abstract class Term implements Iterable<Term> {
         var xi = x.integerValue();
         if (xi != null) {
           var yi = y.integerValue();
-          if (yi != null) return of(xi.remainder(yi));
+          if (yi != null && yi.signum() != 0) return of(xi.remainder(yi));
         }
       }
     }

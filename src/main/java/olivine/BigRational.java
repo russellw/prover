@@ -126,6 +126,10 @@ public final class BigRational extends Number implements Comparable<BigRational>
     return of(num, den);
   }
 
+  public int signum() {
+    return num.signum();
+  }
+
   public static BigRational of(BigInteger num, BigInteger den) {
     return new BigRational(num, den);
   }
