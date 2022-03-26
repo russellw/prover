@@ -1,0 +1,54 @@
+/L9"TPTP" Line Comment = % Block Comment On = /* Block Comment Off = */ Escape Char = \ String Chars = '" File Extensions = P AX
+/Delimiters = ~!@%^&*()-+=|\/{}[]:;"'<> ,	.?
+/Open Brace Strings =  "{" "(" "[" "<"
+/Close Brace Strings = "}" ")" "]" ">"
+/C1"Keywords" STYLE_KEYWORD
+cnf
+fof
+include
+tff
+thf
+/C2"Objects" STYLE_OPERATOR
+/C3"Methods and Properties" STYLE_METHOD
+axiom
+hypothesis
+definition
+assumption
+lemma
+theorem
+conjecture
+negated_conjecture
+plain
+fi_domain
+fi_functors
+fi_predicates
+type
+unknown
+/C4"Operators" STYLE_OPERATOR
+!
+$
+%
+&
+*
++
+-
+// /
+:
+<
+=
+>
+?
+[
+]
+^
+|
+~
+/C5"Separs" STYLE_OPERATOR
+(
+)
+,
+;
+{
+}
+/C6"UE/UES Script Commands" STYLE_FUNCTION
+/C7"UE/UES Script Parameters" STYLE_ELEMENT
