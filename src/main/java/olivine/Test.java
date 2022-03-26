@@ -115,7 +115,7 @@ final class Test {
         writer.println();
       }
 
-      writer.printf("total\t-\t%.3f", totalTime);
+      writer.printf("total\t%d\t%.3f", records.size(), totalTime);
       for (var key : keys) {
         writer.print('\t');
         writer.print(total.getOrDefault(key, 0L));

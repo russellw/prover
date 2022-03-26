@@ -3,10 +3,64 @@ package olivine;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import org.junit.Test;
 
 public class LexicographicPathOrderTest {
-  LexicographicPathOrder order;
+  private final List<Func> funcs = new ArrayList<>();
+  private final List<GlobalVar> globalVars = new ArrayList<>();
+  private final List<Var> vars = new ArrayList<>();
+  private final Random random = new Random(0);
+  private LexicographicPathOrder order;
+
+  private Term randomIndividualTerm(int depth) {
+    if (depth == 0 || random.nextInt(100) < 40)
+      if (random.nextInt(100) < 30) return globalVars.get(random.nextInt(globalVars.size()));
+      else return vars.get(random.nextInt(vars.size()));
+
+    var f = funcs.get(random.nextInt(funcs.size()));
+    var args = new Term[f.params.length];
+    for (var i = 0; i < args.length; i++) args[i] = randomIndividualTerm(depth - 1);
+    return f.call(args);
+  }
+
+  private void makeOrder() {
+    var negative = new ArrayList<Term>();
+    var positive = new ArrayList<Term>();
+    for (var f : funcs) {
+      var args = new Term[f.params.length];
+      for (var i = 0; i < args.length; i++) args[i] = vars.get(0);
+      positive.add(Term.of(Tag.EQUALS, f.call(args), vars.get(0)));
+    }
+    for (var a : globalVars) positive.add(Term.of(Tag.EQUALS, a, a));
+    var clauses = new ArrayList<Clause>();
+    clauses.add(new Clause(negative, positive));
+    order = new LexicographicPathOrder(clauses);
+  }
+
+  @Test
+  public void randomTest() {
+    funcs.clear();
+    for (var i = 0; i < 3; i++)
+      funcs.add(
+          new Func(String.format("f%d", i), Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL));
+
+    globalVars.clear();
+    for (var i = 0; i < 3; i++)
+      globalVars.add(new GlobalVar(String.format("a%d", i), Type.INDIVIDUAL));
+
+    vars.clear();
+    for (var i = 0; i < 3; i++) vars.add(new Var(Type.INDIVIDUAL));
+
+    makeOrder();
+
+    for (var i = 0; i < 100; i++) {
+      var a = randomIndividualTerm(3);
+      var b = randomIndividualTerm(3);
+      assertFalse(order.greater(a, b) && order.greater(b, a));
+    }
+  }
 
   @Test
   public void greater() {
