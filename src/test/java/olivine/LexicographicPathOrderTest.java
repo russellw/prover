@@ -42,22 +42,22 @@ public class LexicographicPathOrderTest {
   @Test
   public void randomTest() {
     funcs.clear();
-    for (var i = 0; i < 3; i++)
+    for (var i = 0; i < 4; i++)
       funcs.add(
           new Func(String.format("f%d", i), Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL));
 
     globalVars.clear();
-    for (var i = 0; i < 3; i++)
+    for (var i = 0; i < 4; i++)
       globalVars.add(new GlobalVar(String.format("a%d", i), Type.INDIVIDUAL));
 
     vars.clear();
-    for (var i = 0; i < 3; i++) vars.add(new Var(Type.INDIVIDUAL));
+    for (var i = 0; i < 4; i++) vars.add(new Var(Type.INDIVIDUAL));
 
     makeOrder();
 
     for (var i = 0; i < 100; i++) {
-      var a = randomIndividualTerm(3);
-      var b = randomIndividualTerm(3);
+      var a = randomIndividualTerm(4);
+      var b = randomIndividualTerm(4);
       assertFalse(order.greater(a, b) && order.greater(b, a));
     }
   }
