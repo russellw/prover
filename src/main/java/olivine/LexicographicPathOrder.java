@@ -37,7 +37,7 @@ public final class LexicographicPathOrder {
     var atag = a.tag();
     var a0 = atag == Tag.CALL ? 1 : 0;
     var an = a.size();
-    for (var i = a0; i < an; i++) if (greaterEq(a.get(i), b)) return true;
+    for (var i = a0; i < an; i++) if (greaterEquals(a.get(i), b)) return true;
 
     // Necessary condition: a > all bi
     var btag = b.tag();
@@ -90,7 +90,7 @@ public final class LexicographicPathOrder {
     return false;
   }
 
-  private boolean greaterEq(Term a, Term b) {
+  private boolean greaterEquals(Term a, Term b) {
     return greater(a, b) || a.equals(b);
   }
 }
