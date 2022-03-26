@@ -55,9 +55,10 @@ public class LexicographicPathOrderTest {
 
     makeOrder();
 
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 10000; i++) {
       var a = randomIndividualTerm(4);
       var b = randomIndividualTerm(4);
+      assertFalse(order.greater(a, b) && a.equals(b));
       assertFalse(order.greater(a, b) && order.greater(b, a));
     }
   }
