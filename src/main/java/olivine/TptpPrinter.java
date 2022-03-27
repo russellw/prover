@@ -218,7 +218,7 @@ public final class TptpPrinter {
     // source
     if (formula.file == null) System.out.print("introduced(definition)");
     else if (formula.negatedConjecture) {
-      System.out.print("inference(negate,[status(ceq)],[file(");
+      System.out.print("inference(negate,[status(cth)],[file(");
       quote('\'', formula.file);
       System.out.print(',');
       maybeQuote(formula.name);
@@ -231,6 +231,26 @@ public final class TptpPrinter {
       System.out.print(')');
     }
     System.out.println(").");
+  }
+
+  private void printLiteralInfo(Clause c, int i, boolean reversed) {
+    if (i < 0) return;
+    System.out.print(", ");
+    System.out.print(i);
+    System.out.print(',');
+    var e = new Equation(c.literals[i]);
+    var a = e.left;
+    var b = e.right;
+    if (reversed) {
+      a = e.right;
+      b = e.left;
+    }
+    if (i < c.negativeSize) System.out.print('~');
+    print(a);
+    if (b != Term.TRUE) {
+      System.out.print('=');
+      print(b);
+    }
   }
 
   private void println(Clause c) {
@@ -248,12 +268,31 @@ public final class TptpPrinter {
     // source
     var inference = c.inference;
     assert inference != null;
+
     System.out.printf(", inference(%s,[status(%s)],[", inference.rule, inference.status());
-    for (var i = 0; i < inference.from.length; i++) {
-      if (i > 0) System.out.print(',');
-      id(inference.from[i]);
+    id(inference.from);
+    if (inference.from1 != null) {
+      System.out.print(',');
+      id(inference.from1);
     }
-    System.out.println("])).");
+    System.out.print("])");
+
+    // more  info
+    if (inference.from instanceof Clause from) {
+      printLiteralInfo(from, inference.literalIndex, inference.reversed);
+      var from1 = inference.from1 == null ? from : inference.from1;
+      printLiteralInfo(from1, inference.literalIndex1, inference.reversed1);
+      if (inference.position != null) {
+        System.out.print(",[");
+        for (var i = 0; i < inference.position.length; i++) {
+          if (i > 0) System.out.print(", ");
+          System.out.print(inference.position[i]);
+        }
+        System.out.print(']');
+      }
+    }
+
+    System.out.println(").");
   }
 
   public void println(AbstractFormula formula) {

@@ -128,7 +128,8 @@ public class Clause extends AbstractFormula {
   @Override
   protected void getProof(Set<AbstractFormula> visited, List<AbstractFormula> proof) {
     if (!visited.add(this)) return;
-    for (var formula : inference.from) formula.getProof(visited, proof);
+    inference.from.getProof(visited, proof);
+    if (inference.from1 != null) inference.from1.getProof(visited, proof);
     proof.add(this);
   }
 

@@ -16,6 +16,11 @@ public final class Superposition {
   private SZS defaultAnswer = SZS.Satisfiable;
   public Answer answer;
 
+  private boolean reversed(Clause c, int i, Term c0) {
+    var e = new Equation(c.literals[i]);
+    return c0 != e.left;
+  }
+
   private void clause(Clause c) {
     if (c.isTrue()) return;
     if (passive.size() >= clauseLimit) {
@@ -58,7 +63,6 @@ public final class Superposition {
     assert c.original() == c;
     var inference = new Inference("er", c);
     inference.literalIndex = ci;
-    inference.equation = new Equation(c.literals[ci]);
     clause(new Clause(negative, positive, inference));
   }
 
@@ -106,9 +110,9 @@ public final class Superposition {
     assert c.original() == c;
     var inference = new Inference("ef", c);
     inference.literalIndex = ci;
-    inference.equation = new Equation(c0, c1);
-    inference.literalIndex = cj;
-    inference.equation = new Equation(c2, c3);
+    inference.reversed = reversed(c, ci, c0);
+    inference.literalIndex1 = cj;
+    inference.reversed1 = reversed(c, cj, c2);
     clause(new Clause(negative, positive, inference));
   }
 
@@ -184,12 +188,13 @@ public final class Superposition {
     atoms.add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
-    var inference = new Inference(rule, c.original(), d.original());
+    var inference = new Inference(rule, c.original());
+    inference.from1 = d.original();
     inference.literalIndex = ci;
-    inference.equation = new Equation(c0, c1);
+    inference.reversed = reversed(c, ci, c0);
     inference.literalIndex1 = di;
-    inference.equation1 = new Equation(d0, d1);
-    inference.position = Etc.intArray(position);
+    inference.reversed = reversed(d, di, d0);
+    if (position.size() > 0) inference.position = Etc.intArray(position);
     clause(new Clause(negative, positive, inference));
   }
 
