@@ -1,6 +1,10 @@
 package olivine;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 final class Main {
   private static String file;
@@ -55,5 +59,15 @@ final class Main {
       System.err.println("Input not specified");
       System.exit(1);
     }
+    var xs = Files.readAllLines(Path.of(file), StandardCharsets.UTF_8);
+    var i = 0;
+    while (!xs.get(i).contains("SZS output start CNFRefutation")) i++;
+    i++;
+    while (!xs.get(i).contains("SZS output end CNFRefutation")) {
+      var s = xs.get(i++);
+      System.out.println(s);
+      TptpParser.parse(null, new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
+    }
+    for (var f : TptpParser.FORMULAS) new TptpPrinter().println(f);
   }
 }

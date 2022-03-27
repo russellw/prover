@@ -32,6 +32,8 @@ problems = args.problems
 if problems.endswith(".lst"):
     problems = [s.rstrip() for s in open(problems)]
 for filename in problems:
+    if "^" in filename:
+        continue
     pname = os.path.basename(os.path.splitext(filename)[0])
     print(pname, end=" ")
     sys.stdout.flush()
