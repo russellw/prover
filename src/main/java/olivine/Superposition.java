@@ -55,7 +55,11 @@ public final class Superposition {
       positive.add(c.literals[i].replace(map));
 
     // Make new clause
-    clause(new Clause(negative, positive, c));
+    assert c.original() == c;
+    var inference = new Inference("er", c);
+    inference.literalIndex = ci;
+    inference.equation = new Equation(c.literals[ci]);
+    clause(new Clause(negative, positive, inference));
   }
 
   // For each negative equation
@@ -77,7 +81,7 @@ public final class Superposition {
   */
 
   // Substitute and make new clause
-  private void factor(Clause c, Term c0, Term c1, int cj, Term c2, Term c3) {
+  private void factor(Clause c, int ci, Term c0, Term c1, int cj, Term c2, Term c3) {
     // in tests, the unification check failed more often than the equatable
     // check,  so putting it first may save a little time
     var map = Unification.unify(FMap.EMPTY, c0, c2);
@@ -99,7 +103,13 @@ public final class Superposition {
       if (i != cj) positive.add(c.literals[i].replace(map));
 
     // Make new clause
-    clause(new Clause(negative, positive, c));
+    assert c.original() == c;
+    var inference = new Inference("ef", c);
+    inference.literalIndex = ci;
+    inference.equation = new Equation(c0, c1);
+    inference.literalIndex = cj;
+    inference.equation = new Equation(c2, c3);
+    clause(new Clause(negative, positive, inference));
   }
 
   // For each positive equation (both directions) again
@@ -109,8 +119,8 @@ public final class Superposition {
       var e = new Equation(c.literals[cj]);
       var c2 = e.left;
       var c3 = e.right;
-      factor(c, c0, c1, cj, c2, c3);
-      factor(c, c0, c1, cj, c3, c2);
+      factor(c, ci, c0, c1, cj, c2, c3);
+      factor(c, ci, c0, c1, cj, c3, c2);
     }
   }
 
@@ -165,10 +175,22 @@ public final class Superposition {
       if (i != di) positive.add(d.literals[i].replace(map));
 
     // Negative and positive superposition
-    (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
+    var atoms = negative;
+    var rule = "ns";
+    if (di >= d.negativeSize) {
+      atoms = positive;
+      rule = "ps";
+    }
+    atoms.add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
-    clause(new Clause(negative, positive, c.original(), d.original()));
+    var inference = new Inference(rule, c.original(), d.original());
+    inference.literalIndex = ci;
+    inference.equation = new Equation(c0, c1);
+    inference.literalIndex1 = di;
+    inference.equation1 = new Equation(d0, d1);
+    inference.position = Etc.intArray(position);
+    clause(new Clause(negative, positive, inference));
   }
 
   // Descend into subterms

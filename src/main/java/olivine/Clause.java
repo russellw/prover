@@ -5,12 +5,12 @@ import java.util.*;
 public class Clause extends AbstractFormula {
   final Term[] literals;
   final int negativeSize;
-  final AbstractFormula[] from;
+  final Inference inference;
 
   private Clause(Term[] literals, int negativeSize) {
     this.literals = literals;
     this.negativeSize = negativeSize;
-    this.from = null;
+    this.inference = null;
   }
 
   public Clause original() {
@@ -69,8 +69,8 @@ public class Clause extends AbstractFormula {
     return free;
   }
 
-  public Clause(List<Term> negative, List<Term> positive, AbstractFormula... from) {
-    this.from = from;
+  public Clause(List<Term> negative, List<Term> positive, Inference inference) {
+    this.inference = inference;
 
     // Simplify
     for (var i = 0; i < negative.size(); i++) negative.set(i, negative.get(i).simplify());
@@ -128,7 +128,7 @@ public class Clause extends AbstractFormula {
   @Override
   protected void getProof(Set<AbstractFormula> visited, List<AbstractFormula> proof) {
     if (!visited.add(this)) return;
-    for (var formula : from) formula.getProof(visited, proof);
+    for (var formula : inference.from) formula.getProof(visited, proof);
     proof.add(this);
   }
 

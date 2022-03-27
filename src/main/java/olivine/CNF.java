@@ -359,7 +359,7 @@ public final class CNF {
     negative.clear();
     positive.clear();
     literals(a);
-    var c = new Clause(negative, positive, from);
+    var c = new Clause(negative, positive, new Inference("cnf", from));
     if (c.isTrue()) return;
     clauses.add(c);
   }

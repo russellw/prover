@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 
 public final class Etc {
   private Etc() {}
@@ -69,6 +66,12 @@ public final class Etc {
     var q = a.divide(b);
     if (a.signum() < 0 && !q.multiply(b).equals(a)) q = q.subtract(BigInteger.valueOf(b.signum()));
     return q;
+  }
+
+  public static int[] intArray(List<Integer> v) {
+    var w = new int[v.size()];
+    for (var i = 0; i < w.length; i++) w[i] = v.get(i);
+    return w;
   }
 
   public static BigInteger divideFloor(BigInteger a, BigInteger b) {
