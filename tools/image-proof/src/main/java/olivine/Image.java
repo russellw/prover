@@ -11,8 +11,8 @@ import javax.imageio.ImageIO;
 
 public final class Image {
   private final Graphics2D g2d;
-  private final Font smallFont;
-  private final Font bigFont;
+  private final Font font;
+  private final Font boldFont;
   private final int indentWidth;
   private final Map<Term, Integer> vars = new HashMap<>();
   private int width, height;
@@ -36,11 +36,13 @@ public final class Image {
     g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-    smallFont = new Font("Arial", Font.PLAIN, 12);
-    g2d.setFont(smallFont);
-    indentWidth = fontMetrics().charWidth(' ' * 2);
+    var fontName = "Cambria Math";
+    var fontSize = 12;
+    font = new Font(fontName, Font.PLAIN, fontSize);
+    g2d.setFont(font);
+    indentWidth = fontMetrics().charWidth(' ');
 
-    bigFont = new Font("Arial", Font.PLAIN, 16);
+    boldFont = new Font(fontName, Font.BOLD, fontSize);
 
     print(0, 0, clauses.get(0));
 
@@ -56,20 +58,20 @@ public final class Image {
     for (var i = 0; i < c.literals.length; i++) {
       print(width, y, i < c.negativeSize ? "\u2260" : "=", new Equation(c.literals[i]));
       if (i + 1 < c.literals.length) {
-        g2d.setFont(bigFont);
-        print(width, y + fontMetrics().getAscent(), "\u2228");
+        g2d.setFont(boldFont);
+        print(width, y + fontMetrics().getAscent(), " \u2228 ");
       }
     }
   }
 
   private void print(int x, int y, String op, Equation e) {
-    g2d.setFont(smallFont);
+    g2d.setFont(font);
     print(x, y + fontMetrics().getAscent(), e.left);
 
-    g2d.setFont(bigFont);
+    g2d.setFont(boldFont);
     print(width, y + fontMetrics().getAscent(), " " + op + " ");
 
-    g2d.setFont(smallFont);
+    g2d.setFont(font);
     print(width, y + fontMetrics().getAscent(), e.right);
   }
 
@@ -101,8 +103,8 @@ public final class Image {
           default -> throw new IllegalArgumentException(a.toString());
         }
       }
-      case TRUE -> print(x, y, "$true");
-      case FALSE -> print(x, y, "$false");
+      case TRUE -> print(x, y, "\u22a4");
+      case FALSE -> print(x, y, "\u22a5");
       case INTEGER, GLOBAL_VAR, FUNC -> print(x, y, a.toString());
       case RATIONAL -> {
         if (a.type() == Type.REAL) print(x, y, "$to_real(" + a + ')');
