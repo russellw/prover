@@ -37,6 +37,12 @@ public final class Etc {
     return 'a' <= c && c <= 'z';
   }
 
+  public static String addExtension(String file, String extension) {
+    var i = file.lastIndexOf('.');
+    if (i >= 0) file = file.substring(0, i);
+    return file + '.' + extension;
+  }
+
   public static String extension(String file) {
     var i = file.lastIndexOf('.');
     if (i < 0) return "";

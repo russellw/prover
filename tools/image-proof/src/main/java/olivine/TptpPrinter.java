@@ -244,26 +244,7 @@ public final class TptpPrinter {
 
     // literals
     print(c.term().quantify());
-
-    // source
-    var from = c.from;
-    assert from != null;
-
-    String rule;
-    var status = "thm";
-    if (from.length > 1) rule = "s";
-    else if (from[0] instanceof Clause) rule = "o";
-    else {
-      rule = "cnf";
-      status = "esa";
-    }
-
-    System.out.printf(", inference(%s,[status(%s)],[", rule, status);
-    for (var i = 0; i < from.length; i++) {
-      if (i > 0) System.out.print(',');
-      id(from[i]);
-    }
-    System.out.println("])).");
+    System.out.println(").");
   }
 
   public void println(AbstractFormula formula) {

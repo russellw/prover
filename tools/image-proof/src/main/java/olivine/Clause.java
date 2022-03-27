@@ -69,6 +69,14 @@ public class Clause extends AbstractFormula {
     return free;
   }
 
+  public static Clause make(List<Term> negative, List<Term> positive) {
+    var negativeSize = negative.size();
+    var literals = new Term[negativeSize + positive.size()];
+    for (var i = 0; i < negativeSize; i++) literals[i] = negative.get(i);
+    for (var i = 0; i < positive.size(); i++) literals[negativeSize + i] = positive.get(i);
+    return new Clause(literals, negativeSize);
+  }
+
   public Clause(List<Term> negative, List<Term> positive, AbstractFormula... from) {
     this.from = from;
 

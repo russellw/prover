@@ -26,7 +26,7 @@ public final class TptpParser {
   final Map<String, DistinctObject> distinctObjects;
   final Map<String, Global> globals;
 
-  static final List<Formula> FORMULAS = new ArrayList<>();
+  static final List<Clause> clauses = new ArrayList<>();
 
   // File state
   private final String file;
@@ -631,11 +631,6 @@ public final class TptpParser {
     }
   }
 
-  private void collect(String name, boolean negatedConjecture, Term a) {
-    a.check(Type.BOOLEAN);
-    FORMULAS.add(new Formula(name, negatedConjecture, a, file));
-  }
-
   private void skip() throws IOException {
     switch (tok) {
       case '(' -> {
@@ -673,12 +668,21 @@ public final class TptpParser {
             word();
             expect(',');
 
-            // we could treat CNF input specially as clauses, but it is equally correct and simpler
-            // to just treat it as formulas
-            var a = logicFormula(null).quantify();
-            collect(name, false, a);
+            var parens = 0;
+            while (eat('(')) parens++;
+
+            var negative = new ArrayList<Term>();
+            var positive = new ArrayList<Term>();
+            do {
+              var a = unary(null);
+              if (a.tag() == Tag.NOT) negative.add(a.get(0));
+              else positive.add(a);
+            } while (eat('|'));
+
+            while (parens-- > 0) expect(')');
+            clauses.add(Clause.make(negative, positive));
           }
-          case "fof", "tff", "tcf" -> {
+          case "fof", "tff" -> {
             expect(',');
 
             var role = word();
@@ -712,14 +716,8 @@ public final class TptpParser {
             }
 
             // formula
-            var negatedConjecture = false;
             var a = logicFormula(Map.of());
             assert a.freeVars().equals(Set.of());
-            if (role.equals("conjecture")) {
-              negatedConjecture = true;
-              a = Term.of(Tag.NOT, a);
-            }
-            collect(name, negatedConjecture, a);
           }
           case "thf" -> throw new InappropriateException();
           default -> throw err(String.format("'%s': unknown language", s));

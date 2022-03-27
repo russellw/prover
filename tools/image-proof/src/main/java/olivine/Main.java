@@ -68,6 +68,7 @@ final class Main {
       System.out.println(s);
       TptpParser.parse(null, new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
     }
-    for (var f : TptpParser.FORMULAS) new TptpPrinter().println(f);
+    for (var c : TptpParser.clauses) new TptpPrinter().println(c);
+    new Image(file, TptpParser.clauses);
   }
 }
