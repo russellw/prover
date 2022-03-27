@@ -220,7 +220,6 @@ public final class Superposition {
     this.steps = steps;
     order = new LexicographicPathOrder(clauses);
     List<Clause> active = new ArrayList<>();
-    var subsumption = new Subsumption();
     try {
       for (var c : clauses) {
         // add the initial clauses to the passive queue
@@ -248,12 +247,6 @@ public final class Superposition {
         // Rename variables, because subsumption and superposition both assume
         // clauses have disjoint variable names
         var g1 = g.renameVars();
-
-        // Discount loop, which only subsumes against active clauses, performed slightly better in
-        // tests.
-        // The alternative Otter loop would also subsume against passive clauses
-        if (subsumption.subsumesForward(active, g1)) continue;
-        active = subsumption.subsumeBackward(g1, active);
 
         // Infer from one clause
         resolve(g);

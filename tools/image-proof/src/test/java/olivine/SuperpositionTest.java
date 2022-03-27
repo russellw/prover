@@ -268,23 +268,5 @@ public class SuperpositionTest {
 
     szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
     assertEquals(szs, SZS.Unsatisfiable);
-
-    // (p(a) | p(b)) & (!p(x) | !p(y))
-    clauses.clear();
-
-    negative.clear();
-    positive.clear();
-    positive.add(Term.of(Tag.CALL, p1, a));
-    positive.add(Term.of(Tag.CALL, p1, b));
-    clauses.add(new Clause(negative, positive));
-
-    negative.clear();
-    negative.add(Term.of(Tag.CALL, p1, x));
-    negative.add(Term.of(Tag.CALL, p1, y));
-    positive.clear();
-    clauses.add(new Clause(negative, positive));
-
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
   }
 }
