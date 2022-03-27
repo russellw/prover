@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 final class Test {
+  private static final Pattern TPTP_PATTERN =
+      Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]\\d\\d\\d.\\d+(\\.\\d+)?");
   private static final Pattern STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
 
   private static List<String> files = new ArrayList<>();
@@ -20,8 +22,25 @@ final class Test {
   private Test() {}
 
   private static void addFile(String s) {
+    // skip higher order problems
     if (s.contains("^")) return;
+
+    // accept unadorned TPTP problem names
+    var matcher = TPTP_PATTERN.matcher(s);
+    System.out.println(matcher.matches());
+    if (matcher.matches()) {
+      var dir = System.getenv("TPTP");
+      if (dir == null) throw new IllegalStateException("TPTP environment variable not set");
+      dir = String.format("%s/Problems/%s", dir, s.substring(0, 3));
+      s = s.toUpperCase(Locale.ROOT) + ".p";
+      files.add(Path.of(dir, s).toString());
+      return;
+    }
+
+    // skip things that are not TPTP problem files
     if (!s.endsWith(".p")) return;
+
+    // this is a file to be processed
     files.add(s);
   }
 
