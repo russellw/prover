@@ -22,10 +22,11 @@ public final class TptpParser {
   private static final int XOR = -15;
 
   // Problem state
-  final CNF cnf;
   final Map<String, OpaqueType> types;
   final Map<String, DistinctObject> distinctObjects;
   final Map<String, Global> globals;
+
+  static final List<Formula> FORMULAS = new ArrayList<>();
 
   // File state
   private final String file;
@@ -632,7 +633,7 @@ public final class TptpParser {
 
   private void collect(String name, boolean negatedConjecture, Term a) {
     a.check(Type.BOOLEAN);
-    cnf.add(new Formula(name, negatedConjecture, a, file));
+    FORMULAS.add(new Formula(name, negatedConjecture, a, file));
   }
 
   private void skip() throws IOException {
@@ -649,14 +650,12 @@ public final class TptpParser {
   private TptpParser(
       String file,
       InputStream stream,
-      CNF cnf,
       Map<String, OpaqueType> types,
       Map<String, DistinctObject> distinctObjects,
       Map<String, Global> globals)
       throws IOException {
     this.file = file;
     this.stream = stream;
-    this.cnf = cnf;
     this.types = types;
     this.distinctObjects = distinctObjects;
     this.globals = globals;
@@ -719,7 +718,6 @@ public final class TptpParser {
             if (role.equals("conjecture")) {
               negatedConjecture = true;
               a = Term.of(Tag.NOT, a);
-              cnf.conjecture = true;
             }
             collect(name, negatedConjecture, a);
           }
@@ -735,7 +733,7 @@ public final class TptpParser {
     }
   }
 
-  public static void parse(String file, InputStream stream, CNF cnf) throws IOException {
-    new TptpParser(file, stream, cnf, new HashMap<>(), new HashMap<>(), new HashMap<>());
+  public static void parse(String file, InputStream stream) throws IOException {
+    new TptpParser(file, stream, new HashMap<>(), new HashMap<>(), new HashMap<>());
   }
 }

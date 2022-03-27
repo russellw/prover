@@ -23,10 +23,10 @@ public final class TptpParser {
   private static final int XOR = -15;
 
   // Problem state
-  final CNF cnf;
-  final Map<String, OpaqueType> types;
-  final Map<String, DistinctObject> distinctObjects;
-  final Map<String, Global> globals;
+  private final CNF cnf;
+  private final Map<String, OpaqueType> types;
+  private final Map<String, DistinctObject> distinctObjects;
+  private final Map<String, Global> globals;
 
   // File state
   private final String file;
