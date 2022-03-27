@@ -54,7 +54,7 @@ for filename in problems:
             print(m[1], end=" ")
     if hasProof(stdout):
         print("*", end="")
-        f = open(pname + "-proof.p", "w")
-        for x in stdout:
-            f.write(x + "\n")
+        with open(pname + "-proof.p", "w") as f:
+            for x in stdout:
+                f.write(x + "\n")
     print()
