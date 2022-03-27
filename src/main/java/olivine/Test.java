@@ -27,7 +27,6 @@ final class Test {
 
     // accept unadorned TPTP problem names
     var matcher = TPTP_PATTERN.matcher(s);
-    System.out.println(matcher.matches());
     if (matcher.matches()) {
       var dir = System.getenv("TPTP");
       if (dir == null) throw new IllegalStateException("TPTP environment variable not set");
