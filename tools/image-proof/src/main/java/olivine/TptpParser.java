@@ -2,7 +2,6 @@ package olivine;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.util.*;
 
 public final class TptpParser {
@@ -31,7 +30,6 @@ public final class TptpParser {
   // File state
   private final String file;
   private final InputStream stream;
-  private final Set<String> select;
   private int c;
   private int line = 1;
   private int tok;
@@ -632,13 +630,7 @@ public final class TptpParser {
     }
   }
 
-  private boolean selecting(String name) {
-    if (select == null) return true;
-    return select.contains(name);
-  }
-
   private void collect(String name, boolean negatedConjecture, Term a) {
-    if (!selecting(name)) return;
     a.check(Type.BOOLEAN);
     cnf.add(new Formula(name, negatedConjecture, a, file));
   }
@@ -660,8 +652,7 @@ public final class TptpParser {
       CNF cnf,
       Map<String, OpaqueType> types,
       Map<String, DistinctObject> distinctObjects,
-      Map<String, Global> globals,
-      Set<String> select)
+      Map<String, Global> globals)
       throws IOException {
     this.file = file;
     this.stream = stream;
@@ -669,7 +660,6 @@ public final class TptpParser {
     this.types = types;
     this.distinctObjects = distinctObjects;
     this.globals = globals;
-    this.select = select;
     c = stream.read();
     lex();
     try {
@@ -726,38 +716,14 @@ public final class TptpParser {
             var negatedConjecture = false;
             var a = logicFormula(Map.of());
             assert a.freeVars().equals(Set.of());
-            if (selecting(name)) {
-              if (role.equals("conjecture")) {
-                negatedConjecture = true;
-                a = Term.of(Tag.NOT, a);
-                cnf.conjecture = true;
-              }
-              collect(name, negatedConjecture, a);
+            if (role.equals("conjecture")) {
+              negatedConjecture = true;
+              a = Term.of(Tag.NOT, a);
+              cnf.conjecture = true;
             }
+            collect(name, negatedConjecture, a);
           }
           case "thf" -> throw new InappropriateException();
-          case "include" -> {
-            var dir = System.getenv("TPTP");
-            if (dir == null) throw err("TPTP environment variable not set");
-            var file1 = Path.of(dir, name).toString();
-            var select1 = select;
-            if (eat(',')) {
-              if (tok == WORD && tokString.equals("all")) {
-                lex();
-              } else {
-                expect('[');
-                select1 = new HashSet<>();
-                do {
-                  var name1 = formulaName();
-                  if (selecting(name1)) select1.add(name1);
-                } while (eat(','));
-                expect(']');
-              }
-            }
-            try (var stream1 = new BufferedInputStream(new FileInputStream(file1))) {
-              new TptpParser(file1, stream1, cnf, types, distinctObjects, globals, select1);
-            }
-          }
           default -> throw err(String.format("'%s': unknown language", s));
         }
         if (tok == ',') do skip(); while (tok != ')');
@@ -770,6 +736,6 @@ public final class TptpParser {
   }
 
   public static void parse(String file, InputStream stream, CNF cnf) throws IOException {
-    new TptpParser(file, stream, cnf, new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
+    new TptpParser(file, stream, cnf, new HashMap<>(), new HashMap<>(), new HashMap<>());
   }
 }
