@@ -282,14 +282,11 @@ public final class TptpPrinter {
       printLiteralInfo(from, inference.literalIndex, inference.reversed);
       var from1 = inference.from1 == null ? from : inference.from1;
       printLiteralInfo(from1, inference.literalIndex1, inference.reversed1);
-      if (inference.position != null) {
-        System.out.print(",[");
-        for (var i = 0; i < inference.position.length; i++) {
-          if (i > 0) System.out.print(", ");
-          System.out.print(inference.position[i]);
+      if (inference.position != null)
+        for (var i : inference.position) {
+          System.out.print(',');
+          System.out.print(i);
         }
-        System.out.print(']');
-      }
     }
 
     System.out.println(").");
