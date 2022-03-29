@@ -329,6 +329,13 @@ def read_tptp(filename):
             lex()
             expect(",")
             source.literal = literal()
+        if c.rule == "ef":
+            source = c.sources[-1]
+            expect(",")
+            source.i1 = int(tok)
+            lex()
+            expect(",")
+            source.literal1 = literal()
         if c.rule != "cnf":
             source = c.sources[-1]
             while eat(","):
