@@ -2,4 +2,6 @@
 *.lst
 *.p
 .idea/
+.vs/
+obj/
 target/
