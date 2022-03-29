@@ -233,24 +233,12 @@ public final class TptpPrinter {
     System.out.println(").");
   }
 
-  private void printLiteralInfo(Clause c, int i, boolean reversed) {
+  private void printLiteralInfo(int i, boolean reversed) {
     if (i < 0) return;
-    System.out.print(", ");
+    System.out.print(',');
     System.out.print(i);
     System.out.print(',');
-    var e = new Equation(c.literals[i]);
-    var a = e.left;
-    var b = e.right;
-    if (reversed) {
-      a = e.right;
-      b = e.left;
-    }
-    if (i < c.negativeSize) System.out.print('~');
-    print(a);
-    if (b != Term.TRUE) {
-      System.out.print('=');
-      print(b);
-    }
+    System.out.print(reversed ? '1' : '0');
   }
 
   private void println(Clause c) {
@@ -279,9 +267,9 @@ public final class TptpPrinter {
 
     // more  info
     if (inference.from instanceof Clause from) {
-      printLiteralInfo(from, inference.literalIndex, inference.reversed);
+      printLiteralInfo(inference.literalIndex, inference.reversed);
       var from1 = inference.from1 == null ? from : inference.from1;
-      printLiteralInfo(from1, inference.literalIndex1, inference.reversed1);
+      printLiteralInfo(inference.literalIndex1, inference.reversed1);
       if (inference.position != null)
         for (var i : inference.position) {
           System.out.print(',');

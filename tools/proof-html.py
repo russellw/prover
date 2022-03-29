@@ -244,6 +244,11 @@ def read_tptp(filename):
             y = atomic_term()
         return pol, x, y
 
+    def parseInt():
+        s = tok
+        lex()
+        return int(s)
+
     # top level
     def ignore():
         if eat("("):
@@ -328,14 +333,14 @@ def read_tptp(filename):
             source.i = int(tok)
             lex()
             expect(",")
-            source.literal = literal()
+            source.revd = parseInt()
         if c.rule == "ef":
             source = c.sources[-1]
             expect(",")
             source.i1 = int(tok)
             lex()
             expect(",")
-            source.literal1 = literal()
+            source.revd1 = parseInt()
         if c.rule != "cnf":
             source = c.sources[-1]
             while eat(","):
@@ -408,7 +413,14 @@ def prliteral(a):
     pr("<br>\n")
 
 
-def boldliteral(a):
+def rev(a):
+    pol, x, y = a
+    return pol, y, x
+
+
+def boldliteral(a, revd):
+    if revd:
+        a = rev(a)
     pr("<b>")
     pr(a[1])
     pr(" ")
@@ -459,9 +471,9 @@ for name in clauses:
         for i in range(len(c.literals)):
             a = c.literals[i]
             if i == sr.i:
-                boldliteral(sr.literal)
+                boldliteral(a, sr.revd)
             elif hasattr(sr, "i1") and i == sr.i1:
-                boldliteral(sr.literal1)
+                boldliteral(a, sr.revd1)
             else:
                 prliteral(a)
     headerlink(name)

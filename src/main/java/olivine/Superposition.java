@@ -61,7 +61,7 @@ public final class Superposition {
 
     // Make new clause
     assert c.original() == c;
-    var inference = new Inference("er", c);
+    var inference = new Inference(Rule.er, c);
     inference.literalIndex = ci;
     clause(new Clause(negative, positive, inference));
   }
@@ -108,7 +108,7 @@ public final class Superposition {
 
     // Make new clause
     assert c.original() == c;
-    var inference = new Inference("ef", c);
+    var inference = new Inference(Rule.ef, c);
     inference.literalIndex = ci;
     inference.reversed = reversed(c, ci, c0);
     inference.literalIndex1 = cj;
@@ -180,10 +180,10 @@ public final class Superposition {
 
     // Negative and positive superposition
     var atoms = negative;
-    var rule = "ns";
+    var rule = Rule.ns;
     if (di >= d.negativeSize) {
       atoms = positive;
-      rule = "ps";
+      rule = Rule.ps;
     }
     atoms.add(new Equation(d0c1, d1).term().replace(map));
 

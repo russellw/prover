@@ -1,7 +1,7 @@
 package olivine;
 
 public final class Inference {
-  public final String rule;
+  public final Rule rule;
   public final AbstractFormula from;
   public Clause from1;
 
@@ -12,7 +12,7 @@ public final class Inference {
   public boolean reversed1;
   public int[] position;
 
-  public Inference(String rule, AbstractFormula from) {
+  public Inference(Rule rule, AbstractFormula from) {
     this.rule = rule;
     this.from = from;
   }
