@@ -283,11 +283,17 @@ def read_tptp(filename):
                     break
             expect("]")
             expect(":")
+        parens = 0
+        while eat("("):
+            parens += 1
         if not eat("$false"):
             while 1:
                 c.literals.append(literal())
                 if not eat("|"):
                     break
+        while parens:
+            expect(")")
+            parens -= 1
         expect(",")
 
         # source
