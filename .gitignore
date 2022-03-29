@@ -3,5 +3,6 @@
 *.p
 .idea/
 .vs/
+bin/
 obj/
 target/
