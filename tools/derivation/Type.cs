@@ -19,38 +19,61 @@ public abstract class Type
 {
     public abstract Kind Kind { get; }
 
-    private class BoolType : Type
+    public virtual Type this[int i]=>throw new NotImplementedException();
+
+    class BoolType : Type
     {
-        public override Kind Kind { get { return Kind.Bool; } }
+        public override Kind Kind => Kind.Bool;
     }
 
     public static readonly Type Bool = new BoolType();
 
-    private class IndividualType : Type
+    class IndividualType : Type
     {
-        public override Kind Kind { get { return Kind.Individual; } }
+        public override Kind Kind => Kind.Individual;
     }
 
     public static readonly Type Individual = new IndividualType();
 
-    private class IntegerType : Type
+    class IntegerType : Type
     {
-        public override Kind Kind { get { return Kind.Integer; } }
+        public override Kind Kind => Kind.Integer;
     }
 
     public static readonly Type Integer = new IntegerType();
 
-    private class RationalType : Type
+    class RationalType : Type
     {
-        public override Kind Kind { get { return Kind.Rational; } }
+        public override Kind Kind => Kind.Rational;
     }
 
     public static readonly Type Rational = new RationalType();
 
-    private class RealType : Type
+    class RealType : Type
     {
-        public override Kind Kind { get { return Kind.Real; } }
+        public override Kind Kind => Kind.Real;
     }
 
     public static readonly Type Real = new RealType();
+
+    public static Type Of(Kind kind,params Type[] v)
+    {
+        return new Types(kind, v);
+    }
+
+    class Types : Type
+    {
+        readonly Kind kind;
+        readonly Type[] v;
+
+        public override Kind Kind => kind;
+
+        public Types(Kind kind, Type[] v)
+        {
+            this.kind = kind;
+            this.v = v;
+        }
+
+        public override Type this[int i] => v[i];
+    }
 }
