@@ -193,7 +193,7 @@ public final class Superposition {
     inference.literalIndex = ci;
     inference.reversed = reversed(c, ci, c0);
     inference.literalIndex1 = di;
-    inference.reversed = reversed(d, di, d0);
+    inference.reversed1 = reversed(d, di, d0);
     if (position.size() > 0) inference.position = Etc.intArray(position);
     clause(new Clause(negative, positive, inference));
   }

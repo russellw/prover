@@ -390,6 +390,12 @@ def pr(x):
     pr(")")
 
 
+def bold(x):
+    pr("<b>")
+    pr(x)
+    pr("</b>")
+
+
 def prliteral(a):
     pr(a[1])
     pr(" ")
@@ -400,6 +406,19 @@ def prliteral(a):
     pr(" ")
     pr(a[2])
     pr("<br>\n")
+
+
+def boldliteral(a):
+    pr("<b>")
+    pr(a[1])
+    pr(" ")
+    if a[0]:
+        pr("=")
+    else:
+        ucode(0x2260)
+    pr(" ")
+    pr(a[2])
+    pr("</b><br>\n")
 
 
 ######################################## main
@@ -427,7 +446,7 @@ for name in clauses:
             outf.write("&amp; ")
         prname(z.sources[i].name)
         pr(" ")
-    outf.write(z.rule + "-&gt; ")
+    outf.write("-" + z.rule + "-&gt; ")
     prname(z.name)
     outf.write("<br>\n")
 
@@ -437,8 +456,14 @@ for name in clauses:
     for sr in z.sources:
         header(sr.name)
         c = clauses[sr.name]
-        for a in c.literals:
-            prliteral(a)
+        for i in range(len(c.literals)):
+            a = c.literals[i]
+            if i == sr.i:
+                boldliteral(sr.literal)
+            elif hasattr(sr, "i1") and i == sr.i1:
+                boldliteral(sr.literal1)
+            else:
+                prliteral(a)
     headerlink(name)
     for a in z.literals:
         prliteral(a)
