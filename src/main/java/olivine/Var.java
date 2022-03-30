@@ -8,6 +8,16 @@ public final class Var extends Term {
   }
 
   @Override
+  public FMap match(FMap map, Term b) {
+    assert map != null;
+    if (this == b) return map;
+    if (!type.equals(b.type())) return null;
+    var a1 = map.get(this);
+    if (a1 != null) return a1.equals(b) ? map : null;
+    return map.add(this, b);
+  }
+
+  @Override
   public boolean contains(Var b) {
     return this == b;
   }
