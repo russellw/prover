@@ -112,12 +112,44 @@ namespace derivation
         public static readonly Term True = new TrueTerm();
     }
 
-    public sealed class Func : Term
+    public abstract class Global : Term
+    {
+        string name;
+
+        protected Global(string name)
+        {
+            this.name = name;
+        }
+    }
+
+    public sealed class GlobalVar : Global
+    {
+        Type type;
+
+        public GlobalVar(string name) : base(name)
+        {
+        }
+
+        public GlobalVar(string name, Type type) : base(name)
+        {
+            this.type = type;
+        }
+
+        public override Tag Tag => Tag.GLOBAL_VAR;
+
+        public override Type Type => type;
+    }
+
+    public sealed class Func : Global
     {
         public override Tag Tag => Tag.FUNC;
 
         public Type returnType;
         public Type[] parms;
+
+        public Func(string name) : base(name)
+        {
+        }
 
         public override Type Type
         {

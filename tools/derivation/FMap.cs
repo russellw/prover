@@ -8,7 +8,7 @@ namespace derivation
 {
     public sealed class FMap
     {
-        public static readonly FMap Empty = null;// new FMap(null,null,null);
+        public static readonly FMap Empty = new FMap(null, null, null);
         readonly FMap parent;
         readonly Term key;
         readonly Term value;
@@ -27,12 +27,15 @@ namespace derivation
             return new FMap(this, key, value);
         }
 
-        public Term get(Term key)
+        public Term this[Term key]
         {
-            for (var map = this; map != Empty; map = map.parent)
-                if (map.key == key)
-                    return map.value;
-            return null;
+            get
+            {
+                for (var map = this; map != Empty; map = map.parent)
+                    if (map.key == key)
+                        return map.value;
+                return null;
+            }
         }
     }
 }
