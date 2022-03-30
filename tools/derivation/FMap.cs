@@ -8,12 +8,10 @@ namespace derivation
 {
     public sealed class FMap
     {
-        public static readonly FMap Empty = new FMap(null, null, null);
+        public static readonly FMap Empty = new(null, null, null);
         readonly FMap parent;
         readonly Term key;
         readonly Term value;
-
-        FMap() { }
 
         FMap(FMap parent, Term key, Term value)
         {

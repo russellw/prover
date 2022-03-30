@@ -17,7 +17,14 @@ namespace derivation_tests
 
             map = FMap.Empty;
             Assert.AreSame(null, map[x]);
-            //Assert.AreEqual(null, map[x]);
+
+            map = map.Add(x, a);
+            Assert.AreSame(a, map[x]);
+            Assert.AreSame(null, map[y]);
+
+            map = map.Add(y, b);
+            Assert.AreSame(a, map[x]);
+            Assert.AreSame(b, map[y]);
         }
     }
 }
