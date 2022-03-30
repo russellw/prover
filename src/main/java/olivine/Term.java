@@ -6,6 +6,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Term implements Iterable<Term> {
+  public boolean contains(FMap map, Var b) {
+    for (var ai : this) if (ai.contains(map, b)) return true;
+    return false;
+  }
+
   public FMap match(FMap map, Term b) {
     assert map != null;
     if (equals(b)) return map;
