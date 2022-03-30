@@ -22,59 +22,59 @@ public class UnificationTest {
     FMap map;
 
     // Succeeds. (tautology)
-    map = Unification.match(FMap.EMPTY, a, a);
+    map = a.match(FMap.EMPTY, a);
     assertNotNull(map);
     assertEquals(map, FMap.EMPTY);
 
     // a and b do not match
-    map = Unification.match(FMap.EMPTY, a, b);
+    map = a.match(FMap.EMPTY, b);
     assertNull(map);
 
     // Succeeds. (tautology)
-    map = Unification.match(FMap.EMPTY, x, x);
+    map = x.match(FMap.EMPTY, x);
     assertNotNull(map);
     assertEquals(map, FMap.EMPTY);
 
     // a and x do not match
-    map = Unification.match(FMap.EMPTY, a, x);
+    map = a.match(FMap.EMPTY, x);
     assertNull(map);
 
     // x and y are aliased
-    map = Unification.match(FMap.EMPTY, x, y);
+    map = x.match(FMap.EMPTY, y);
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), y);
 
     // Function and constant symbols match, x is unified with the constant b
-    map = Unification.match(FMap.EMPTY, f2.call(a, x), f2.call(a, b));
+    map = f2.call(a, x).match(FMap.EMPTY, f2.call(a, b));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), b);
 
     // f and g do not match
-    map = Unification.match(FMap.EMPTY, f1.call(a), g1.call(a));
+    map = f1.call(a).match(FMap.EMPTY, g1.call(a));
     assertNull(map);
 
     // x and y are aliased
-    map = Unification.match(FMap.EMPTY, f1.call(x), f1.call(y));
+    map = f1.call(x).match(FMap.EMPTY, f1.call(y));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), y);
 
     // f and g do not match
-    map = Unification.match(FMap.EMPTY, f1.call(x), g1.call(y));
+    map = f1.call(x).match(FMap.EMPTY, g1.call(y));
     assertNull(map);
 
     // Fails. The f function symbols have different arity
-    map = Unification.match(FMap.EMPTY, f1.call(x), f2.call(y, z));
+    map = f1.call(x).match(FMap.EMPTY, f2.call(y, z));
     assertNull(map);
 
     // g(x) and y do not match
-    map = Unification.match(FMap.EMPTY, f1.call(g1.call(x)), f1.call(y));
+    map = f1.call(g1.call(x)).match(FMap.EMPTY, f1.call(y));
     assertNull(map);
 
     // g(x) and y do not match
-    map = Unification.match(FMap.EMPTY, f2.call(g1.call(x), x), f2.call(y, a));
+    map = f2.call(g1.call(x), x).match(FMap.EMPTY, f2.call(y, a));
     assertNull(map);
   }
 

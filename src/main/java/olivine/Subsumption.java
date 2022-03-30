@@ -29,9 +29,9 @@ public final class Subsumption {
         var de = new Equation(d[di]);
 
         // Try orienting equation one way
-        var m = Unification.match(map, ce.left, de.left);
+        var m = ce.left.match(map, de.left);
         if (m != null) {
-          m = Unification.match(m, ce.right, de.right);
+          m = ce.right.match(m, de.right);
           if (m != null) {
             if (c1 == null) c1 = Term.remove(c, ci);
             d1 = Term.remove(d, di);
@@ -41,9 +41,9 @@ public final class Subsumption {
         }
 
         // And the other way
-        m = Unification.match(map, ce.left, de.right);
+        m = ce.left.match(map, de.right);
         if (m != null) {
-          m = Unification.match(m, ce.right, de.left);
+          m = ce.right.match(m, de.left);
           if (m != null) {
             if (c1 == null) c1 = Term.remove(c, ci);
             if (d1 == null) d1 = Term.remove(d, di);

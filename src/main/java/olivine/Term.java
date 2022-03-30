@@ -6,6 +6,26 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Term implements Iterable<Term> {
+  public FMap match(FMap map, Term b) {
+    assert map != null;
+    if (equals(b)) return map;
+    if (!type().equals(b.type())) return null;
+    if (this instanceof Var) {
+      var a1 = map.get(this);
+      if (a1 != null) return a1.equals(b) ? map : null;
+      return map.add(this, b);
+    }
+    if (tag() != b.tag()) return null;
+    var n = size();
+    if (n == 0) return null;
+    if (n != b.size()) return null;
+    for (var i = 0; i < n; i++) {
+      map = get(i).match(map, b.get(i));
+      if (map == null) break;
+    }
+    return map;
+  }
+
   public final List<Term> flatten(Tag tag) {
     // optimize for the common special  case
     if (tag() != tag) return Collections.singletonList(this);
