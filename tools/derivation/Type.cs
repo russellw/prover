@@ -23,35 +23,35 @@ namespace derivation
 
         public virtual Type this[int i] => throw new NotImplementedException();
 
-        class BoolType : Type
+        sealed class BoolType : Type
         {
             public override Kind Kind => Kind.Bool;
         }
 
         public static readonly Type Bool = new BoolType();
 
-        class IndividualType : Type
+        sealed class IndividualType : Type
         {
             public override Kind Kind => Kind.Individual;
         }
 
         public static readonly Type Individual = new IndividualType();
 
-        class IntegerType : Type
+        sealed class IntegerType : Type
         {
             public override Kind Kind => Kind.Integer;
         }
 
         public static readonly Type Integer = new IntegerType();
 
-        class RationalType : Type
+        sealed class RationalType : Type
         {
             public override Kind Kind => Kind.Rational;
         }
 
         public static readonly Type Rational = new RationalType();
 
-        class RealType : Type
+        sealed class RealType : Type
         {
             public override Kind Kind => Kind.Real;
         }
@@ -63,7 +63,7 @@ namespace derivation
             return new Types(kind, v);
         }
 
-        class Types : Type
+        sealed class Types : Type
         {
             readonly Kind kind;
             readonly Type[] v;

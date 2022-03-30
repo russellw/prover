@@ -98,14 +98,14 @@ namespace derivation
             }
         }
 
-        private class FalseTerm : Term
+        sealed class FalseTerm : Term
         {
             public override Tag Tag => Tag.FALSE;
         }
 
         public static readonly Term False = new FalseTerm();
 
-        private class TrueTerm : Term
+        sealed class TrueTerm : Term
         {
             public override Tag Tag => Tag.TRUE;
         }
@@ -113,7 +113,7 @@ namespace derivation
         public static readonly Term True = new TrueTerm();
     }
 
-    public class Func : Term
+    public sealed class Func : Term
     {
         public override Tag Tag => Tag.FUNC;
 
@@ -132,7 +132,7 @@ namespace derivation
         }
     }
 
-    public class Var : Term
+    public sealed class Var : Term
     {
         public override Tag Tag => Tag.VAR;
 
