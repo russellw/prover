@@ -55,7 +55,6 @@ namespace derivation
             get => throw new NotImplementedException(ToString());
         }
 
-
         public virtual Type Type
         {
             get
@@ -117,8 +116,8 @@ namespace derivation
     {
         public override Tag Tag => Tag.FUNC;
 
-        public Type? returnType;
-        public Type[]? parms;
+        public Type returnType;
+        public Type[] parms;
 
         public override Type Type
         {
