@@ -92,63 +92,63 @@ public class UnificationTest {
     FMap map;
 
     // Succeeds. (tautology)
-    map = Unification.unify(FMap.EMPTY, a, a);
+    map = a.unify(FMap.EMPTY, a);
     assertNotNull(map);
     assertEquals(map, FMap.EMPTY);
 
     // a and b do not match
-    map = Unification.unify(FMap.EMPTY, a, b);
+    map = a.unify(FMap.EMPTY, b);
     assertNull(map);
 
     // Succeeds. (tautology)
-    map = Unification.unify(FMap.EMPTY, x, x);
+    map = x.unify(FMap.EMPTY, x);
     assertNotNull(map);
     assertEquals(map, FMap.EMPTY);
 
     // x is unified with the constant a
-    map = Unification.unify(FMap.EMPTY, a, x);
+    map = a.unify(FMap.EMPTY, x);
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), a);
 
     // x and y are aliased
-    map = Unification.unify(FMap.EMPTY, x, y);
+    map = x.unify(FMap.EMPTY, y);
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), y.replace(map));
 
     // Function and constant symbols match, x is unified with the constant b
-    map = Unification.unify(FMap.EMPTY, f2.call(a, x), f2.call(a, b));
+    map = f2.call(a, x).unify(FMap.EMPTY, f2.call(a, b));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), b);
 
     // f and g1 do not match
-    map = Unification.unify(FMap.EMPTY, f1.call(a), g1.call(a));
+    map = f1.call(a).unify(FMap.EMPTY, g1.call(a));
     assertNull(map);
 
     // x and y are aliased
-    map = Unification.unify(FMap.EMPTY, f1.call(x), f1.call(y));
+    map = f1.call(x).unify(FMap.EMPTY, f1.call(y));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), y.replace(map));
 
     // f and g1 do not match
-    map = Unification.unify(FMap.EMPTY, f1.call(x), g1.call(y));
+    map = f1.call(x).unify(FMap.EMPTY, g1.call(y));
     assertNull(map);
 
     // Fails. The f function symbols have different arity
-    map = Unification.unify(FMap.EMPTY, f1.call(x), f2.call(y, z));
+    map = f1.call(x).unify(FMap.EMPTY, f2.call(y, z));
     assertNull(map);
 
     // Unifies y with the term g1(x)
-    map = Unification.unify(FMap.EMPTY, f1.call(g1.call(x)), f1.call(y));
+    map = f1.call(g1.call(x)).unify(FMap.EMPTY, f1.call(y));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(y.replace(map), g1.call(x));
 
     // Unifies x with constant a, and y with the term g1(a)
-    map = Unification.unify(FMap.EMPTY, f2.call(g1.call(x), x), f2.call(y, a));
+    map = f2.call(g1.call(x), x).unify(FMap.EMPTY, f2.call(y, a));
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), a);
@@ -156,29 +156,29 @@ public class UnificationTest {
 
     // Returns false in first-order logic and many modern Prolog dialects (enforced by the occurs
     // check).
-    map = Unification.unify(FMap.EMPTY, x, f1.call(x));
+    map = x.unify(FMap.EMPTY, f1.call(x));
     assertNull(map);
 
     // Both x and y are unified with the constant a
-    map = Unification.unify(FMap.EMPTY, x, y);
-    map = Unification.unify(map, y, a);
+    map = x.unify(FMap.EMPTY, y);
+    map = y.unify(map, a);
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), a);
     assertEquals(y.replace(map), a);
 
     // As above (order of equations in set doesn't matter)
-    map = Unification.unify(FMap.EMPTY, a, y);
-    map = Unification.unify(map, x, y);
+    map = a.unify(FMap.EMPTY, y);
+    map = x.unify(map, y);
     assertNotNull(map);
     assertNotEquals(map, FMap.EMPTY);
     assertEquals(x.replace(map), a);
     assertEquals(y.replace(map), a);
 
     // Fails. a and b do not match, so x can't be unified with both
-    map = Unification.unify(FMap.EMPTY, x, a);
+    map = x.unify(FMap.EMPTY, a);
     assertNotNull(map);
-    map = Unification.unify(map, b, x);
+    map = b.unify(map, x);
     assertNull(map);
   }
 }

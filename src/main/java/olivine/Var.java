@@ -8,6 +8,22 @@ public final class Var extends Term {
   }
 
   @Override
+  public FMap unify(FMap map, Term b) {
+    assert map != null;
+    if (this == b) return map;
+    if (!type.equals(b.type())) return null;
+
+    var a1 = map.get(this);
+    if (a1 != null) return a1.unify(map, b);
+
+    var b1 = map.get(b);
+    if (b1 != null) return unify(map, b1);
+
+    if (b.contains(map, this)) return null;
+    return map.add(this, b);
+  }
+
+  @Override
   public boolean contains(FMap map, Var b) {
     if (this == b) return true;
     var a1 = map.get(this);

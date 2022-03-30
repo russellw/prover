@@ -6,6 +6,25 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Term implements Iterable<Term> {
+  public FMap unify(FMap map, Term b) {
+    assert map != null;
+    if (equals(b)) return map;
+    if (!type().equals(b.type())) return null;
+
+    if (b instanceof Var b1) return b1.unify(map, this);
+
+    if (tag() != b.tag()) return null;
+    var n = size();
+    if (n == 0) return null;
+
+    if (n != b.size()) return null;
+    for (var i = 0; i < n; i++) {
+      map = get(i).unify(map, b.get(i));
+      if (map == null) break;
+    }
+    return map;
+  }
+
   public boolean contains(FMap map, Var b) {
     for (var ai : this) if (ai.contains(map, b)) return true;
     return false;
@@ -15,9 +34,11 @@ public abstract class Term implements Iterable<Term> {
     assert map != null;
     if (equals(b)) return map;
     if (!type().equals(b.type())) return null;
+
     if (tag() != b.tag()) return null;
     var n = size();
     if (n == 0) return null;
+
     if (n != b.size()) return null;
     for (var i = 0; i < n; i++) {
       map = get(i).match(map, b.get(i));

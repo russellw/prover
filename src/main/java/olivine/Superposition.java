@@ -70,7 +70,7 @@ public final class Superposition {
   private void resolve(Clause c) {
     for (var ci = 0; ci < c.negativeSize; ci++) {
       var e = new Equation(c.literals[ci]);
-      var map = Unification.unify(FMap.EMPTY, e.left, e.right);
+      var map = e.left.unify(FMap.EMPTY, e.right);
       if (map != null) resolve(c, ci, map);
     }
   }
@@ -88,7 +88,7 @@ public final class Superposition {
   private void factor(Clause c, int ci, Term c0, Term c1, int cj, Term c2, Term c3) {
     // in tests, the unification check failed more often than the equatable
     // check,  so putting it first may save a little time
-    var map = Unification.unify(FMap.EMPTY, c0, c2);
+    var map = c0.unify(FMap.EMPTY, c2);
     if (map == null) return;
 
     // If these two terms are not equatable (for which the types must match, and predicates can only
@@ -161,7 +161,7 @@ public final class Superposition {
       Term d1,
       List<Integer> position,
       Term a) {
-    var map = Unification.unify(FMap.EMPTY, c0, a);
+    var map = c0.unify(FMap.EMPTY, a);
     if (map == null) return;
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;
