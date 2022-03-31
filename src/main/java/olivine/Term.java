@@ -26,7 +26,7 @@ public abstract class Term implements Iterable<Term> {
   }
 
   public boolean contains(FMap map, Var b) {
-    for (var ai : this) if (ai.contains(map, b)) return true;
+    for (var a : this) if (a.contains(map, b)) return true;
     return false;
   }
 

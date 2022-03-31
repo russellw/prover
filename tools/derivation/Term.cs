@@ -50,6 +50,22 @@ namespace derivation
 
     public abstract class Term : IReadOnlyList<Term>
     {
+        public virtual bool contains(Var b)
+        {
+            foreach (var a in this)
+                if (a.contains(b))
+                    return true;
+            return false;
+        }
+
+        public virtual bool contains(FMap map, Var b)
+        {
+            foreach (var a in this)
+                if (a.contains(map, b))
+                    return true;
+            return false;
+        }
+
         public virtual FMap match(FMap map, Term b)
         {
             if (map == null) throw new ArgumentNullException(nameof(map));
@@ -64,6 +80,27 @@ namespace derivation
             for (var i = 0; i < n; i++)
             {
                 map = this[i].match(map, b[i]);
+                if (map == null) break;
+            }
+            return map;
+        }
+
+        public virtual FMap unify(FMap map, Term b)
+        {
+            if (map == null) throw new ArgumentNullException(nameof(map));
+            if (Equals(b)) return map;
+            if (!Type.Equals(b.Type)) return null;
+
+            if (b is Var b1) return b1.unify(map, this);
+
+            if (Tag != b.Tag) return null;
+            var n = Count;
+            if (n == 0) return null;
+
+            if (n != b.Count) return null;
+            for (var i = 0; i < n; i++)
+            {
+                map = this[i].unify(map, b[i]);
                 if (map == null) break;
             }
             return map;
@@ -526,11 +563,27 @@ namespace derivation
         public override FMap match(FMap map, Term b)
         {
             if (map == null) throw new ArgumentNullException(nameof(map));
-            if (Equals(b)) return map;
+            if (this == b) return map;
             if (!Type.Equals(b.Type)) return null;
 
             var a1 = map[this];
             if (a1 != null) return a1.Equals(b) ? map : null;
+            return map.Add(this, b);
+        }
+
+        public override FMap unify(FMap map, Term b)
+        {
+            if (map == null) throw new ArgumentNullException(nameof(map));
+            if (this == b) return map;
+            if (!Type.Equals(b.Type)) return null;
+
+            var a1 = map[this];
+            if (a1 != null) return a1.unify(map, b);
+
+            var b1 = map[b];
+            if (b1 != null) return unify(map, b1);
+
+            if (b.contains(map, this)) return null;
             return map.Add(this, b);
         }
 
@@ -543,6 +596,18 @@ namespace derivation
         public Var(Type type)
         {
             this.type = type;
+        }
+
+        public override bool contains(FMap map, Var b)
+        {
+            if (this == b) return true;
+            var a = map[this];
+            return a != null && a.contains(map, b);
+        }
+
+        public override bool contains(Var b)
+        {
+            return this == b;
         }
     }
 

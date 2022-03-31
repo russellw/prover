@@ -26,9 +26,8 @@ public final class Var extends Term {
   @Override
   public boolean contains(FMap map, Var b) {
     if (this == b) return true;
-    var a1 = map.get(this);
-    if (a1 != null) return a1.contains(map, b);
-    return false;
+    var a = map.get(this);
+    return a != null && a.contains(map, b);
   }
 
   @Override
@@ -37,8 +36,8 @@ public final class Var extends Term {
     if (this == b) return map;
     if (!type.equals(b.type())) return null;
 
-    var a1 = map.get(this);
-    if (a1 != null) return a1.equals(b) ? map : null;
+    var a = map.get(this);
+    if (a != null) return a.equals(b) ? map : null;
     return map.add(this, b);
   }
 

@@ -108,6 +108,111 @@ namespace derivation_tests
             Assert.IsNull(map);
         }
 
+        [TestMethod]
+        public void Unify()
+        {
+            // https://en.wikipedia.org/wiki/Unification_(computer_science)#Examples_of_syntactic_unification_of_first-order_terms
+            var a = new GlobalVar("a", Type.INDIVIDUAL);
+            var b = new GlobalVar("b", Type.INDIVIDUAL);
+            var f1 = new Function("f1", Type.INDIVIDUAL, Type.INDIVIDUAL);
+            var f2 = new Function("f2", Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL);
+            var g1 = new Function("g1", Type.INDIVIDUAL, Type.INDIVIDUAL);
+            var x = new Var(Type.INDIVIDUAL);
+            var y = new Var(Type.INDIVIDUAL);
+            var z = new Var(Type.INDIVIDUAL);
+            FMap map;
+
+            // Succeeds. (tautology)
+            map = a.unify(FMap.EMPTY, a);
+            Assert.IsNotNull(map);
+            Assert.AreEqual(map, FMap.EMPTY);
+
+            // a and b do not match
+            map = a.unify(FMap.EMPTY, b);
+            Assert.IsNull(map);
+
+            // Succeeds. (tautology)
+            map = x.unify(FMap.EMPTY, x);
+            Assert.IsNotNull(map);
+            Assert.AreEqual(map, FMap.EMPTY);
+
+            // x is unified with the constant a
+            map = a.unify(FMap.EMPTY, x);
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), a);
+
+            // x and y are aliased
+            map = x.unify(FMap.EMPTY, y);
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), y.replace(map));
+
+            // Function and constant symbols match, x is unified with the constant b
+            map = f2.call(a, x).unify(FMap.EMPTY, f2.call(a, b));
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), b);
+
+            // f and g1 do not match
+            map = f1.call(a).unify(FMap.EMPTY, g1.call(a));
+            Assert.IsNull(map);
+
+            // x and y are aliased
+            map = f1.call(x).unify(FMap.EMPTY, f1.call(y));
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), y.replace(map));
+
+            // f and g1 do not match
+            map = f1.call(x).unify(FMap.EMPTY, g1.call(y));
+            Assert.IsNull(map);
+
+            // Fails. The f function symbols have different arity
+            map = f1.call(x).unify(FMap.EMPTY, f2.call(y, z));
+            Assert.IsNull(map);
+
+            // Unifies y with the term g1(x)
+            map = f1.call(g1.call(x)).unify(FMap.EMPTY, f1.call(y));
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(y.replace(map), g1.call(x));
+
+            // Unifies x with constant a, and y with the term g1(a)
+            map = f2.call(g1.call(x), x).unify(FMap.EMPTY, f2.call(y, a));
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), a);
+            Assert.AreEqual(y.replace(map), g1.call(a));
+
+            // Returns false in first-order logic and many modern Prolog dialects (enforced by the occurs
+            // check).
+            map = x.unify(FMap.EMPTY, f1.call(x));
+            Assert.IsNull(map);
+
+            // Both x and y are unified with the constant a
+            map = x.unify(FMap.EMPTY, y);
+            map = y.unify(map, a);
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), a);
+            Assert.AreEqual(y.replace(map), a);
+
+            // As above (order of equations in set doesn't matter)
+            map = a.unify(FMap.EMPTY, y);
+            map = x.unify(map, y);
+            Assert.IsNotNull(map);
+            Assert.AreNotEqual(map, FMap.EMPTY);
+            Assert.AreEqual(x.replace(map), a);
+            Assert.AreEqual(y.replace(map), a);
+
+            // Fails. a and b do not match, so x can't be unified with both
+            map = x.unify(FMap.EMPTY, a);
+            Assert.IsNotNull(map);
+            map = b.unify(map, x);
+            Assert.IsNull(map);
+        }
+
         static void CheckSize(Term a, int n)
         {
             Assert.AreEqual(n, a.Count);
