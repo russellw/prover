@@ -92,9 +92,18 @@ namespace derivation
                         return this[0].Type;
                     case Tag.CALL:
                         return ((Func)this[0]).returnType!;
-                    default:
-                        throw new ArgumentException(ToString());
+                    case Tag.FALSE:
+                    case Tag.TRUE:
+                    case Tag.DISTINCT_OBJECT:
+                    case Tag.VAR:
+                    case Tag.GLOBAL_VAR:
+                    case Tag.CAST:
+                    case Tag.INTEGER:
+                    case Tag.RATIONAL:
+                    case Tag.FUNC:
+                        break;
                 }
+                throw new ArgumentException(ToString());
             }
         }
 
@@ -137,6 +146,18 @@ namespace derivation
                     throw new ArgumentOutOfRangeException(i.ToString());
                 }
             }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Term1 o)
+                    return tag.Equals(o.tag) && a.Equals(o.a);
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(tag.GetHashCode(), a.GetHashCode());
+            }
         }
 
         sealed class Term2 : Term
@@ -157,14 +178,25 @@ namespace derivation
             {
                 get
                 {
-                    switch (i)
+                    return i switch
                     {
-                        case 0: return a;
-                        case 1: return b;
-                        default:
-                            throw new ArgumentOutOfRangeException(i.ToString());
-                    }
+                        0 => a,
+                        1 => b,
+                        _ => throw new ArgumentOutOfRangeException(i.ToString()),
+                    };
                 }
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Term2 o)
+                    return tag.Equals(o.tag) && a.Equals(o.a) && b.Equals(o.b);
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(tag.GetHashCode(), a.GetHashCode(), b.GetHashCode());
             }
         }
 
@@ -187,15 +219,26 @@ namespace derivation
             {
                 get
                 {
-                    switch (i)
+                    return i switch
                     {
-                        case 0: return a;
-                        case 1: return b;
-                        case 2: return c;
-                        default:
-                            throw new ArgumentOutOfRangeException(i.ToString());
-                    }
+                        0 => a,
+                        1 => b,
+                        2 => c,
+                        _ => throw new ArgumentOutOfRangeException(i.ToString()),
+                    };
                 }
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Term3 o)
+                    return tag.Equals(o.tag) && a.Equals(o.a) && b.Equals(o.b) && c.Equals(o.c);
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(tag.GetHashCode(), a.GetHashCode(), b.GetHashCode(), c.GetHashCode());
             }
         }
 
@@ -213,6 +256,18 @@ namespace derivation
             public override Tag Tag => tag;
 
             public override Term this[int i] => v[i];
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Terms o)
+                    return tag.Equals(o.tag) && v.SequenceEqual(o.v);
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(tag.GetHashCode(), v.GetHashCode());
+            }
         }
     }
 
@@ -231,19 +286,14 @@ namespace derivation
 
         public override bool Equals(object obj)
         {
-            if (obj is not IntegerTerm)
-                return false;
-            return Equals((IntegerTerm)obj);
+            if (obj is IntegerTerm o)
+                return value.Equals(o.value);
+            return false;
         }
 
         public override int GetHashCode()
         {
             return value.GetHashCode();
-        }
-
-        public bool Equals(IntegerTerm other)
-        {
-            return value.Equals(other.value);
         }
 
         public override string ToString()
@@ -269,19 +319,14 @@ namespace derivation
 
         public override bool Equals(object obj)
         {
-            if (obj is not RationalTerm)
-                return false;
-            return Equals((RationalTerm)obj);
+            if (obj is RationalTerm o)
+                return value.Equals(o.value);
+            return false;
         }
 
         public override int GetHashCode()
         {
             return value.GetHashCode();
-        }
-
-        public bool Equals(RationalTerm other)
-        {
-            return value.Equals(other.value);
         }
 
         public override string ToString()
@@ -323,19 +368,25 @@ namespace derivation
         public override Tag Tag => Tag.FUNC;
 
         public Type returnType;
-        public Type[] parms;
+        public Type[] prms;
 
         public Func(string name) : base(name)
         {
+        }
+
+        public Func(string name, Type returnType, params Type[] prms) : base(name)
+        {
+            this.returnType = returnType;
+            this.prms = prms;
         }
 
         public override Type Type
         {
             get
             {
-                var v = new Type[1 + parms!.Length];
-                v[0] = returnType!;
-                Array.Copy(parms!, 0, v, 1, parms!.Length);
+                var v = new Type[1 + prms.Length];
+                v[0] = returnType;
+                Array.Copy(prms, 0, v, 1, prms.Length);
                 return Type.Of(Kind.Func, v);
             }
         }

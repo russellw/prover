@@ -77,6 +77,18 @@ namespace derivation
             }
 
             public override Type this[int i] => v[i];
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Types o)
+                    return kind.Equals(o.kind) && v.SequenceEqual(o.v);
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return v.GetHashCode();
+            }
         }
     }
 }

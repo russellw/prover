@@ -35,9 +35,9 @@ namespace derivation
             this.den = den / g;
         }
 
-        public static BigRational operator+(BigRational a, BigRational b)
+        public static BigRational operator +(BigRational a, BigRational b)
         {
-            return new BigRational(a.num * b.den + b.num * a.den,a. den * b.den);
+            return new BigRational(a.num * b.den + b.num * a.den, a.den * b.den);
         }
 
         public BigInteger Ceiling()
@@ -45,7 +45,7 @@ namespace derivation
             return Etc.divideFloor(num + den - 1, den);
         }
 
-        public static BigRational operator/(BigRational a, BigRational b)
+        public static BigRational operator /(BigRational a, BigRational b)
         {
             return new BigRational(a.num * b.den, a.den * b.num);
         }
@@ -55,12 +55,12 @@ namespace derivation
             return Etc.divideFloor(num, den);
         }
 
-        public static BigRational operator*(BigRational a, BigRational b)
+        public static BigRational operator *(BigRational a, BigRational b)
         {
-            return new BigRational(a.num * b.num,a. den * b.den);
+            return new BigRational(a.num * b.num, a.den * b.den);
         }
 
-        public static BigRational operator-(BigRational a)
+        public static BigRational operator -(BigRational a)
         {
             return new BigRational(-a.num, a.den);
         }
@@ -151,9 +151,9 @@ namespace derivation
             return n;
         }
 
-        public static BigRational operator-(BigRational a, BigRational b)
+        public static BigRational operator -(BigRational a, BigRational b)
         {
-            return new BigRational(a.num * b.den - b.num *a. den,a. den * b.den);
+            return new BigRational(a.num * b.den - b.num * a.den, a.den * b.den);
         }
 
         public override string ToString()
@@ -168,9 +168,9 @@ namespace derivation
 
         public override bool Equals(object obj)
         {
-            if (obj is not BigRational)
-                return false;
-            return Equals((BigRational)obj);
+            if (obj is BigRational o)
+                return Equals(o);
+            return false;
         }
 
         public override int GetHashCode()
@@ -178,9 +178,9 @@ namespace derivation
             return HashCode.Combine(num.GetHashCode(), den.GetHashCode());
         }
 
-        public bool Equals(BigRational other)
+        public bool Equals(BigRational o)
         {
-            return num.Equals(other.num) && den.Equals(other.den);
+            return num.Equals(o.num) && den.Equals(o.den);
         }
 
         public int CompareTo(object obj)
@@ -197,7 +197,7 @@ namespace derivation
             return (num * other.den).CompareTo(other.num * den);
         }
 
-        public static bool operator ==(BigRational a,BigRational b)
+        public static bool operator ==(BigRational a, BigRational b)
         {
             return a.Equals(b);
         }
@@ -209,7 +209,7 @@ namespace derivation
 
         public static bool operator <(BigRational a, BigRational b)
         {
-            return a.CompareTo(b)<0;
+            return a.CompareTo(b) < 0;
         }
 
         public static bool operator <=(BigRational a, BigRational b)
