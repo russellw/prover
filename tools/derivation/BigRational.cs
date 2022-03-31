@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace derivation
@@ -62,6 +63,63 @@ namespace derivation
         public static BigRational operator-(BigRational a)
         {
             return new BigRational(-a.num, a.den);
+        }
+
+        public static BigRational ParseDecimal(String s)
+        {
+            Match m;
+
+            // Integer
+            m = Regex.Match(s, @"^([+-]?\d+)$");
+            if (m.Success)
+            {
+                var num = BigInteger.Parse(m.Groups[1].Value);
+                return new BigRational(num);
+            }
+
+            // Decimal
+            m = Regex.Match(s, @"^([+-]?\d+)\.(\d+)$");
+            if (m.Success)
+            {
+                var den = BigInteger.Pow(10, m.Groups[2].Value.Length);
+                var whole = BigInteger.Parse(m.Groups[1].Value) * den;
+                var fraction = BigInteger.Parse(m.Groups[2].Value);
+                var num = whole >= 0 ? whole + fraction : whole - fraction;
+                return new BigRational(num, den);
+            }
+
+            // Exponent
+            m = Regex.Match(s, @"^([+-]?\d+)[eE]([+-]?\d+)$");
+            if (m.Success)
+            {
+                var num = BigInteger.Parse(m.Groups[1].Value);
+                var den = BigInteger.One;
+                var exponent = int.Parse(m.Groups[2].Value);
+                if (exponent > 0)
+                    num *= BigInteger.Pow(10, exponent);
+                else
+                    den *= BigInteger.Pow(10, -exponent);
+                return new BigRational(num, den);
+            }
+
+            // Decimal exponent
+            m = Regex.Match(s, @"^([+-]?\d+)\.(\d+)[eE]([+-]?\d+)$");
+            if (m.Success)
+            {
+                var den = BigInteger.Pow(10, m.Groups[2].Value.Length);
+                var whole = BigInteger.Parse(m.Groups[1].Value) * den;
+                var fraction = BigInteger.Parse(m.Groups[2].Value);
+                var num = whole.Sign >= 0 ? whole + fraction : whole - fraction;
+                var exponent = int.Parse(m.Groups[3].Value);
+                if (exponent > 0)
+                    num *= BigInteger.Pow(10, exponent);
+                else
+                    den *= BigInteger.Pow(10, -exponent);
+                return new BigRational(num, den);
+            }
+
+            // None of the above
+            throw new FormatException(s);
         }
 
         public static BigRational Parse(String s)
