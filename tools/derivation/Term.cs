@@ -101,6 +101,8 @@ namespace derivation
         sealed class FalseTerm : Term
         {
             public override Tag Tag => Tag.FALSE;
+
+            public override Type Type => Type.Bool;
         }
 
         public static readonly Term False = new FalseTerm();
@@ -108,9 +110,110 @@ namespace derivation
         sealed class TrueTerm : Term
         {
             public override Tag Tag => Tag.TRUE;
+
+            public override Type Type => Type.Bool;
         }
 
         public static readonly Term True = new TrueTerm();
+
+        sealed class Term1 : Term
+        {
+            readonly Tag tag;
+            readonly Term a;
+
+            public Term1(Tag tag, Term a)
+            {
+                this.tag = tag;
+                this.a = a;
+            }
+
+            public override Tag Tag => tag;
+
+            public override Term this[int i]
+            {
+                get
+                {
+                    if (i == 0) return a;
+                    throw new ArgumentOutOfRangeException(i.ToString());
+                }
+            }
+        }
+
+        sealed class Term2 : Term
+        {
+            readonly Tag tag;
+            readonly Term a, b;
+
+            public Term2(Tag tag, Term a, Term b)
+            {
+                this.tag = tag;
+                this.a = a;
+                this.b = b;
+            }
+
+            public override Tag Tag => tag;
+
+            public override Term this[int i]
+            {
+                get
+                {
+                    switch (i)
+                    {
+                        case 0: return a;
+                        case 1: return b;
+                        default:
+                            throw new ArgumentOutOfRangeException(i.ToString());
+                    }
+                }
+            }
+        }
+
+        sealed class Term3 : Term
+        {
+            readonly Tag tag;
+            readonly Term a, b, c;
+
+            public Term3(Tag tag, Term a, Term b, Term c)
+            {
+                this.tag = tag;
+                this.a = a;
+                this.b = b;
+                this.c = c;
+            }
+
+            public override Tag Tag => tag;
+
+            public override Term this[int i]
+            {
+                get
+                {
+                    switch (i)
+                    {
+                        case 0: return a;
+                        case 1: return b;
+                        case 2: return c;
+                        default:
+                            throw new ArgumentOutOfRangeException(i.ToString());
+                    }
+                }
+            }
+        }
+
+        sealed class Terms : Term
+        {
+            readonly Tag tag;
+            readonly Term[] v;
+
+            public Terms(Tag tag, Term[] v)
+            {
+                this.tag = tag;
+                this.v = v;
+            }
+
+            public override Tag Tag => tag;
+
+            public override Term this[int i] => v[i];
+        }
     }
 
     public sealed class IntegerTerm : Term
