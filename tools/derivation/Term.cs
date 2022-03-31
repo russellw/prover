@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -47,7 +48,7 @@ namespace derivation
         LESS_EQUALS,
     }
 
-    public abstract class Term
+    public abstract class Term : IReadOnlyList<Term>
     {
         public abstract Tag Tag { get; }
 
@@ -107,6 +108,8 @@ namespace derivation
             }
         }
 
+        public virtual int Count => 0;
+
         sealed class FalseTerm : Term
         {
             public override Tag Tag => Tag.FALSE;
@@ -138,6 +141,8 @@ namespace derivation
 
             public override Tag Tag => tag;
 
+            public override int Count => 1;
+
             public override Term this[int i]
             {
                 get
@@ -145,6 +150,11 @@ namespace derivation
                     if (i == 0) return a;
                     throw new ArgumentOutOfRangeException(i.ToString());
                 }
+            }
+
+            public override IEnumerator<Term> GetEnumerator()
+            {
+                yield return a;
             }
 
             public override bool Equals(object obj)
@@ -174,6 +184,8 @@ namespace derivation
 
             public override Tag Tag => tag;
 
+            public override int Count => 2;
+
             public override Term this[int i]
             {
                 get
@@ -185,6 +197,12 @@ namespace derivation
                         _ => throw new ArgumentOutOfRangeException(i.ToString()),
                     };
                 }
+            }
+
+            public override IEnumerator<Term> GetEnumerator()
+            {
+                yield return a;
+                yield return b;
             }
 
             public override bool Equals(object obj)
@@ -215,6 +233,8 @@ namespace derivation
 
             public override Tag Tag => tag;
 
+            public override int Count => 3;
+
             public override Term this[int i]
             {
                 get
@@ -227,6 +247,13 @@ namespace derivation
                         _ => throw new ArgumentOutOfRangeException(i.ToString()),
                     };
                 }
+            }
+
+            public override IEnumerator<Term> GetEnumerator()
+            {
+                yield return a;
+                yield return b;
+                yield return c;
             }
 
             public override bool Equals(object obj)
@@ -255,7 +282,14 @@ namespace derivation
 
             public override Tag Tag => tag;
 
+            public override int Count => v.Length;
+
             public override Term this[int i] => v[i];
+
+            public override IEnumerator<Term> GetEnumerator()
+            {
+                return ((IEnumerable<Term>)v).GetEnumerator();
+            }
 
             public override bool Equals(object obj)
             {
@@ -295,6 +329,16 @@ namespace derivation
                 3 => new Term3(tag, v[0], v[1], v[2]),
                 _ => new Terms(tag, v),
             };
+        }
+
+        public virtual IEnumerator<Term> GetEnumerator()
+        {
+            yield break;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,9 +18,11 @@ namespace derivation
         Opaque,
     }
 
-    public abstract class Type
+    public abstract class Type : IReadOnlyList<Type>
     {
         public abstract Kind Kind { get; }
+
+        public virtual int Count => 0;
 
         public virtual Type this[int i] => throw new NotImplementedException();
 
@@ -63,12 +66,29 @@ namespace derivation
             return new Types(kind, v);
         }
 
+        public virtual IEnumerator<Type> GetEnumerator()
+        {
+            yield break;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class Types : Type
         {
             readonly Kind kind;
             readonly Type[] v;
 
             public override Kind Kind => kind;
+
+            public override int Count => v.Length;
+
+            public override IEnumerator<Type> GetEnumerator()
+            {
+                return ((IEnumerable<Type>)v).GetEnumerator();
+            }
 
             public Types(Kind kind, Type[] v)
             {

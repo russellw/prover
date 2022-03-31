@@ -25,6 +25,23 @@ namespace derivation_tests
 
             Assert.AreEqual(Term.Of(Tag.EQUALS, x, x), Term.Of(Tag.EQUALS, x, x));
             Assert.AreEqual(Term.Of(Tag.NEGATE, new IntegerTerm(5)), Term.Of(Tag.NEGATE, new IntegerTerm(5)));
+
+            CheckSize(x, 0);
+            CheckSize(Term.Of(Tag.NEGATE, new IntegerTerm(5)), 1);
+            CheckSize(Term.Of(Tag.EQUALS, x, x), 2);
+            CheckSize(Term.Of(Tag.AND, Term.False, Term.False, Term.False), 3);
+            CheckSize(Term.Of(Tag.AND, new Term[] { Term.False, Term.False, Term.False }), 3);
+            CheckSize(Term.Of(Tag.AND, new Term[] { Term.False, Term.False, Term.False, Term.False }), 4);
+        }
+
+        static void CheckSize(Term a, int n)
+        {
+            Assert.AreEqual(n, a.Count);
+
+            var m = 0;
+            foreach (var b in a)
+                m++;
+            Assert.AreEqual(n, m);
         }
     }
 }
