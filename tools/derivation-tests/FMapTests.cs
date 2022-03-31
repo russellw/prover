@@ -7,7 +7,7 @@ namespace derivation_tests
     public class FMapTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void FMapTest()
         {
             var a = new GlobalVar("a",Type.Individual);
             var b = new GlobalVar("b",Type.Individual);

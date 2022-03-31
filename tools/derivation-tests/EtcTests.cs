@@ -10,7 +10,7 @@ namespace derivation_tests
     public class EtcTests
     {
         [TestMethod]
-        public void divideEuclidean()
+        public void DivideEuclidean()
         {
             Assert.AreEqual(
                 Etc.divideEuclidean(new BigInteger(0), new BigInteger(1)), new BigInteger(0));
@@ -52,7 +52,7 @@ namespace derivation_tests
         }
 
         [TestMethod]
-        public void remainderEuclidean()
+        public void RemainderEuclidean()
         {
             Assert.AreEqual(
                 Etc.remainderEuclidean(new BigInteger(1), new BigInteger(1)),
@@ -76,7 +76,7 @@ namespace derivation_tests
         }
 
         [TestMethod]
-        public void divideFloor()
+        public void DivideFloor()
         {
             Assert.AreEqual(
                 Etc.divideFloor(new BigInteger(0), new BigInteger(1)), new BigInteger(0));
@@ -115,7 +115,7 @@ namespace derivation_tests
         }
 
         [TestMethod]
-        public void remainderFloor()
+        public void RemainderFloor()
         {
             Assert.AreEqual(
                 Etc.remainderFloor(new BigInteger(1), new BigInteger(1)), new BigInteger(0));

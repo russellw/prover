@@ -7,7 +7,7 @@ namespace derivation_tests
     public class TypeTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TypeTest()
         {
             Assert.AreEqual(Type.Bool.Kind, Kind.Bool);
         }
