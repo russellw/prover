@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -89,7 +90,7 @@ namespace derivation
                     case Tag.REMAINDER_FLOOR:
                     case Tag.REMAINDER_TRUNCATE:
                         return this[0].Type;
-                    case Tag.FUNC:
+                    case Tag.CALL:
                         return ((Func)this[0]).returnType!;
                     default:
                         throw new ArgumentException(ToString());
@@ -110,6 +111,80 @@ namespace derivation
         }
 
         public static readonly Term True = new TrueTerm();
+    }
+
+    public sealed class IntegerTerm : Term
+    {
+        public override Tag Tag => Tag.INTEGER;
+
+        public override Type Type => Type.Integer;
+
+        readonly BigInteger value;
+
+        public IntegerTerm(BigInteger value)
+        {
+            this.value = value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not IntegerTerm)
+                return false;
+            return Equals((IntegerTerm)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+
+        public bool Equals(IntegerTerm other)
+        {
+            return value.Equals(other.value);
+        }
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
+    }
+
+    public sealed class RationalTerm : Term
+    {
+        public override Tag Tag => Tag.RATIONAL;
+
+        public override Type Type => type;
+
+        readonly Type type;
+        readonly BigRational value;
+
+        public RationalTerm(Type type, BigRational value)
+        {
+            this.type = type;
+            this.value = value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not RationalTerm)
+                return false;
+            return Equals((RationalTerm)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+
+        public bool Equals(RationalTerm other)
+        {
+            return value.Equals(other.value);
+        }
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 
     public abstract class Global : Term
@@ -174,6 +249,25 @@ namespace derivation
         public Var(Type type)
         {
             this.type = type;
+        }
+    }
+
+    public sealed class DistinctObject : Term
+    {
+        public override Tag Tag => Tag.DISTINCT_OBJECT;
+
+        public override Type Type => Type.Individual;
+
+        readonly string name;
+
+        public DistinctObject(string name)
+        {
+            this.name = name;
+        }
+
+        public override string ToString()
+        {
+            return '"' + name + '"';
         }
     }
 }
