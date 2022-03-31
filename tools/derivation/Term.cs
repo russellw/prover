@@ -269,6 +269,33 @@ namespace derivation
                 return HashCode.Combine(tag.GetHashCode(), v.GetHashCode());
             }
         }
+
+        public static Term Of(Tag tag, Term a)
+        {
+            return new Term1(tag, a);
+        }
+
+        public static Term Of(Tag tag, Term a, Term b)
+        {
+            return new Term2(tag, a, b);
+        }
+
+        public static Term Of(Tag tag, Term a, Term b, Term c)
+        {
+            return new Term3(tag, a, b, c);
+        }
+
+        public static Term Of(Tag tag, Term[] v)
+        {
+            return v.Length switch
+            {
+                0 => throw new ArgumentException(tag.ToString()),
+                1 => new Term1(tag, v[0]),
+                2 => new Term2(tag, v[0], v[1]),
+                3 => new Term3(tag, v[0], v[1], v[2]),
+                _ => new Terms(tag, v),
+            };
+        }
     }
 
     public sealed class IntegerTerm : Term
