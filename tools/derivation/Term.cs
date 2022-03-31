@@ -50,6 +50,25 @@ namespace derivation
 
     public abstract class Term : IReadOnlyList<Term>
     {
+        public virtual FMap match(FMap map, Term b)
+        {
+            if (map == null) throw new ArgumentNullException(nameof(map));
+            if (Equals(b)) return map;
+            if (!Type.Equals(b.Type)) return null;
+
+            if (Tag != b.Tag) return null;
+            var n = Count;
+            if (n == 0) return null;
+
+            if (n != b.Count) return null;
+            for (var i = 0; i < n; i++)
+            {
+                map = this[i].match(map, b[i]);
+                if (map == null) break;
+            }
+            return map;
+        }
+
         public abstract Tag Tag { get; }
 
         public virtual Term this[int i]
@@ -92,7 +111,7 @@ namespace derivation
                     case Tag.REMAINDER_TRUNCATE:
                         return this[0].Type;
                     case Tag.CALL:
-                        return ((Func)this[0]).returnType!;
+                        return ((Function)this[0]).returnType!;
                     case Tag.FALSE:
                     case Tag.TRUE:
                     case Tag.DISTINCT_OBJECT:
@@ -331,6 +350,40 @@ namespace derivation
             };
         }
 
+        public static Term Of(Tag tag, Term a, Term[] v)
+        {
+            var w = new Term[1 + v.Length];
+            w[0] = a;
+            Array.Copy(v, 0, w, 1, v.Length);
+            return Of(tag, w);
+        }
+
+        public virtual Term remake(Term[] v)
+        {
+            return Of(Tag, v);
+        }
+
+        public Term mapLeaves(Func<Term, Term> f)
+        {
+            var n = Count;
+            if (n == 0) return f(this);
+            var v = new Term[n];
+            for (var i = 0; i < n; i++)
+                v[i] = this[i].mapLeaves(f);
+            return remake(v);
+        }
+
+        public Term replace(FMap map)
+        {
+            return mapLeaves((a) =>
+            {
+                var b = map[a];
+                if (a.Equals(b)) throw new ArgumentException(nameof(map));
+                if (b == null) return a;
+                return b.replace(map);
+            });
+        }
+
         public virtual IEnumerator<Term> GetEnumerator()
         {
             yield break;
@@ -434,18 +487,18 @@ namespace derivation
         public override Type Type => type;
     }
 
-    public sealed class Func : Global
+    public sealed class Function : Global
     {
         public override Tag Tag => Tag.FUNC;
 
         public Type returnType;
         public Type[] prms;
 
-        public Func(string name) : base(name)
+        public Function(string name) : base(name)
         {
         }
 
-        public Func(string name, Type returnType, params Type[] prms) : base(name)
+        public Function(string name, Type returnType, params Type[] prms) : base(name)
         {
             this.returnType = returnType;
             this.prms = prms;
@@ -461,10 +514,26 @@ namespace derivation
                 return Type.Of(Kind.Func, v);
             }
         }
+
+        public Term call(params Term[] args)
+        {
+            return Of(Tag.CALL, this, args);
+        }
     }
 
     public sealed class Var : Term
     {
+        public override FMap match(FMap map, Term b)
+        {
+            if (map == null) throw new ArgumentNullException(nameof(map));
+            if (Equals(b)) return map;
+            if (!Type.Equals(b.Type)) return null;
+
+            var a1 = map[this];
+            if (a1 != null) return a1.Equals(b) ? map : null;
+            return map.Add(this, b);
+        }
+
         public override Tag Tag => Tag.VAR;
 
         readonly Type type;
@@ -481,7 +550,7 @@ namespace derivation
     {
         public override Tag Tag => Tag.DISTINCT_OBJECT;
 
-        public override Type Type => Type.Individual;
+        public override Type Type => Type.INDIVIDUAL;
 
         readonly string name;
 

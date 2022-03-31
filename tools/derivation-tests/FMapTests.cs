@@ -9,13 +9,13 @@ namespace derivation_tests
         [TestMethod]
         public void FMapTest()
         {
-            var a = new GlobalVar("a",Type.Individual);
-            var b = new GlobalVar("b",Type.Individual);
-            var x=new Var(Type.Individual);
-            var y=new Var(Type.Individual);
+            var a = new GlobalVar("a",Type.INDIVIDUAL);
+            var b = new GlobalVar("b",Type.INDIVIDUAL);
+            var x=new Var(Type.INDIVIDUAL);
+            var y=new Var(Type.INDIVIDUAL);
             FMap map;
 
-            map = FMap.Empty;
+            map = FMap.EMPTY;
             Assert.AreSame(null, map[x]);
 
             map = map.Add(x, a);

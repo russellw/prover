@@ -38,7 +38,7 @@ namespace derivation
             public override Kind Kind => Kind.Individual;
         }
 
-        public static readonly Type Individual = new IndividualType();
+        public static readonly Type INDIVIDUAL = new IndividualType();
 
         sealed class IntegerType : Type
         {

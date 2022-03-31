@@ -36,6 +36,7 @@ public final class Var extends Term {
     assert map != null;
     if (this == b) return map;
     if (!type.equals(b.type())) return null;
+
     var a1 = map.get(this);
     if (a1 != null) return a1.equals(b) ? map : null;
     return map.add(this, b);
