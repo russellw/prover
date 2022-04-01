@@ -701,8 +701,7 @@ public abstract class Term implements Iterable<Term> {
         return;
       }
     }
-    var n = size();
-    for (var i = 0; i < n; i++) get(i).freeVars(bound, free);
+    for (var a : this) a.freeVars(bound, free);
   }
 
   public final Set<Term> freeVars() {

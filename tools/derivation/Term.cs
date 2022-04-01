@@ -424,10 +424,33 @@ namespace derivation
             return mapLeaves((a) =>
             {
                 var b = map[a];
-                if (a.Equals(b)) throw new ArgumentException(nameof(map));
+                if (a.Equals(b)) throw new ArgumentException(null, nameof(map));
                 if (b == null) return a;
                 return b.replace(map);
             });
+        }
+
+        public void freeVars(HashSet<Term> bound, OrderedSet<Term> free)
+        {
+            switch (Tag)
+            {
+                case Tag.VAR:
+                    if (!bound.Contains(this))
+                        free.Add(this);
+                    break;
+                case Tag.ALL:
+                case Tag.EXISTS:
+                    {
+                        bound = new HashSet<Term>(bound);
+                        var n = Count;
+                        for (var i = 1; i < n; i++)
+                            bound.Add(this[i]);
+                        this[0].freeVars(bound, free);
+                        return;
+                    }
+            }
+            foreach (var a in this)
+                a.freeVars(bound, free);
         }
 
         public virtual IEnumerator<Term> GetEnumerator()
