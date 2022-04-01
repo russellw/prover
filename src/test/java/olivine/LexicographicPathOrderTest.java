@@ -8,6 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 public class LexicographicPathOrderTest {
+  private static final int ITERATIONS = 10000;
   private final List<Func> funcs = new ArrayList<>();
   private final List<GlobalVar> globalVars = new ArrayList<>();
   private final List<Var> vars = new ArrayList<>();
@@ -16,7 +17,8 @@ public class LexicographicPathOrderTest {
 
   private Term randomIndividualTerm(int depth) {
     if (depth == 0 || random.nextInt(100) < 40)
-      if (random.nextInt(100) < 30) return globalVars.get(random.nextInt(globalVars.size()));
+      if (vars.isEmpty() || random.nextInt(100) < 30)
+        return globalVars.get(random.nextInt(globalVars.size()));
       else return vars.get(random.nextInt(vars.size()));
 
     var f = funcs.get(random.nextInt(funcs.size()));
@@ -39,23 +41,20 @@ public class LexicographicPathOrderTest {
     order = new LexicographicPathOrder(clauses);
   }
 
-  @Test
-  public void randomTest() {
-    funcs.clear();
+  private void makeRandomOrder() {
     for (var i = 0; i < 4; i++)
       funcs.add(
           new Func(String.format("f%d", i), Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL));
-
-    globalVars.clear();
     for (var i = 0; i < 4; i++)
       globalVars.add(new GlobalVar(String.format("a%d", i), Type.INDIVIDUAL));
-
-    vars.clear();
     for (var i = 0; i < 4; i++) vars.add(new Var(Type.INDIVIDUAL));
-
     makeOrder();
+  }
 
-    for (var i = 0; i < 10000; i++) {
+  @Test
+  public void randomTest() {
+    makeRandomOrder();
+    for (var i = 0; i < ITERATIONS; i++) {
       var a = randomIndividualTerm(4);
       var b = randomIndividualTerm(4);
       assertFalse(order.greater(a, b) && a.equals(b));
@@ -136,5 +135,34 @@ public class LexicographicPathOrderTest {
   private void checkUnordered(Term a, Term b) {
     assertFalse(order.greater(a, b));
     assertFalse(order.greater(b, a));
+  }
+
+  private static boolean containsSubterm(Term a, Term b) {
+    if (a.equals(b)) return true;
+    for (var ai : a) if (containsSubterm(ai, b)) return true;
+    return false;
+  }
+
+  @Test
+  public void totalOnGroundTerms() {
+    makeRandomOrder();
+    vars.clear();
+    for (var i = 0; i < ITERATIONS; i++) {
+      var a = randomIndividualTerm(4);
+      var b = randomIndividualTerm(4);
+      if (!a.equals(b)) checkOrdered(a, b);
+    }
+  }
+
+  @Test
+  public void containsSubtermRelation() {
+    makeRandomOrder();
+    for (var i = 0; i < ITERATIONS; i++) {
+      var a = randomIndividualTerm(4);
+      var b = randomIndividualTerm(4);
+      if (a.equals(b)) continue;
+      if (containsSubterm(a, b)) assertTrue(order.greater(a, b));
+      if (containsSubterm(b, a)) assertTrue(order.greater(b, a));
+    }
   }
 }

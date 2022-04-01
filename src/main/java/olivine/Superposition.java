@@ -16,6 +16,10 @@ public final class Superposition {
   private boolean complete = true;
   private final boolean result;
 
+  private boolean less(Term c0, Term c1) {
+    return order.greater(c1, c0);
+  }
+
   private void clause(Clause c) {
     if (c.isTrue()) return;
     if (passive.size() >= clauseLimit) {
@@ -195,12 +199,13 @@ public final class Superposition {
 
   // For each equation in d (both directions)
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
+    if (less(c0, c1)) return;
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
       var d0 = e.left;
       var d1 = e.right;
-      superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
-      superposition(c, d, ci, c0, c1, di, d1, d0, new ArrayList<>(), d1);
+      if (!less(d0, d1)) superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
+      if (!less(d1, d0)) superposition(c, d, ci, c0, c1, di, d1, d0, new ArrayList<>(), d1);
     }
   }
 
@@ -210,8 +215,8 @@ public final class Superposition {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
-      if (!order.greater(c1, c0)) superposition(c, d, ci, c0, c1);
-      if (!order.greater(c0, c1)) superposition(c, d, ci, c1, c0);
+      superposition(c, d, ci, c0, c1);
+      superposition(c, d, ci, c1, c0);
     }
   }
 
