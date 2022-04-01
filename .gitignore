@@ -1,4 +1,5 @@
 *.html
+*.log
 *.lst
 *.p
 .idea/
