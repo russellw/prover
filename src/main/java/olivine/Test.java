@@ -4,7 +4,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -113,14 +112,6 @@ final class Test {
     return (System.currentTimeMillis() - start) * 0.001;
   }
 
-  private static void printBlock(Map<String, Long> map) {
-    if (map.isEmpty()) return;
-    System.out.println();
-    var df = new DecimalFormat("#,###");
-    for (var kv : map.entrySet())
-      System.out.printf("%20s  %s\n", df.format(kv.getValue()), kv.getKey());
-  }
-
   public static void main(String[] args) throws IOException {
     args(args);
     if (shuffle) {
@@ -166,6 +157,6 @@ final class Test {
     }
     System.out.println(solved);
     System.out.printf("%.3f\n", time(start));
-    printBlock(Record.total);
+    Stats.print();
   }
 }
