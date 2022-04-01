@@ -99,14 +99,14 @@ public abstract class Term implements Iterable<Term> {
 
   private void checkArity(int expected) {
     if (size() != expected)
-      throw new TypeException(String.format("%s: args count: %d != %d", this, size(), expected));
+      throw new TypeError(String.format("%s: args count: %d != %d", this, size(), expected));
   }
 
   public final void check(Type expected) {
     var type = type();
-    if (type == null) throw new TypeException(String.format("%s: null type", this));
+    if (type == null) throw new TypeError(String.format("%s: null type", this));
     if (!type.equals(expected))
-      throw new TypeException(String.format("%s: type error: %s != %s", this, type, expected));
+      throw new TypeError(String.format("%s: type error: %s != %s", this, type, expected));
 
     var n = size();
     switch (tag()) {
@@ -125,18 +125,18 @@ public abstract class Term implements Iterable<Term> {
         assert n == 0;
         switch (type.kind()) {
           case RATIONAL, REAL -> {}
-          default -> throw new TypeException(String.format("%s: type error: %s", this, type));
+          default -> throw new TypeError(String.format("%s: type error: %s", this, type));
         }
       }
       case GLOBAL_VAR -> {
         assert n == 0;
         if (type.kind() == Kind.FUNC)
-          throw new TypeException(String.format("%s: type error: %s", this, type));
+          throw new TypeError(String.format("%s: type error: %s", this, type));
       }
       case VAR -> {
         assert n == 0;
         switch (type.kind()) {
-          case BOOLEAN, FUNC -> throw new TypeException(
+          case BOOLEAN, FUNC -> throw new TypeError(
               String.format("%s: type error: %s", this, type));
         }
       }
@@ -156,7 +156,7 @@ public abstract class Term implements Iterable<Term> {
         checkArity(2);
         type = get(0).type();
         switch (type.kind()) {
-          case BOOLEAN, FUNC -> throw new TypeException(
+          case BOOLEAN, FUNC -> throw new TypeError(
               String.format("%s: type error: %s", this, type));
         }
         for (var a : this) a.check(type);
@@ -168,11 +168,10 @@ public abstract class Term implements Iterable<Term> {
       case CALL -> {
         type = get(0).type();
         if (type.kind() != Kind.FUNC)
-          throw new TypeException(String.format("%s: type error: %s", this, type));
+          throw new TypeError(String.format("%s: type error: %s", this, type));
         assert type.get(0).equals(expected);
         if (n != type.size())
-          throw new TypeException(
-              String.format("%s: arity mismatch: %d != %d", this, n, type.size()));
+          throw new TypeError(String.format("%s: arity mismatch: %d != %d", this, n, type.size()));
         for (var i = 1; i < n; i++) get(i).check(type.get(i));
       }
       case FUNC -> {
@@ -183,7 +182,7 @@ public abstract class Term implements Iterable<Term> {
         checkArity(1);
         type = get(0).type();
         if (!type.isNumeric())
-          throw new TypeException(String.format("%s: type error: %s is not numeric", this, type));
+          throw new TypeError(String.format("%s: type error: %s is not numeric", this, type));
         get(0).check(type);
       }
       case LESS_EQUALS,
@@ -200,14 +199,14 @@ public abstract class Term implements Iterable<Term> {
         checkArity(2);
         type = get(0).type();
         if (!type.isNumeric())
-          throw new TypeException(String.format("%s: type error: %s is not numeric", this, type));
+          throw new TypeError(String.format("%s: type error: %s is not numeric", this, type));
         for (var a : this) a.check(type);
       }
       case DIVIDE -> {
         checkArity(2);
         type = get(0).type();
         if (type != Type.RATIONAL && type != Type.REAL)
-          throw new TypeException(String.format("%s: type error: %s", this, type));
+          throw new TypeError(String.format("%s: type error: %s", this, type));
         for (var a : this) a.check(type);
       }
     }

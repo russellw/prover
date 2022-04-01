@@ -9,7 +9,7 @@ public final class Subsumption {
   private int steps;
 
   private FMap search(FMap map, Term[] c, Term[] c2, Term[] d, Term[] d2) {
-    if (steps-- == 0) throw new TimeoutException();
+    if (steps-- == 0) throw new Fail();
 
     // Matched everything in one polarity
     if (c.length == 0) {
@@ -87,7 +87,7 @@ public final class Subsumption {
       steps = 1000;
       var map = search(FMap.EMPTY, c1, c2, d1, d2);
       return map != null;
-    } catch (TimeoutException e) {
+    } catch (Fail e) {
       return false;
     }
   }

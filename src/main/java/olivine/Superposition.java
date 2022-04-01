@@ -29,7 +29,7 @@ public final class Superposition {
     }
     for (var a : c.literals) {
       steps -= a.symbolCount();
-      if (steps < 0) throw new TimeoutException();
+      if (steps < 0) throw new Fail();
     }
     passive.add(c);
   }
@@ -267,7 +267,7 @@ public final class Superposition {
         superposition(g1, c);
       }
     }
-    if (!complete) throw new TimeoutException();
+    if (!complete) throw new Fail();
     result = true;
   }
 

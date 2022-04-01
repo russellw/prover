@@ -38,8 +38,8 @@ public final class TptpParser {
   private String tokString;
   private final Map<String, Var> free = new HashMap<>();
 
-  private ParseException err(String s) {
-    return new ParseException(String.format("%s:%d: %s", file, line, s));
+  private ParseError err(String s) {
+    return new ParseError(String.format("%s:%d: %s", file, line, s));
   }
 
   // Tokenizer
@@ -286,7 +286,7 @@ public final class TptpParser {
   private Type atomicType() throws IOException {
     var s = tokString;
     switch (tok) {
-      case '!', '[' -> throw new InappropriateException();
+      case '!', '[' -> throw new Inappropriate();
       case DEFINED_WORD -> {
         lex();
         return switch (s) {
@@ -295,7 +295,7 @@ public final class TptpParser {
           case "int" -> Type.INTEGER;
           case "rat" -> Type.RATIONAL;
           case "real" -> Type.REAL;
-          case "tType" -> throw new InappropriateException();
+          case "tType" -> throw new Inappropriate();
           default -> throw err(String.format("'$%s': unknown type", s));
         };
       }
@@ -360,7 +360,7 @@ public final class TptpParser {
     var s = tokString;
     lex();
     switch (k) {
-      case '!', '?', '[' -> throw new InappropriateException();
+      case '!', '?', '[' -> throw new Inappropriate();
       case DEFINED_WORD -> {
         switch (s) {
           case "ceiling" -> {
@@ -456,7 +456,7 @@ public final class TptpParser {
           case "uminus" -> {
             return definedAtomicTerm(bound, Tag.NEGATE);
           }
-          case "ite" -> throw new InappropriateException();
+          case "ite" -> throw new Inappropriate();
           default -> throw err(String.format("'$%s': unknown word", s));
         }
       }
@@ -707,7 +707,7 @@ public final class TptpParser {
                 lex();
                 if (tok == '>')
                   // this is some higher-order construct that Olivine doesn't understand
-                  throw new InappropriateException();
+                  throw new Inappropriate();
                 // Otherwise, the symbol will be simply used as the name of a type. No particular
                 // action is
                 // required at this point, so accept this and move on.
@@ -730,7 +730,7 @@ public final class TptpParser {
               collect(name, a);
             }
           }
-          case "thf" -> throw new InappropriateException();
+          case "thf" -> throw new Inappropriate();
           case "include" -> {
             var dir = System.getenv("TPTP");
             if (dir == null) throw err("TPTP environment variable not set");
@@ -759,7 +759,7 @@ public final class TptpParser {
         expect(')');
         expect('.');
       }
-    } catch (TypeException e) {
+    } catch (TypeError e) {
       throw err(e.getMessage());
     }
   }

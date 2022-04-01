@@ -158,9 +158,9 @@ final class Test {
             default -> throw new IllegalStateException(status);
           }
         solved++;
-      } catch (InappropriateException e) {
+      } catch (Inappropriate e) {
         System.out.println("iap");
-      } catch (TimeoutException e) {
+      } catch (Fail e) {
         System.out.printf("-\t%.3f\n", time(start1));
       }
     }
