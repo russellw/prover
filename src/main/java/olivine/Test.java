@@ -21,9 +21,18 @@ final class Test {
 
   private Test() {}
 
-  private static void addFile(String s) {
-    // skip higher order problems
-    if (s.contains("^")) return;
+  private static void addFile(String s) throws IOException {
+    // accept unadorned TPTP
+    if (s.equalsIgnoreCase("TPTP")) {
+      var dir = System.getenv("TPTP");
+      if (dir == null) throw new IllegalStateException("TPTP environment variable not set");
+      for (var file :
+          Files.walk(Path.of(dir))
+              .filter(p -> !Files.isDirectory(p))
+              .map(Path::toString)
+              .toArray(String[]::new)) addFile(file);
+      return;
+    }
 
     // accept unadorned TPTP problem names
     var matcher = TPTP_PATTERN.matcher(s);
@@ -38,6 +47,9 @@ final class Test {
 
     // skip things that are not TPTP problem files
     if (!s.endsWith(".p")) return;
+
+    // skip higher order problems
+    if (s.contains("^")) return;
 
     // this is a file to be processed
     files.add(s);
