@@ -153,8 +153,12 @@ public final class Superposition {
       Term a) {
     var map = c0.unify(FMap.EMPTY, a);
     if (map == null) return;
+
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;
+
+    if (less(c0.replace(map), c1.replace(map))) return;
+    if (less(d0.replace(map), d1.replace(map))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
