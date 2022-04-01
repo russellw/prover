@@ -410,6 +410,15 @@ namespace derivation
             return remake(v);
         }
 
+        public Term map(Func<Term, Term> f)
+        {
+            var n = Count;
+            if (n == 0) return this;
+            var v = new Term[n];
+            for (var i = 0; i < n; i++) v[i] = f(this[i]);
+            return remake(v);
+        }
+
         public Term replace(FMap map)
         {
             return mapLeaves((a) =>
