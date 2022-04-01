@@ -2,22 +2,16 @@ package olivine;
 
 import java.util.*;
 
-public class Clause extends AbstractFormula {
+public final class Clause {
   final Term[] literals;
   final int negativeSize;
-  final Inference inference;
 
   private Clause(Term[] literals, int negativeSize) {
     this.literals = literals;
     this.negativeSize = negativeSize;
-    this.inference = null;
   }
 
-  public Clause original() {
-    return this;
-  }
-
-  public final Clause renameVars() {
+  public Clause renameVars() {
     var map = new HashMap<Term, Term>();
     var v = new Term[literals.length];
     for (var i = 0; i < v.length; i++) {
@@ -35,21 +29,7 @@ public class Clause extends AbstractFormula {
                 return a;
               });
     }
-    return new ClauseRenamed(v, negativeSize, this);
-  }
-
-  private static final class ClauseRenamed extends Clause {
-    private final Clause original;
-
-    ClauseRenamed(Term[] literals, int negativeSize, Clause original) {
-      super(literals, negativeSize);
-      this.original = original;
-    }
-
-    @Override
-    public Clause original() {
-      return original;
-    }
+    return new Clause(v, negativeSize);
   }
 
   @Override
@@ -57,21 +37,19 @@ public class Clause extends AbstractFormula {
     return String.format("%s => %s", Arrays.toString(negative()), Arrays.toString(positive()));
   }
 
-  public final long volume() {
+  public long volume() {
     var n = literals.length * 2L;
     for (var a : literals) n += a.symbolCount();
     return n;
   }
 
-  public final Set<Term> freeVars() {
+  public Set<Term> freeVars() {
     var free = new LinkedHashSet<Term>();
     for (var a : literals) a.freeVars(Set.of(), free);
     return free;
   }
 
-  public Clause(List<Term> negative, List<Term> positive, Inference inference) {
-    this.inference = inference;
-
+  public Clause(List<Term> negative, List<Term> positive) {
     // Simplify
     for (var i = 0; i < negative.size(); i++) negative.set(i, negative.get(i).simplify());
     for (var i = 0; i < positive.size(); i++) positive.set(i, positive.get(i).simplify());
@@ -94,23 +72,23 @@ public class Clause extends AbstractFormula {
     for (var i = 0; i < positive.size(); i++) literals[negativeSize + i] = positive.get(i);
   }
 
-  public final Term[] negative() {
+  public Term[] negative() {
     return Arrays.copyOf(literals, negativeSize);
   }
 
-  public final Term[] positive() {
+  public Term[] positive() {
     return Arrays.copyOfRange(literals, negativeSize, literals.length);
   }
 
-  public final int positiveSize() {
+  public int positiveSize() {
     return literals.length - negativeSize;
   }
 
-  public final boolean isFalse() {
+  public boolean isFalse() {
     return literals.length == 0;
   }
 
-  public final boolean isTrue() {
+  public boolean isTrue() {
     if (literals.length == 1 && literals[0] == Term.TRUE) {
       assert negativeSize == 0;
       return true;
@@ -125,15 +103,6 @@ public class Clause extends AbstractFormula {
     return false;
   }
 
-  @Override
-  protected void getProof(Set<AbstractFormula> visited, List<AbstractFormula> proof) {
-    if (!visited.add(this)) return;
-    inference.from.getProof(visited, proof);
-    if (inference.from1 != null) inference.from1.getProof(visited, proof);
-    proof.add(this);
-  }
-
-  @Override
   public Term term() {
     var v = new Term[literals.length];
     for (var i = 0; i < literals.length; i++) {

@@ -85,20 +85,20 @@ final class Test {
     }
   }
 
-  private static String header(String file) throws IOException {
-    String expected = null;
+  private static String status(String file) throws IOException {
     try (var reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
       String s;
       while ((s = reader.readLine()) != null) {
         if (!s.isBlank() && s.charAt(0) != '%') break;
-        System.out.println(s);
-        if (expected == null) {
-          var matcher = STATUS_PATTERN.matcher(s);
-          if (matcher.matches()) expected = matcher.group(1);
-        }
+        var matcher = STATUS_PATTERN.matcher(s);
+        if (matcher.matches()) return matcher.group(1);
       }
     }
-    return expected;
+    return null;
+  }
+
+  private static double time(long start) {
+    return (System.currentTimeMillis() - start) * 0.001;
   }
 
   private static void printBlock(Map<String, Long> map) {
@@ -109,41 +109,7 @@ final class Test {
       System.out.printf("%20s  %s\n", df.format(kv.getValue()), kv.getKey());
   }
 
-  private static void writeCSV(List<Record> records, String file) throws FileNotFoundException {
-    var keys = Record.total.keySet();
-    var totalTime = 0.0;
-    var total = new LinkedHashMap<String, Long>();
-    try (var writer = new PrintWriter(file + ".csv")) {
-      writer.print("file\tszs\ttime");
-      for (var key : keys) {
-        writer.print('\t');
-        writer.print(key);
-      }
-      writer.println();
-
-      for (var record : records) {
-        writer.printf("%s\t%s\t%.3f", record.file, record.answer, record.time);
-        totalTime += record.time;
-        for (var key : keys) {
-          writer.print('\t');
-          var n = record.get(key);
-          writer.print(n);
-          total.put(key, total.getOrDefault(key, 0L) + n);
-        }
-        writer.println();
-      }
-
-      writer.printf("total\t%d\t%.3f", records.size(), totalTime);
-      for (var key : keys) {
-        writer.print('\t');
-        writer.print(total.getOrDefault(key, 0L));
-      }
-      writer.println();
-    }
-  }
-
   public static void main(String[] args) throws IOException {
-    // command line
     args(args);
     if (shuffle) {
       var random = randomSeed == -1 ? new Random() : new Random(randomSeed);
@@ -151,59 +117,43 @@ final class Test {
     }
     if (maxFiles >= 0 && files.size() > maxFiles) files = files.subList(0, maxFiles);
 
-    // attempt problems
-    var solved = new ArrayList<Record>();
-    var unsolved = new ArrayList<Record>();
-
+    var solved = 0;
     var start = System.currentTimeMillis();
     for (var file : files) {
-      var expected = header(file);
-      Record.init(file);
-      var cnf = new CNF();
-
+      var status = status(file);
+      System.out.printf("%s\t%s\t", file, status);
       var start1 = System.currentTimeMillis();
       try (var stream = new BufferedInputStream(new FileInputStream(file))) {
         // read
+        var cnf = new CNF();
         TptpParser.parse(file, stream, cnf);
 
         // solve
-        var answer = new Superposition(cnf.clauses, 10000000, steps).answer;
+        var sat = Superposition.sat(cnf.clauses, 10000000, steps);
 
         // output
-        System.out.print("% SZS status ");
-        Record.current.answer = answer.szs.string(cnf.conjecture);
-        System.out.println(Record.current.answer);
-        if (answer.proof != null) new TptpPrinter().proof(answer.proof);
+        System.out.printf("%s\t%.3f\n", sat ? "sat" : "uns", time(start1));
 
-        Record.current.time = (System.currentTimeMillis() - start1) / 1000.0;
-        System.out.printf("%.3f seconds\n", Record.current.time);
-        printBlock(Record.current.map);
-
-        // check and record
-        if (answer.szs.success()) {
-          if (expected != null) {
-            if (answer.szs == SZS.Unsatisfiable && expected.equals("ContradictoryAxioms"))
-              expected = Record.current.answer;
-            if (!Record.current.answer.equals(expected))
-              throw new IllegalStateException(Record.current.answer);
+        // check
+        if (status != null)
+          switch (status) {
+            case "ContradictoryAxioms", "Unsatisfiable", "Theorem" -> {
+              if (sat) throw new IllegalStateException(status);
+            }
+            case "Satisfiable", "CounterSatisfiable" -> {
+              if (!sat) throw new IllegalStateException(status);
+            }
+            default -> throw new IllegalStateException(status);
           }
-          solved.add(Record.current);
-        } else unsolved.add(Record.current);
+        solved++;
       } catch (InappropriateException e) {
-        System.out.println("% SZS status Inappropriate");
+        System.out.println("iap");
+      } catch (TimeoutException e) {
+        System.out.printf("-\t%.3f\n", time(start1));
       }
-      System.out.println();
     }
-
-    // print summary
-    System.out.printf(
-        "Solved %d/%d (%.1f%%)\n",
-        solved.size(), files.size(), solved.size() * 100.0 / files.size());
-    System.out.printf("%.3f seconds\n", (System.currentTimeMillis() - start) / 1000.0);
+    System.out.println(solved);
+    System.out.printf("%.3f\n", time(start));
     printBlock(Record.total);
-
-    // write summary files
-    writeCSV(solved, "solved");
-    writeCSV(unsolved, "unsolved");
   }
 }

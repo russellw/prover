@@ -7,9 +7,8 @@ import org.junit.Test;
 
 public class CNFTest {
   private List<Clause> convert(Term a) {
-    var formula = new Formula("", false, a, null);
     var cnf = new CNF();
-    cnf.add(formula);
+    cnf.add(a);
     return cnf.clauses;
   }
 

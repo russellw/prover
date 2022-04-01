@@ -13,13 +13,8 @@ public final class Superposition {
   // incomplete,
   // the problem is satisfiable. In practice, this is rare but can occasionally happen,
   // and is a good way to detect some kinds of incompleteness errors in the prover
-  private SZS defaultAnswer = SZS.Satisfiable;
-  public Answer answer;
-
-  private boolean reversed(Clause c, int i, Term c0) {
-    var e = new Equation(c.literals[i]);
-    return c0 != e.left;
-  }
+  private boolean complete = true;
+  private final boolean result;
 
   private void clause(Clause c) {
     if (c.isTrue()) return;
@@ -30,7 +25,7 @@ public final class Superposition {
 
       // If we had to discard clauses to save memory, completeness was lost,
       // so running out of inferences doesn't prove anything
-      defaultAnswer = SZS.ResourceOut;
+      complete = false;
     }
     for (var a : c.literals) {
       steps -= a.symbolCount();
@@ -60,10 +55,7 @@ public final class Superposition {
       positive.add(c.literals[i].replace(map));
 
     // Make new clause
-    assert c.original() == c;
-    var inference = new Inference(Rule.er, c);
-    inference.literalIndex = ci;
-    clause(new Clause(negative, positive, inference));
+    clause(new Clause(negative, positive));
   }
 
   // For each negative equation
@@ -85,7 +77,7 @@ public final class Superposition {
   */
 
   // Substitute and make new clause
-  private void factor(Clause c, int ci, Term c0, Term c1, int cj, Term c2, Term c3) {
+  private void factor(Clause c, Term c0, Term c1, int cj, Term c2, Term c3) {
     // in tests, the unification check failed more often than the equatable
     // check,  so putting it first may save a little time
     var map = c0.unify(FMap.EMPTY, c2);
@@ -107,13 +99,7 @@ public final class Superposition {
       if (i != cj) positive.add(c.literals[i].replace(map));
 
     // Make new clause
-    assert c.original() == c;
-    var inference = new Inference(Rule.ef, c);
-    inference.literalIndex = ci;
-    inference.reversed = reversed(c, ci, c0);
-    inference.literalIndex1 = cj;
-    inference.reversed1 = reversed(c, cj, c2);
-    clause(new Clause(negative, positive, inference));
+    clause(new Clause(negative, positive));
   }
 
   // For each positive equation (both directions) again
@@ -123,8 +109,8 @@ public final class Superposition {
       var e = new Equation(c.literals[cj]);
       var c2 = e.left;
       var c3 = e.right;
-      factor(c, ci, c0, c1, cj, c2, c3);
-      factor(c, ci, c0, c1, cj, c3, c2);
+      factor(c, c0, c1, cj, c2, c3);
+      factor(c, c0, c1, cj, c3, c2);
     }
   }
 
@@ -179,23 +165,10 @@ public final class Superposition {
       if (i != di) positive.add(d.literals[i].replace(map));
 
     // Negative and positive superposition
-    var atoms = negative;
-    var rule = Rule.ns;
-    if (di >= d.negativeSize) {
-      atoms = positive;
-      rule = Rule.ps;
-    }
-    atoms.add(new Equation(d0c1, d1).term().replace(map));
+    (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
-    var inference = new Inference(rule, c.original());
-    inference.from1 = d.original();
-    inference.literalIndex = ci;
-    inference.reversed = reversed(c, ci, c0);
-    inference.literalIndex1 = di;
-    inference.reversed1 = reversed(d, di, d0);
-    if (position.size() > 0) inference.position = Etc.intArray(position);
-    clause(new Clause(negative, positive, inference));
+    clause(new Clause(negative, positive));
   }
 
   // Descend into subterms
@@ -242,62 +215,63 @@ public final class Superposition {
     }
   }
 
-  public Superposition(List<Clause> clauses, int clauseLimit, long steps) {
+  private Superposition(List<Clause> clauses, int clauseLimit, long steps) {
     this.clauseLimit = clauseLimit;
     this.steps = steps;
     order = new LexicographicPathOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
-    try {
-      for (var c : clauses) {
-        // add the initial clauses to the passive queue
-        clause(c);
+    for (var c : clauses) {
+      // add the initial clauses to the passive queue
+      clause(c);
 
-        // first-order logic is not complete on arithmetic, so check whether this problem uses
-        // arithmetic;
-        // if it does, running out of inferences will not prove anything
-        for (var a : c.literals)
-          a.walkLeaves(
-              b -> {
-                if (b.type().isNumeric()) defaultAnswer = SZS.GaveUp;
-              });
-      }
-      while (!passive.isEmpty()) {
-        // Given clause.
-        var g = passive.poll();
-
-        // Solved
-        if (g.isFalse()) {
-          answer = new Answer(SZS.Unsatisfiable, g);
-          return;
-        }
-
-        // Rename variables, because subsumption and superposition both assume
-        // clauses have disjoint variable names
-        var g1 = g.renameVars();
-
-        // Discount loop, which only subsumes against active clauses, performed slightly better in
-        // tests.
-        // The alternative Otter loop would also subsume against passive clauses
-        if (subsumption.subsumesForward(active, g1)) continue;
-        active = subsumption.subsumeBackward(g1, active);
-
-        // Infer from one clause
-        resolve(g);
-        factor(g);
-
-        // Sometimes need to match g with itself
-        active.add(g);
-
-        // Infer from two clauses
-        for (var c : active) {
-          superposition(c, g1);
-          superposition(g1, c);
-        }
-      }
-      answer = new Answer(defaultAnswer);
-    } catch (TimeoutException e) {
-      answer = new Answer(SZS.Timeout);
+      // first-order logic is not complete on arithmetic, so check whether this problem uses
+      // arithmetic;
+      // if it does, running out of inferences will not prove anything
+      for (var a : c.literals)
+        a.walkLeaves(
+            b -> {
+              if (b.type().isNumeric()) complete = false;
+            });
     }
+    while (!passive.isEmpty()) {
+      // Given clause.
+      var g = passive.poll();
+
+      // Solved
+      if (g.isFalse()) {
+        result = false;
+        return;
+      }
+
+      // Rename variables, because subsumption and superposition both assume
+      // clauses have disjoint variable names
+      var g1 = g.renameVars();
+
+      // Discount loop, which only subsumes against active clauses, performed slightly better in
+      // tests.
+      // The alternative Otter loop would also subsume against passive clauses
+      if (subsumption.subsumesForward(active, g1)) continue;
+      active = subsumption.subsumeBackward(g1, active);
+
+      // Infer from one clause
+      resolve(g);
+      factor(g);
+
+      // Sometimes need to match g with itself
+      active.add(g);
+
+      // Infer from two clauses
+      for (var c : active) {
+        superposition(c, g1);
+        superposition(g1, c);
+      }
+    }
+    if (!complete) throw new TimeoutException();
+    result = true;
+  }
+
+  public static boolean sat(List<Clause> clauses, int clauseLimit, long steps) {
+    return new Superposition(clauses, clauseLimit, steps).result;
   }
 }

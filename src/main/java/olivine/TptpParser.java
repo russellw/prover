@@ -637,10 +637,10 @@ public final class TptpParser {
     return select.contains(name);
   }
 
-  private void collect(String name, boolean negatedConjecture, Term a) {
+  private void collect(String name, Term a) {
     if (!selecting(name)) return;
     a.check(Type.BOOLEAN);
-    cnf.add(new Formula(name, negatedConjecture, a, file));
+    cnf.add(a);
   }
 
   private void skip() throws IOException {
@@ -687,7 +687,7 @@ public final class TptpParser {
             // we could treat CNF input specially as clauses, but it is equally correct and simpler
             // to just treat it as formulas
             var a = logicFormula(null).quantify();
-            collect(name, false, a);
+            collect(name, a);
           }
           case "fof", "tff", "tcf" -> {
             expect(',');
@@ -723,16 +723,11 @@ public final class TptpParser {
             }
 
             // formula
-            var negatedConjecture = false;
             var a = logicFormula(Map.of());
             assert a.freeVars().equals(Set.of());
             if (selecting(name)) {
-              if (role.equals("conjecture")) {
-                negatedConjecture = true;
-                a = Term.of(Tag.NOT, a);
-                cnf.conjecture = true;
-              }
-              collect(name, negatedConjecture, a);
+              if (role.equals("conjecture")) a = Term.of(Tag.NOT, a);
+              collect(name, a);
             }
           }
           case "thf" -> throw new InappropriateException();

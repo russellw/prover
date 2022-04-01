@@ -18,117 +18,117 @@ public class SuperpositionTest {
     var negative = new ArrayList<Term>();
     var positive = new ArrayList<Term>();
     var clauses = new ArrayList<Clause>();
-    SZS szs;
+    boolean szs;
     final int clauseLimit = 1000000;
     final long steps = 1000;
 
     // true
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // false
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // red=red
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, red, red));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // red!=red
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, red, red));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // red=green
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, red, green));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // red!=green
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, red, green));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // a=a
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, a, a));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // a!=a
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, a, a));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // a=b
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, a, b));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // a!=b
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, a, b));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // x=x
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, x, x));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // x!=x
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, x, x));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // x=y
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, x, y));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // x!=y. this differs from a!=b; it is unsatisfiable. Semantically because of the difference
     // between
@@ -142,63 +142,63 @@ public class SuperpositionTest {
     negative.clear();
     negative.add(Term.of(Tag.EQUALS, x, y));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // p(red)
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, red));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // !p(red)
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, red));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // p(a)
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, a));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // !p(a)
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, a));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // p(x)
     clauses.clear();
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, x));
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // !p(x)
     clauses.clear();
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, x));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Satisfiable);
+    clauses.add(new Clause(negative, positive));
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(szs);
 
     // !p(a) & p(x)
     clauses.clear();
@@ -206,15 +206,15 @@ public class SuperpositionTest {
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, a));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, x));
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // !p(a) & (p(x) | p(y)). this can be solved with equality factoring,
     // but does not suffice to test such, because it has an alternative proof
@@ -223,16 +223,16 @@ public class SuperpositionTest {
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, a));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, x));
     positive.add(Term.of(Tag.CALL, p1, y));
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // (!p(a) | !p(b)) & (p(x) | p(y)). This is a test of equality factoring
     clauses.clear();
@@ -241,16 +241,16 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.CALL, p1, a));
     negative.add(Term.of(Tag.CALL, p1, b));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, x));
     positive.add(Term.of(Tag.CALL, p1, y));
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // p(a) & (!p(x) | !p(y))
     clauses.clear();
@@ -258,16 +258,16 @@ public class SuperpositionTest {
     negative.clear();
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, a));
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, x));
     negative.add(Term.of(Tag.CALL, p1, y));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
 
     // (p(a) | p(b)) & (!p(x) | !p(y))
     clauses.clear();
@@ -276,15 +276,15 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, a));
     positive.add(Term.of(Tag.CALL, p1, b));
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
     negative.clear();
     negative.add(Term.of(Tag.CALL, p1, x));
     negative.add(Term.of(Tag.CALL, p1, y));
     positive.clear();
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
 
-    szs = new Superposition(clauses, clauseLimit, steps).answer.szs;
-    assertEquals(szs, SZS.Unsatisfiable);
+    szs = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(szs);
   }
 }

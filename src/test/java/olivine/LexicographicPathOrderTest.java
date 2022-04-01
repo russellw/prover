@@ -35,7 +35,7 @@ public class LexicographicPathOrderTest {
     }
     for (var a : globalVars) positive.add(Term.of(Tag.EQUALS, a, vars.get(0)));
     var clauses = new ArrayList<Clause>();
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
     order = new LexicographicPathOrder(clauses);
   }
 
@@ -83,7 +83,7 @@ public class LexicographicPathOrderTest {
     positive.add(Term.of(Tag.EQUALS, a, b));
     positive.add(Term.of(Tag.CALL, p1, red));
     positive.add(Term.of(Tag.CALL, q1, red));
-    clauses.add(new Clause(negative, positive, null));
+    clauses.add(new Clause(negative, positive));
     order = new LexicographicPathOrder(clauses);
 
     checkUnordered(x, y);

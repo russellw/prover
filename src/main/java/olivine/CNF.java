@@ -9,12 +9,6 @@ public final class CNF {
   private final List<Term> positive = new ArrayList<>();
   public final List<Clause> clauses = new ArrayList<>();
 
-  // record whether at least one input formula had the TPTP role 'conjecture' because this
-  // makes a difference to the exact format of SZS output. This is ancillary data,
-  // not related to the process of CNF conversion, but stored here because it is required
-  // alongside the clauses
-  public boolean conjecture;
-
   // How many clauses a term will expand into, for the purpose of deciding when subformulas need to
   // be renamed. The answer could
   // exceed the range of a fixed-size integer, but then we don't actually need the number, we only
@@ -351,29 +345,28 @@ public final class CNF {
     }
   }
 
-  private void clausify(Formula from, Term a) {
+  private void clausify(Term a) {
     if (a.tag() == Tag.AND) {
-      for (var b : a) clausify(from, b);
+      for (var b : a) clausify(b);
       return;
     }
     negative.clear();
     positive.clear();
     literals(a);
-    var c = new Clause(negative, positive, new Inference(Rule.cnf, from));
+    var c = new Clause(negative, positive);
     if (c.isTrue()) return;
     clauses.add(c);
   }
 
-  public void add(Formula formula) {
+  public void add(Term a) {
     // First run the input formula through the full process: Rename subformulas where necessary to
     // avoid exponential expansion,
     // then convert to negation normal form, distribute OR into AND, and convert to clauses.
-    var a = formula.term();
     defs.clear();
     a = maybeRename(1, a);
     a = nnf(Map.of(), true, a);
     a = distribute(a);
-    clausify(formula, a);
+    clausify(a);
 
     // Then convert all the definitions created by the renaming process. That process works by
     // bottom-up recursion, which means
@@ -383,7 +376,7 @@ public final class CNF {
     for (var b : defs) {
       b = nnf(Map.of(), true, b);
       b = distribute(b);
-      clausify(formula, b);
+      clausify(b);
     }
   }
 }

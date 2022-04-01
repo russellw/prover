@@ -68,12 +68,6 @@ public final class Etc {
     return q;
   }
 
-  public static int[] intArray(List<Integer> v) {
-    var w = new int[v.size()];
-    for (var i = 0; i < w.length; i++) w[i] = v.get(i);
-    return w;
-  }
-
   public static BigInteger divideFloor(BigInteger a, BigInteger b) {
     var qr = a.divideAndRemainder(b);
     var q = qr[0];
