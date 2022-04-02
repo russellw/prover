@@ -4,7 +4,6 @@ import java.util.*;
 
 public final class Superposition {
   private final int clauseLimit;
-  private long steps;
   private final LexicographicPathOrder order;
   private PriorityQueue<Clause> passive =
       new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
@@ -22,12 +21,9 @@ public final class Superposition {
     return n;
   }
 
-  private boolean less(Term c0, Term c1) {
-    return order.greater(c1, c0);
-  }
-
   private void clause(Clause c) {
     if (c.isTrue()) return;
+    // TODO: is the clause limit useful?
     if (passive.size() >= clauseLimit) {
       var passive1 = new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
       for (var i = 0; i < clauseLimit / 2; i++) passive1.add(passive.poll());
@@ -37,11 +33,11 @@ public final class Superposition {
       // so running out of inferences doesn't prove anything
       complete = false;
     }
-    for (var a : c.literals) {
-      steps -= a.symbolCount();
-      if (steps < 0) throw new Fail();
-    }
     passive.add(c);
+  }
+
+  private boolean less(Term c0, Term c1) {
+    return order.greater(c1, c0);
   }
 
   /*
@@ -240,7 +236,6 @@ public final class Superposition {
 
   private Superposition(List<Clause> clauses, int clauseLimit, long steps) {
     this.clauseLimit = clauseLimit;
-    this.steps = steps;
     order = new LexicographicPathOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
@@ -258,6 +253,8 @@ public final class Superposition {
             });
     }
     while (!passive.isEmpty()) {
+      if (steps-- == 0) throw new Fail();
+
       // Given clause.
       var g = passive.poll();
 

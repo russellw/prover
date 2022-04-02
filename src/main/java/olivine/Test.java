@@ -16,7 +16,7 @@ final class Test {
   private static boolean shuffle;
   private static int randomSeed = -1;
   private static int maxFiles = -1;
-  private static long steps = 100000;
+  private static long steps = 100;
 
   private Test() {}
 
