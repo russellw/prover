@@ -37,12 +37,6 @@ public final class Clause {
     return String.format("%s => %s", Arrays.toString(negative()), Arrays.toString(positive()));
   }
 
-  public long volume() {
-    var n = literals.length * 2L;
-    for (var a : literals) n += a.symbolCount();
-    return n;
-  }
-
   public Set<Term> freeVars() {
     var free = new LinkedHashSet<Term>();
     for (var a : literals) a.freeVars(Set.of(), free);

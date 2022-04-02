@@ -7,7 +7,7 @@ public final class Superposition {
   private long steps;
   private final LexicographicPathOrder order;
   private PriorityQueue<Clause> passive =
-      new PriorityQueue<>(Comparator.comparingLong(Clause::volume));
+      new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
 
   // if we run out of inferences, unless one of the reasons applies for the proof search to be
   // incomplete,
@@ -16,6 +16,12 @@ public final class Superposition {
   private boolean complete = true;
   private final boolean result;
 
+  private static long volume(Clause c) {
+    var n = c.literals.length * 2L;
+    for (var a : c.literals) n += a.symbolCount();
+    return n;
+  }
+
   private boolean less(Term c0, Term c1) {
     return order.greater(c1, c0);
   }
@@ -23,7 +29,7 @@ public final class Superposition {
   private void clause(Clause c) {
     if (c.isTrue()) return;
     if (passive.size() >= clauseLimit) {
-      var passive1 = new PriorityQueue<>(Comparator.comparingLong(Clause::volume));
+      var passive1 = new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
       for (var i = 0; i < clauseLimit / 2; i++) passive1.add(passive.poll());
       passive = passive1;
 
