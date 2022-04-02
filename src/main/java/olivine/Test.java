@@ -22,7 +22,7 @@ final class Test {
 
   private static void addFile(String s) throws IOException {
     // accept unadorned TPTP
-    if (s.equalsIgnoreCase("TPTP")) {
+    if (s.equalsIgnoreCase("tptp")) {
       var dir = System.getenv("TPTP");
       if (dir == null) throw new IllegalStateException("TPTP environment variable not set");
       for (var file :

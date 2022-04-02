@@ -92,6 +92,13 @@ public final class Superposition {
     // substituting terms for variables would not make them become so.
     if (!Equation.equatable(c1, c3)) return;
 
+    // Order check. We already checked the equation order before substitution, because failing the
+    // check at that point
+    // saves time, but it's possible for two terms to be unordered before substitution but ordered
+    // after it,
+    // so we need to repeat the check now
+    if (less(c0.replace(map), c1.replace(map))) return;
+
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
     for (var i = 0; i < c.negativeSize; i++) negative.add(c.literals[i].replace(map));
@@ -108,6 +115,7 @@ public final class Superposition {
 
   // For each positive equation (both directions) again
   private void factor(Clause c, int ci, Term c0, Term c1) {
+    if (less(c0, c1)) return;
     for (var cj = c.negativeSize; cj < c.literals.length; cj++) {
       if (cj == ci) continue;
       var e = new Equation(c.literals[cj]);
