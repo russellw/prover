@@ -18,18 +18,18 @@ public class SuperpositionTest {
     var negative = new ArrayList<Term>();
     var positive = new ArrayList<Term>();
     var clauses = new ArrayList<Clause>();
-    boolean szs;
+    boolean sat;
     final int clauseLimit = 1000000;
     final long steps = 1000;
 
     // true
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // false
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // red=red
     clauses.clear();
@@ -37,8 +37,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, red, red));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // red!=red
     clauses.clear();
@@ -46,8 +46,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.EQUALS, red, red));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // red=green
     clauses.clear();
@@ -55,8 +55,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, red, green));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // red!=green
     clauses.clear();
@@ -64,8 +64,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.EQUALS, red, green));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // a=a
     clauses.clear();
@@ -73,8 +73,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, a, a));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // a!=a
     clauses.clear();
@@ -82,8 +82,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.EQUALS, a, a));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // a=b
     clauses.clear();
@@ -91,8 +91,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, a, b));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // a!=b
     clauses.clear();
@@ -100,8 +100,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.EQUALS, a, b));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // x=x
     clauses.clear();
@@ -109,8 +109,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, x, x));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // x!=x
     clauses.clear();
@@ -118,8 +118,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.EQUALS, x, x));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // x=y
     clauses.clear();
@@ -127,8 +127,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.EQUALS, x, y));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // x!=y. this differs from a!=b; it is unsatisfiable. Semantically because of the difference
     // between
@@ -143,8 +143,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.EQUALS, x, y));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // p(red)
     clauses.clear();
@@ -152,8 +152,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, red));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // !p(red)
     clauses.clear();
@@ -161,8 +161,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.CALL, p1, red));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // p(a)
     clauses.clear();
@@ -170,8 +170,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, a));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // !p(a)
     clauses.clear();
@@ -179,8 +179,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.CALL, p1, a));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // p(x)
     clauses.clear();
@@ -188,8 +188,8 @@ public class SuperpositionTest {
     positive.clear();
     positive.add(Term.of(Tag.CALL, p1, x));
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // !p(x)
     clauses.clear();
@@ -197,8 +197,8 @@ public class SuperpositionTest {
     negative.add(Term.of(Tag.CALL, p1, x));
     positive.clear();
     clauses.add(new Clause(negative, positive));
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertTrue(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertTrue(sat);
 
     // !p(a) & p(x)
     clauses.clear();
@@ -213,8 +213,8 @@ public class SuperpositionTest {
     positive.add(Term.of(Tag.CALL, p1, x));
     clauses.add(new Clause(negative, positive));
 
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // !p(a) & (p(x) | p(y)). this can be solved with equality factoring,
     // but does not suffice to test such, because it has an alternative proof
@@ -231,8 +231,8 @@ public class SuperpositionTest {
     positive.add(Term.of(Tag.CALL, p1, y));
     clauses.add(new Clause(negative, positive));
 
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // (!p(a) | !p(b)) & (p(x) | p(y)). This is a test of equality factoring
     clauses.clear();
@@ -249,8 +249,8 @@ public class SuperpositionTest {
     positive.add(Term.of(Tag.CALL, p1, y));
     clauses.add(new Clause(negative, positive));
 
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // p(a) & (!p(x) | !p(y))
     clauses.clear();
@@ -266,8 +266,8 @@ public class SuperpositionTest {
     positive.clear();
     clauses.add(new Clause(negative, positive));
 
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
 
     // (p(a) | p(b)) & (!p(x) | !p(y))
     clauses.clear();
@@ -284,7 +284,62 @@ public class SuperpositionTest {
     positive.clear();
     clauses.add(new Clause(negative, positive));
 
-    szs = Superposition.sat(clauses, clauseLimit, steps);
-    assertFalse(szs);
+    sat = Superposition.sat(clauses, clauseLimit, steps);
+    assertFalse(sat);
+  }
+
+  @Test(expected = Fail.class)
+  public void complicated() {
+    var f = new Func("f", Type.INDIVIDUAL, Type.INDIVIDUAL, Type.INDIVIDUAL);
+    var g = new Func("g", Type.INDIVIDUAL, Type.INDIVIDUAL);
+    var x = new Var(Type.INDIVIDUAL);
+    var y = new Var(Type.INDIVIDUAL);
+    var z = new Var(Type.INDIVIDUAL);
+    var w = new Var(Type.INDIVIDUAL);
+    var negative = new ArrayList<Term>();
+    var positive = new ArrayList<Term>();
+    var clauses = new ArrayList<Clause>();
+    final int clauseLimit = 1000000;
+    final long steps = 1;
+
+    var gx = g.call(x);
+    var gy = g.call(y);
+    var gw = g.call(w);
+
+    var c0 =
+        f.call(
+            g.call(
+                f.call(
+                    gx,
+                    f.call(
+                        g.call(
+                            f.call(
+                                gy,
+                                f.call(
+                                    g.call(
+                                        f.call(
+                                            g.call(f.call(z, g.call(f.call(g.call(y), x)))),
+                                            f.call(z, gx))),
+                                    gx))),
+                        gx))),
+            g.call(f.call(gx, x)));
+    c0.check(Type.INDIVIDUAL);
+    positive.add(Term.of(Tag.EQUALS, c0, x));
+    var c = new Clause(negative, positive);
+    positive.clear();
+
+    var d0 =
+        f.call(
+            g.call(f.call(g.call(f.call(x, gy)), f.call(x, g.call(f.call(z, gw))))),
+            g.call(f.call(g.call(f.call(z, gw)), f.call(z, gw))));
+    d0.check(Type.INDIVIDUAL);
+    var d1 = f.call(z, g.call(f.call(g.call(f.call(gy, g.call(f.call(gw, w)))), w)));
+    d1.check(Type.INDIVIDUAL);
+    positive.add(Term.of(Tag.EQUALS, d0, d1));
+    var d = new Clause(negative, positive);
+
+    clauses.add(c);
+    clauses.add(d);
+    Superposition.sat(clauses, clauseLimit, steps);
   }
 }
