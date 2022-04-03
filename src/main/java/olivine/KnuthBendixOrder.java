@@ -46,21 +46,46 @@ public final class KnuthBendixOrder {
     for (var kv : vars(b).entrySet()) if (kv.getValue() > avars.get(kv.getKey())) return false;
 
     // total weight
-    var atotal = totalWeight(a);
-    var btotal = totalWeight(b);
-    if (atotal > btotal) return true;
-    if (atotal < btotal) return false;
+    var atotalWeight = totalWeight(a);
+    var btotalWeight = totalWeight(b);
+    if (atotalWeight > btotalWeight) return true;
+    if (atotalWeight < btotalWeight) return false;
 
     // different symbols
-    var asymbol = symbolWeight(a);
-    var bsymbol = symbolWeight(b);
-    if (asymbol > bsymbol) return true;
-    if (asymbol < bsymbol) return false;
+    var asymbolWeight = symbolWeight(a);
+    var bsymbolWeight = symbolWeight(b);
+    if (asymbolWeight > bsymbolWeight) return true;
+    if (asymbolWeight < bsymbolWeight) return false;
     assert a.tag() == b.tag();
+    assert a.size() == b.size();
+
+    // Constants
+    switch (a.tag()) {
+      case INTEGER -> {
+        return a.integerValue().compareTo(b.integerValue()) > 0;
+      }
+      case RATIONAL -> {
+        return a.rationalValue().compareTo(b.rationalValue()) > 0;
+      }
+      case DISTINCT_OBJECT -> {
+        // here, we rely on distinct objects being ordered by their names, in other words behaving
+        // as though they had
+        // value semantics. Strictly speaking, this is only guaranteed by the TPTP parser; it is not
+        // guaranteed by the
+        // DistinctObject class itself, which doesn't enforce unique names, and is happy to allow
+        // distinct objects
+        // to be compared by reference for efficiency in other contexts. so assert that
+        // the precondition holds here, i.e. different objects have different names
+        assert !a.toString().equals(b.toString());
+        return a.toString().compareTo(b.toString()) > 0;
+      }
+    }
 
     // recur
     var n = a.size();
-    assert n == b.size();
-    return true;
+    var i = 0;
+    while (i < n && !a.get(i).equals(b.get(i))) i++;
+    if (i == n) return false;
+    return greater(a.get(i), b.get(i));
   }
 }
