@@ -84,7 +84,7 @@ public final class KnuthBendixOrder {
     // recur
     var n = a.size();
     var i = 0;
-    while (i < n && !a.get(i).equals(b.get(i))) i++;
+    while (i < n && a.get(i).equals(b.get(i))) i++;
     if (i == n) return false;
     return greater(a.get(i), b.get(i));
   }
