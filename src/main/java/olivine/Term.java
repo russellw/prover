@@ -8,12 +8,14 @@ import java.util.function.Function;
 public abstract class Term implements Iterable<Term> {
   public FMap unify(FMap map, Term b) {
     assert map != null;
+    // TODO: optimize equals check?
     if (equals(b)) return map;
     if (!type().equals(b.type())) return null;
 
     if (b instanceof Var b1) return b1.unify(map, this);
 
     if (tag() != b.tag()) return null;
+    // TODO: optimize check for calls of different functions?
     var n = size();
     if (n == 0) return null;
 
