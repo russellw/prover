@@ -1,10 +1,8 @@
 # aid debugging of theorem prover by minifying a test case
 # that causes it to produce a different answer to another prover
 # commandline arguments are the commands for the two provers,
-# the full version of the test case,
+# the filename of the test case,
 # and an output filename for the minified version
-# example command for Olivine on WSL:
-# 'dotnet run --project /mnt/c/olivine'
 
 import argparse
 import inspect
@@ -730,4 +728,3 @@ if not test(x):
     raise Exception("Final test failed")
 
 print(open(args.outfile).read(), end="")
-# indVal = first(getGlobalInds(xs))
