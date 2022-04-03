@@ -490,7 +490,10 @@ formnames = 0
 def prformula(x):
     global formnames
     formnames += 1
-    pr("fof")
+    if freeVars(x):
+        pr("cnf")
+    else:
+        pr("fof")
     pr("(f")
 
     # name
@@ -709,6 +712,8 @@ xs = []
 read_tptp(args.infile, xs)
 x = tuple(["&"] + xs)
 if not test(x):
+    print(prove(prover1, x))
+    print(prove(prover2, x))
     raise Exception("Initial test failed")
 print(size(x))
 
