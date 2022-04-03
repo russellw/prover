@@ -43,7 +43,8 @@ public final class KnuthBendixOrder {
   public boolean greater(Term a, Term b) {
     // variables
     var avars = vars(a);
-    for (var kv : vars(b).entrySet()) if (kv.getValue() > avars.get(kv.getKey())) return false;
+    for (var kv : vars(b).entrySet())
+      if (kv.getValue() > avars.getOrDefault(kv.getKey(), 0)) return false;
 
     // total weight
     var atotalWeight = totalWeight(a);
