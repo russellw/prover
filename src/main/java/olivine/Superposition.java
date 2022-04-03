@@ -4,7 +4,7 @@ import java.util.*;
 
 public final class Superposition {
   private final int clauseLimit;
-  private final LexicographicPathOrder order;
+  private final KnuthBendixOrder order;
   private PriorityQueue<Clause> passive =
       new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
 
@@ -236,7 +236,7 @@ public final class Superposition {
 
   private Superposition(List<Clause> clauses, int clauseLimit, long steps) {
     this.clauseLimit = clauseLimit;
-    order = new LexicographicPathOrder(clauses);
+    order = new KnuthBendixOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
     for (var c : clauses) {
