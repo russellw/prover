@@ -647,6 +647,7 @@ def remove_param(fn, i, x):
 
 
 def apply_shrink(s, x):
+    print(s)
     if s[0] == "delete":
         v = s[1]
         return simplify(delete(v, x))
