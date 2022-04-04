@@ -540,32 +540,36 @@ def prove(prover, x):
         xs = [x]
     write_tmp(xs)
     cmd = prover + [args.outfile]
-    p = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdout, stderr = p.communicate()
-    stdout = str(stdout, "utf-8")
-    stderr = str(stderr, "utf-8")
-    if stderr:
-        print(stderr, end="")
-        raise Exception(str(p.returncode))
-    ys = stdout.splitlines()
-    for y in ys:
-        if y == "sat":
-            return 1
-        if "SZS status Satisfiable" in y:
-            return 1
-        if "SZS status CounterSatisfiable" in y:
-            return 1
-        if y == "unsat":
-            return 0
-        if "SZS status Unsatisfiable" in y:
-            return 0
-        if "SZS status Theorem" in y:
-            return 0
-    return -1
+    print(cmd)
+    try:
+        p = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout, stderr = p.communicate(timeout=60)
+        stdout = str(stdout, "utf-8")
+        stderr = str(stderr, "utf-8")
+        if stderr:
+            print(stderr, end="")
+            raise Exception(str(p.returncode))
+        ys = stdout.splitlines()
+        for y in ys:
+            if y == "sat":
+                return 1
+            if "SZS status Satisfiable" in y:
+                return 1
+            if "SZS status CounterSatisfiable" in y:
+                return 1
+            if y == "unsat":
+                return 0
+            if "SZS status Unsatisfiable" in y:
+                return 0
+            if "SZS status Theorem" in y:
+                return 0
+        return -1
+    except subprocess.TimeoutExpired:
+        return -1
 
 
 def test(x):
