@@ -68,7 +68,7 @@ final class Prover {
 
     try {
       System.out.println(solve(file, 10000000, steps) ? "sat" : "unsat");
-    } catch (Inappropriate | Fail ignored) {
+    } catch (Fail ignored) {
     }
   }
 }
