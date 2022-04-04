@@ -19,7 +19,7 @@ public final class KnuthBendixOrder {
     var map = new HashMap<Var, Integer>();
     a.walkLeaves(
         b -> {
-          if (b instanceof Var b1) map.put(b1, map.getOrDefault(b1, 0));
+          if (b instanceof Var b1) map.put(b1, map.getOrDefault(b1, 0) + 1);
         });
     return map;
   }
