@@ -528,8 +528,12 @@ def write_tmp(xs):
 
 ######################################## test
 
+stdout = ""
+stderr = ""
+
 
 def prove(prover, x):
+    global stdout, stderr
     if isinstance(x, tuple) and x[0] == "&":
         xs = x[1:]
     else:
@@ -712,8 +716,14 @@ xs = []
 read_tptp(args.infile, xs)
 x = tuple(["&"] + xs)
 if not test(x):
-    print(prove(prover1, x))
-    print(prove(prover2, x))
+    r1 = prove(prover1, x)
+    if r1 < 0:
+        print(stdout)
+    r2 = prove(prover2, x)
+    if r2 < 0:
+        print(stdout)
+    print(r1)
+    print(r2)
     raise Exception("Initial test failed")
 print(size(x))
 
