@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
-final class Test {
+final class ProverTest {
   private static final Pattern TPTP_PATTERN =
       Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]\\d\\d\\d.\\d+(\\.\\d+)?");
   private static final Pattern STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
@@ -18,7 +18,7 @@ final class Test {
   private static int maxFiles = -1;
   private static long steps = 100;
 
-  private Test() {}
+  private ProverTest() {}
 
   private static void addFile(String s) throws IOException {
     // accept unadorned TPTP
@@ -126,18 +126,9 @@ final class Test {
       var status = status(file);
       System.out.printf("%s\t%s\t", file, status);
       var start1 = System.currentTimeMillis();
-      try (var stream = new BufferedInputStream(new FileInputStream(file))) {
-        // read
-        var cnf = new CNF();
-        TptpParser.parse(file, stream, cnf);
-
-        // solve
-        var sat = Superposition.sat(cnf.clauses, 10000000, steps);
-
-        // output
+      try {
+        var sat = Prover.solve(file, 10000000, steps);
         System.out.printf("%s\t%.3f\n", sat ? "sat" : "uns", time(start1));
-
-        // check
         if (status != null)
           switch (status) {
             case "ContradictoryAxioms", "Unsatisfiable", "Theorem" -> {
