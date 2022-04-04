@@ -379,9 +379,8 @@ def read_tptp(filename, formulas, select=True):
         return select is True or name in select
 
     def source_record(derived_from):
-        if tok == "file":
+        if not eat("inference"):
             return
-        expect("inference")
         expect("(")
         lex()
         expect(",")
@@ -628,6 +627,8 @@ def prove(xs):
         raise Exception(str(p.returncode))
     ys = stdout.splitlines()
     for y in ys:
+        if y == "unsat":
+            return 1
         if "SZS status Unsatisfiable" in y:
             return 1
     raise Exception(xs)
