@@ -65,6 +65,9 @@ if r1 < 0:
 r2 = prove(prover2)
 if r2 < 0:
     print(stdout)
+if r1 < 0 or r2 < 0:
+    print("did not get two answers")
+    exit(1)
 if r1 == r2:
     print("answers are not different")
     exit(1)
