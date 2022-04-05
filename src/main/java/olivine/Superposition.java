@@ -40,6 +40,26 @@ public final class Superposition {
     return order.compare(c0, c1) == KnuthBendixOrder.LESS;
   }
 
+  private int compare(boolean pol0, Equation e0, boolean pol1, Equation e1) {
+    assert !less(e0.left, e0.right);
+    assert !less(e1.left, e1.right);
+    var c = order.compare(e0.left, e1.left);
+    if (c != KnuthBendixOrder.EQUALS) return c;
+    if (pol0 != pol1) return pol0 ? KnuthBendixOrder.LESS : KnuthBendixOrder.GREATER;
+    return order.compare(e0.right, e1.right);
+  }
+
+  private boolean maybeMaximal(Clause c, int i, Equation e) {
+    var pol = i >= c.negativeSize;
+    for (var j = 0; j < c.literals.length; j++) {
+      if (i == j) continue;
+      var pol1 = j >= c.negativeSize;
+      var e1 = new Equation(c.literals[j]);
+      if (compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return false;
+    }
+    return true;
+  }
+
   /*
   Equality resolution
     c | c0 != c1
@@ -215,6 +235,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
+      if (!maybeMaximal(d, di, e)) continue;
       var d0 = e.left;
       var d1 = e.right;
       assert !less(d0, d1);
@@ -227,6 +248,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
+      if (!maybeMaximal(c, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
       assert !less(c0, c1);
