@@ -117,7 +117,6 @@ public final class Superposition {
 
   // For each positive equation (both directions) again
   private void factor(Clause c, int ci, Term c0, Term c1) {
-    if (less(c0, c1)) return;
     for (var cj = c.negativeSize; cj < c.literals.length; cj++) {
       if (cj == ci) continue;
       var e = new Equation(c.literals[cj]);
@@ -134,8 +133,9 @@ public final class Superposition {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
+      assert !less(c0, c1);
       factor(c, ci, c0, c1);
-      factor(c, ci, c1, c0);
+      if (!less(c1, c0)) factor(c, ci, c1, c0);
     }
   }
 
@@ -213,12 +213,12 @@ public final class Superposition {
 
   // For each equation in d (both directions)
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
-    if (less(c0, c1)) return;
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
       var d0 = e.left;
       var d1 = e.right;
-      if (!less(d0, d1)) superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
+      assert !less(d0, d1);
+      superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
       if (!less(d1, d0)) superposition(c, d, ci, c0, c1, di, d1, d0, new ArrayList<>(), d1);
     }
   }
@@ -229,8 +229,9 @@ public final class Superposition {
       var e = new Equation(c.literals[ci]);
       var c0 = e.left;
       var c1 = e.right;
+      assert !less(c0, c1);
       superposition(c, d, ci, c0, c1);
-      superposition(c, d, ci, c1, c0);
+      if (!less(c1, c0)) superposition(c, d, ci, c1, c0);
     }
   }
 
@@ -262,6 +263,17 @@ public final class Superposition {
       if (g.isFalse()) {
         result = false;
         return;
+      }
+
+      // the time to put all the equations in this clause in the right order is now,
+      // late enough that we know we are actually going to use this clause,
+      // but early enough that we can do it just once
+      for (var i = 0; i < g.literals.length; i++) {
+        var a = g.literals[i];
+        if (a.tag() != Tag.EQUALS) continue;
+        var x = a.get(0);
+        var y = a.get(1);
+        if (order.compare(x, y) == KnuthBendixOrder.LESS) g.literals[i] = Term.of(Tag.EQUALS, y, x);
       }
 
       // Rename variables, because subsumption and superposition both assume
