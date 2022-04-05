@@ -51,18 +51,22 @@ public class KnuthBendixOrderTest {
     makeOrder();
   }
 
-  @org.junit.Test
+  private boolean greater(Term a, Term b) {
+    return order.compare(a, b) == KnuthBendixOrder.GREATER;
+  }
+
+  @Test
   public void randomTest() {
     makeRandomOrder();
     for (var i = 0; i < ITERATIONS; i++) {
       var a = randomIndividualTerm(4);
       var b = randomIndividualTerm(4);
-      assertFalse(order.greater(a, b) && a.equals(b));
-      assertFalse(order.greater(a, b) && order.greater(b, a));
+      assertFalse(greater(a, b) && a.equals(b));
+      assertFalse(greater(a, b) && greater(b, a));
     }
   }
 
-  @org.junit.Test
+  @Test
   public void greater() {
     var red = new DistinctObject("red");
     var green = new DistinctObject("green");
@@ -129,12 +133,12 @@ public class KnuthBendixOrderTest {
   }
 
   private void checkOrdered(Term a, Term b) {
-    assertTrue(order.greater(a, b) || order.greater(b, a));
+    assertTrue(greater(a, b) || greater(b, a));
   }
 
   private void checkUnordered(Term a, Term b) {
-    assertFalse(order.greater(a, b));
-    assertFalse(order.greater(b, a));
+    assertFalse(greater(a, b));
+    assertFalse(greater(b, a));
   }
 
   private static boolean containsSubterm(Term a, Term b) {
@@ -143,7 +147,7 @@ public class KnuthBendixOrderTest {
     return false;
   }
 
-  @org.junit.Test
+  @Test
   public void totalOnGroundTerms() {
     makeRandomOrder();
     vars.clear();
@@ -161,8 +165,8 @@ public class KnuthBendixOrderTest {
       var a = randomIndividualTerm(4);
       var b = randomIndividualTerm(4);
       if (a.equals(b)) continue;
-      if (containsSubterm(a, b)) assertTrue(order.greater(a, b));
-      if (containsSubterm(b, a)) assertTrue(order.greater(b, a));
+      if (containsSubterm(a, b)) assertTrue(greater(a, b));
+      if (containsSubterm(b, a)) assertTrue(greater(b, a));
     }
   }
 }

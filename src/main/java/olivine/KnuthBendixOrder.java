@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public final class KnuthBendixOrder {
+  public static final int EQUALS = 1;
+  public static final int LESS = 1 << 1;
+  public static final int GREATER = 1 << 2;
+  public static final int UNORDERED = 0;
+
   private final Map<Term, Integer> weights = new HashMap<>();
 
   public KnuthBendixOrder(List<Clause> clauses) {
@@ -40,33 +45,51 @@ public final class KnuthBendixOrder {
     return n;
   }
 
-  public boolean greater(Term a, Term b) {
+  private static int comparison(int d) {
+    if (d < 0) return LESS;
+    if (d == 0) return EQUALS;
+    return GREATER;
+  }
+
+  public int compare(Term a, Term b) {
     // variables
     var avars = vars(a);
-    for (var kv : vars(b).entrySet())
-      if (kv.getValue() > avars.getOrDefault(kv.getKey(), 0)) return false;
+    var bvars = vars(b);
+    var possible = LESS | GREATER;
+    for (var kv : avars.entrySet())
+      if (kv.getValue() > bvars.getOrDefault(kv.getKey(), 0)) {
+        possible &= ~LESS;
+        break;
+      }
+    for (var kv : bvars.entrySet())
+      if (kv.getValue() > avars.getOrDefault(kv.getKey(), 0)) {
+        possible &= ~GREATER;
+        break;
+      }
+    if (possible == UNORDERED) return UNORDERED;
 
     // total weight
     var atotalWeight = totalWeight(a);
     var btotalWeight = totalWeight(b);
-    if (atotalWeight > btotalWeight) return true;
-    if (atotalWeight < btotalWeight) return false;
+    if (atotalWeight < btotalWeight) return possible & LESS;
+    if (atotalWeight > btotalWeight) return possible & GREATER;
 
     // different symbols
     var asymbolWeight = symbolWeight(a);
     var bsymbolWeight = symbolWeight(b);
-    if (asymbolWeight > bsymbolWeight) return true;
-    if (asymbolWeight < bsymbolWeight) return false;
+    if (asymbolWeight < bsymbolWeight) return possible & LESS;
+    if (asymbolWeight > bsymbolWeight) return possible & GREATER;
     assert a.tag() == b.tag();
     assert a.size() == b.size();
 
     // Constants
+    // TODO: cast
     switch (a.tag()) {
       case INTEGER -> {
-        return a.integerValue().compareTo(b.integerValue()) > 0;
+        return comparison(a.integerValue().compareTo(b.integerValue()));
       }
       case RATIONAL -> {
-        return a.rationalValue().compareTo(b.rationalValue()) > 0;
+        return comparison(a.rationalValue().compareTo(b.rationalValue()));
       }
       case DISTINCT_OBJECT -> {
         // here, we rely on distinct objects being ordered by their names, in other words behaving
@@ -77,8 +100,8 @@ public final class KnuthBendixOrder {
         // distinct objects
         // to be compared by reference for efficiency in other contexts. so assert that
         // the precondition holds here, i.e. different objects have different names
-        assert !a.toString().equals(b.toString());
-        return a.toString().compareTo(b.toString()) > 0;
+        assert !(a != b && a.toString().equals(b.toString()));
+        return comparison(a.toString().compareTo(b.toString()));
       }
     }
 
@@ -86,7 +109,7 @@ public final class KnuthBendixOrder {
     var n = a.size();
     var i = 0;
     while (i < n && a.get(i).equals(b.get(i))) i++;
-    if (i == n) return false;
-    return greater(a.get(i), b.get(i));
+    if (i == n) return EQUALS;
+    return compare(a.get(i), b.get(i));
   }
 }

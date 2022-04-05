@@ -37,7 +37,7 @@ public final class Superposition {
   }
 
   private boolean less(Term c0, Term c1) {
-    return order.greater(c1, c0);
+    return order.compare(c0, c1) == KnuthBendixOrder.LESS;
   }
 
   /*
