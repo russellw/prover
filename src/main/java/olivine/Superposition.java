@@ -52,7 +52,7 @@ public final class Superposition {
   private boolean maybeMaximal(Clause c, int i, Equation e) {
     var pol = i >= c.negativeSize;
     for (var j = 0; j < c.literals.length; j++) {
-      if (i == j) continue;
+      if (j == i) continue;
       var pol1 = j >= c.negativeSize;
       var e1 = new Equation(c.literals[j]);
       if (compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return false;
@@ -88,6 +88,7 @@ public final class Superposition {
   private void resolve(Clause c) {
     for (var ci = 0; ci < c.negativeSize; ci++) {
       var e = new Equation(c.literals[ci]);
+      if (!maybeMaximal(c, ci, e)) continue;
       var map = e.left.unify(FMap.EMPTY, e.right);
       if (map != null) resolve(c, ci, map);
     }
@@ -112,14 +113,8 @@ public final class Superposition {
     // If these two terms are not equatable (for which the types must match, and predicates can only
     // be equated with True),
     // substituting terms for variables would not make them become so.
+    // TODO: c1=true?
     if (!Equation.equatable(c1, c3)) return;
-
-    // Order check. We already checked the equation order before substitution, because failing the
-    // check at that point
-    // saves time, but it's possible for two terms to be unordered before substitution but ordered
-    // after it,
-    // so we need to repeat the check now
-    if (less(c0.replace(map), c1.replace(map))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
@@ -151,6 +146,7 @@ public final class Superposition {
   private void factor(Clause c) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
+      if (!maybeMaximal(c, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
       assert !less(c0, c1);
@@ -186,9 +182,6 @@ public final class Superposition {
 
     var d0c1 = d0.splice(position, 0, c1);
     if (!Equation.equatable(d0c1, d1)) return;
-
-    if (less(c0.replace(map), c1.replace(map))) return;
-    if (less(d0.replace(map), d1.replace(map))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
