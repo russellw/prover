@@ -58,7 +58,6 @@ parser.add_argument("prover")
 parser.add_argument("problems")
 parser.add_argument("-b", "--batch", help="batch size limit")
 parser.add_argument("-p", "--proof", help="extract proofs", action="store_true")
-parser.add_argument("-q", "--quiet", help="suppress errors", action="store_true")
 parser.add_argument("-s", "--shuffle", help="shuffle problem list", action="store_true")
 args = parser.parse_args()
 
@@ -105,10 +104,6 @@ for filename in problems:
         )
         stdout, stderr = p.communicate(timeout=60)
         stdout = str(stdout, "utf-8")
-        stderr = str(stderr, "utf-8")
-        if not args.quiet and stderr:
-            print(stderr, end="")
-            raise Exception(str(p.returncode))
         stdout = stdout.split("\n")
 
         result = "-"
@@ -135,6 +130,7 @@ for filename in problems:
                 for x in stdout:
                     f.write(x + "\n")
     except subprocess.TimeoutExpired:
+        p.kill()
         print("Timeout", end="\t")
     print("%.3f" % (time.time() - start))
 print("%d/%d" % (solved, attempted))
