@@ -8,6 +8,8 @@ import sys
 import random
 import logging
 
+os.nice(20)
+
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.DEBUG)
@@ -68,6 +70,8 @@ if problems.casefold() == "tptp".casefold():
                 problems.append(os.path.join(root, filename))
 elif problems.endswith(".lst"):
     problems = [s.rstrip() for s in open(problems)]
+else:
+    problems = [problems]
 
 
 if args.shuffle:
