@@ -96,6 +96,7 @@ for filename in problems:
     sys.stdout.flush()
     cmd = prover + [filename]
     start = time.time()
+    stderr = ""
     try:
         p = subprocess.Popen(
             cmd,
@@ -104,6 +105,7 @@ for filename in problems:
         )
         stdout, stderr = p.communicate(timeout=60)
         stdout = str(stdout, "utf-8")
+        stderr = str(stderr, "utf-8")
         stdout = stdout.split("\n")
 
         result = "-"
@@ -133,4 +135,6 @@ for filename in problems:
         p.kill()
         print("Timeout", end="\t")
     print("%.3f" % (time.time() - start))
+    if stderr:
+        print(stderr, end="")
 print("%d/%d" % (solved, attempted))
