@@ -15,6 +15,13 @@ public abstract class Type {
     throw new UnsupportedOperationException(kind().toString());
   }
 
+  public int compareTo(Type b) {
+    // ordered comparison of types is not particularly meaningful, but that doesn't matter;
+    // superposition calculus needs a total order on ground terms, which for some terms,
+    // means ordering by type, so we need a total order on types
+    return kind().compareTo(b.kind());
+  }
+
   public static Type of(Kind kind, Type... v) {
     return new Types(kind, v);
   }
@@ -78,6 +85,20 @@ public abstract class Type {
     private Types(Kind kind, Type[] v) {
       this.kind = kind;
       this.v = v;
+    }
+
+    @Override
+    public int compareTo(Type b) {
+      var c = kind.compareTo(b.kind());
+      if (c != 0) return c;
+      var b1 = (Types) b;
+      if (v.length != b1.v.length) return v.length - b1.v.length;
+      for (var i = 0; i < v.length; i++) {
+        c = v[i].compareTo(b1.v[i]);
+        if (c != 0) return c;
+      }
+      assert equals(b);
+      return 0;
     }
 
     @Override

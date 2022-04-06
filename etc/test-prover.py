@@ -57,8 +57,12 @@ parser = argparse.ArgumentParser(description="Test prover")
 parser.add_argument("prover")
 parser.add_argument("problems")
 parser.add_argument("-b", "--batch", help="batch size limit")
+parser.add_argument(
+    "-o", "--output-solved", help="output list of solved problems to a file"
+)
 parser.add_argument("-p", "--proof", help="extract proofs", action="store_true")
 parser.add_argument("-s", "--shuffle", help="shuffle problem list", action="store_true")
+parser.add_argument("-t", "--cpu-limit", help="time limit per problem")
 args = parser.parse_args()
 
 prover = args.prover.split()
@@ -76,17 +80,20 @@ elif problems.endswith(".lst"):
 else:
     problems = [problems]
 
-
 if args.shuffle:
     random.seed(0)
     random.shuffle(problems)
+
+timeout = 60.0
+if args.cpu_limit:
+    timeout = float(args.cpu_limit)
 
 attempted = 0
 solved = 0
 for filename in problems:
     if "^" in filename:
         continue
-    if args.batch and attempted == args.batch:
+    if args.batch and attempted == int(args.batch):
         break
     attempted += 1
     pname = os.path.basename(os.path.splitext(filename)[0])
@@ -103,7 +110,7 @@ for filename in problems:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        stdout, stderr = p.communicate(timeout=60)
+        stdout, stderr = p.communicate(timeout=timeout)
         stdout = str(stdout, "utf-8")
         stderr = str(stderr, "utf-8")
         stdout = stdout.split("\n")
@@ -131,6 +138,12 @@ for filename in problems:
             with open(pname + "-proof.p", "w") as f:
                 for x in stdout:
                     f.write(x + "\n")
+
+        if meaning(result):
+            solved += 1
+            if args.output_solved:
+                osf = open(args.output_solved, "a")
+                osf.write(filename + "\n")
     except subprocess.TimeoutExpired:
         p.kill()
         print("Timeout", end="\t")

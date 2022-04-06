@@ -51,6 +51,8 @@ public final class KnuthBendixOrder {
     return GREATER;
   }
 
+  // TODO: shortcut comparison of identical terms?
+  // TODO: pacman lemma?
   public int compare(Term a, Term b) {
     // variables
     var avars = vars(a);
