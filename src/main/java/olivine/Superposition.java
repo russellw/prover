@@ -110,10 +110,23 @@ public final class Superposition {
     var map = c0.unify(FMap.EMPTY, c2);
     if (map == null) return;
 
+    // the test for c1=c3 being a valid equation, would strictly speaking fail if c1=True and c3
+    // is some other predicate.
+    // (That would be a valid equation, just the wrong way round; in superposition calculus,
+    // that means the equation should be turned  the right way round, not discarded.)
+    // But if c1=True, c0 is a predicate
+    // that is not True (or the clause would have been a tautology, filtered out earlier), so c2 is
+    // a
+    // predicate that is not True (or unification would have failed; there is no such thing as a
+    // Boolean
+    // variable in first-order logic), so c3
+    // can only be True (because an equation with a predicate other than True on one side,
+    // can only have True on the other)
+    assert !(c1 == Term.TRUE && c3 != Term.TRUE);
+
     // If these two terms are not equatable (for which the types must match, and predicates can only
     // be equated with True),
     // substituting terms for variables would not make them become so.
-    // TODO: c1=true?
     if (!Equation.equatable(c1, c3)) return;
 
     // Negative literals
@@ -181,6 +194,17 @@ public final class Superposition {
     if (map == null) return;
 
     var d0c1 = d0.splice(position, 0, c1);
+
+    // the test for d0c1=d1 being a valid equation, would strictly speaking fail if d0c1=True and d1
+    // is some other predicate. But if d0c1=True, c1=True, c0 is a predicate
+    // that is not True (or the clause would have been a tautology, filtered out earlier), so d0(a)
+    // is a
+    // predicate that is not True (or unification would have failed; there is no such thing as a
+    // Boolean
+    // variable in first-order logic), so d1
+    // can only be True (because an equation with a predicate other than True on one side,
+    // can only have True on the other)
+    assert !(d0c1 == Term.TRUE && d1 != Term.TRUE);
     if (!Equation.equatable(d0c1, d1)) return;
 
     // Negative literals
