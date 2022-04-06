@@ -26,16 +26,18 @@ def getExpected(filename):
     return "-"
 
 
-def meaning(szs):
-    if szs == "Satisfiable":
+def meaning(s):
+    if s in ("sat", "unsat"):
+        return s
+    if s == "Satisfiable":
         return "sat"
-    if szs == "CounterSatisfiable":
+    if s == "CounterSatisfiable":
         return "sat"
-    if szs == "Unsatisfiable":
+    if s == "Unsatisfiable":
         return "unsat"
-    if szs == "Theorem":
+    if s == "Theorem":
         return "unsat"
-    if szs == "ContradictoryAxioms":
+    if s == "ContradictoryAxioms":
         return "unsat"
 
 
@@ -103,9 +105,13 @@ for filename in problems:
 
         result = "-"
         for x in stdout:
+            if x in ("sat", "unsat"):
+                result = x
+                break
             m = re.match(r".*SZS status (\w+)", x)
             if m:
                 result = m[1]
+                break
         print(result, end="\t")
 
         if (

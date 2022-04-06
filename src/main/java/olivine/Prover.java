@@ -13,8 +13,9 @@ final class Prover {
   private Prover() {}
 
   private static void help() {
-    System.out.println("-h  Show help");
-    System.out.println("-V  Show version");
+    System.out.println("-h          Show help");
+    System.out.println("-V          Show version");
+    System.out.println("-t seconds  Time limit");
   }
 
   private static void setFile(String s) {
@@ -38,7 +39,7 @@ final class Prover {
             help();
             System.exit(0);
           }
-          case "t", "cpu-limit" -> {
+          case "t", "T", "cpu-limit" -> {
             var seconds = Double.parseDouble(option.getArg());
             new Timer()
                 .schedule(
