@@ -8,7 +8,11 @@ import sys
 import random
 import logging
 
-os.nice(20)
+try:
+    os.nice(20)
+except AttributeError:
+    # Python on Windows doesn't have 'nice'
+    pass
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler(sys.stdout))
