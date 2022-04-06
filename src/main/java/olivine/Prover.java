@@ -3,6 +3,8 @@ package olivine;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 final class Prover {
   private static String file;
@@ -35,6 +37,18 @@ final class Prover {
           case "?", "h", "help" -> {
             help();
             System.exit(0);
+          }
+          case "t", "cpu-limit" -> {
+            var seconds = Double.parseDouble(option.getArg());
+            new Timer()
+                .schedule(
+                    new TimerTask() {
+                      @Override
+                      public void run() {
+                        System.exit(1);
+                      }
+                    },
+                    (long) (seconds * 1000));
           }
           case "V", "version" -> {
             Etc.printVersion();
