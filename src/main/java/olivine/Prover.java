@@ -75,15 +75,21 @@ final class Prover {
   }
 
   public static void main(String[] args) throws IOException {
-    args(args);
-    if (file == null) {
-      System.err.println("Input not specified");
-      System.exit(1);
-    }
-
     try {
+      args(args);
+      if (file == null) {
+        System.err.println("Input not specified");
+        System.exit(1);
+      }
+
       System.out.println(solve(file, 10000000, steps) ? "sat" : "unsat");
     } catch (Fail ignored) {
+      System.exit(0);
+    } catch (Throwable e) {
+      // this needs to be done explicitly in case there is a timer thread still running,
+      // which would cause the program to hang until timeout without the explicit System.exit
+      e.printStackTrace();
+      System.exit(1);
     }
   }
 }
