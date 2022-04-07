@@ -96,6 +96,16 @@ timeout = 60.0
 if args.cpu_limit:
     timeout = float(args.cpu_limit)
 
+alreadyWritten = set()
+if args.output_solved:
+    try:
+        for s in open(args.output_solved).readlines():
+            s = s.strip()
+            set.add(s)
+    except:
+        pass
+
+
 attempted = 0
 solved = 0
 for filename in problems:
@@ -150,7 +160,7 @@ for filename in problems:
 
         if meaning(result):
             solved += 1
-            if args.output_solved:
+            if args.output_solved and filename not in alreadyWritten:
                 osf = open(args.output_solved, "a")
                 osf.write(filename + "\n")
     except subprocess.TimeoutExpired:
