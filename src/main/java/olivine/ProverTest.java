@@ -8,7 +8,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 final class ProverTest {
-  private static final Pattern TPTP_PATTERN =
+  private static final Pattern TPTP_DOMAIN_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]");
+  private static final Pattern TPTP_PROBLEM_PATTERN =
       Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]\\d\\d\\d.\\d+(\\.\\d+)?");
   private static final Pattern STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
 
@@ -23,24 +24,32 @@ final class ProverTest {
   private static void addFile(String s) throws IOException {
     // accept unadorned TPTP
     if (s.equalsIgnoreCase("tptp")) {
-      var dir = System.getenv("TPTP");
-      if (dir == null) throw new IllegalStateException("TPTP environment variable not set");
       for (var file :
-          Files.walk(Path.of(dir))
+          Files.walk(Path.of(Etc.tptp()))
               .filter(p -> !Files.isDirectory(p))
               .map(Path::toString)
               .toArray(String[]::new)) addFile(file);
       return;
     }
 
-    // accept unadorned TPTP problem names
-    var matcher = TPTP_PATTERN.matcher(s);
+    // accept unadorned TPTP domain
+    var matcher = TPTP_DOMAIN_PATTERN.matcher(s);
     if (matcher.matches()) {
-      var dir = System.getenv("TPTP");
-      if (dir == null) throw new IllegalStateException("TPTP environment variable not set");
-      dir = String.format("%s/Problems/%s", dir, s.substring(0, 3));
-      s = s.toUpperCase(Locale.ROOT) + ".p";
-      files.add(Path.of(dir, s).toString());
+      s = s.toUpperCase(Locale.ROOT);
+      for (var file :
+          Files.walk(Path.of(Etc.tptp(), "Problems", s))
+              .filter(p -> !Files.isDirectory(p))
+              .map(Path::toString)
+              .toArray(String[]::new)) addFile(file);
+      return;
+    }
+
+    // accept unadorned TPTP problem name
+    matcher = TPTP_PROBLEM_PATTERN.matcher(s);
+    if (matcher.matches()) {
+      s = s.toUpperCase(Locale.ROOT);
+      var domain = s.substring(0, 3);
+      files.add(Path.of(Etc.tptp(), "Problems", domain, s + ".p").toString());
       return;
     }
 

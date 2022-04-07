@@ -732,9 +732,7 @@ public final class TptpParser {
           }
           case "thf" -> throw new Inappropriate();
           case "include" -> {
-            var dir = System.getenv("TPTP");
-            if (dir == null) throw err("TPTP environment variable not set");
-            var file1 = Path.of(dir, name).toString();
+            var file1 = Path.of(Etc.tptp(), name).toString();
             var select1 = select;
             if (eat(',')) {
               if (tok == WORD && tokString.equals("all")) {
