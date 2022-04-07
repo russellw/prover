@@ -125,6 +125,7 @@ for filename in problems:
 
         result = "-"
         for x in stdout:
+            x = x.strip()
             if x in ("sat", "unsat"):
                 result = x
                 break
