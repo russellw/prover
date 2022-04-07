@@ -53,7 +53,6 @@ def hasProof(xs):
             return 1
 
 
-# TODO: random seed option
 parser = argparse.ArgumentParser(description="Test prover")
 parser.add_argument("prover")
 parser.add_argument("problems")
@@ -62,8 +61,9 @@ parser.add_argument(
     "-o", "--output-solved", help="output list of solved problems to a file"
 )
 parser.add_argument("-p", "--proof", help="extract proofs", action="store_true")
+parser.add_argument("-r", "--random-seed", help="deterministic random sequence")
 parser.add_argument("-s", "--shuffle", help="shuffle problem list", action="store_true")
-parser.add_argument("-t", "--cpu-limit", help="time limit per problem")
+parser.add_argument("-t", "--cpu-limit", help="time limit (seconds) per problem")
 args = parser.parse_args()
 
 prover = args.prover.split()
@@ -90,7 +90,8 @@ else:
     problems = [problems]
 
 if args.shuffle:
-    random.seed(0)
+    if args.random_seed:
+        random.seed(args.random_seed)
     random.shuffle(problems)
 
 timeout = 60.0
