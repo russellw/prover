@@ -141,6 +141,10 @@ public class KnuthBendixOrderTest {
     assertFalse(greater(b, a));
   }
 
+  private void checkEqual(Term a, Term b) {
+    assertEquals(order.compare(a, b), KnuthBendixOrder.EQUALS);
+  }
+
   private static boolean containsSubterm(Term a, Term b) {
     if (a.equals(b)) return true;
     for (var ai : a) if (containsSubterm(ai, b)) return true;
@@ -168,5 +172,21 @@ public class KnuthBendixOrderTest {
       if (containsSubterm(a, b)) assertTrue(greater(a, b));
       if (containsSubterm(b, a)) assertTrue(greater(b, a));
     }
+  }
+
+  @Test
+  public void cast() {
+    var negative = new ArrayList<Term>();
+    var positive = new ArrayList<Term>();
+    var a = new GlobalVar("a", Type.REAL);
+    var b = new GlobalVar("b", Type.REAL);
+    positive.add(Term.of(Tag.EQUALS, a, b));
+    var clauses = new ArrayList<Clause>();
+    clauses.add(new Clause(negative, positive));
+    order = new KnuthBendixOrder(clauses);
+
+    checkOrdered(Term.cast(Type.REAL, a), Term.cast(Type.RATIONAL, a));
+    checkOrdered(Term.cast(Type.REAL, a), Term.cast(Type.REAL, b));
+    checkEqual(Term.cast(Type.REAL, a), Term.cast(Type.REAL, a));
   }
 }

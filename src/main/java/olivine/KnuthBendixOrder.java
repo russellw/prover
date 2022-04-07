@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public final class KnuthBendixOrder {
+  // comparison is usually encoded as a three-way integer. Here, the presence of variables
+  // (which substitution could expand into any term) make some pairs of terms unordered
+  // (because the result could change depending on what the variables are replaced with),
+  // so we need four-way comparison. The actual values should be treated as arbitrary
+  // by client code; they are chosen to make certain logical operations efficient
   public static final int EQUALS = 1;
   public static final int LESS = 1 << 1;
   public static final int GREATER = 1 << 2;
@@ -45,9 +50,9 @@ public final class KnuthBendixOrder {
     return n;
   }
 
-  private static int comparison(int d) {
-    if (d < 0) return LESS;
-    if (d == 0) return EQUALS;
+  private static int fourWay(int c) {
+    if (c < 0) return LESS;
+    if (c == 0) return EQUALS;
     return GREATER;
   }
 
@@ -76,7 +81,7 @@ public final class KnuthBendixOrder {
     if (atotalWeight < btotalWeight) return possible & LESS;
     if (atotalWeight > btotalWeight) return possible & GREATER;
 
-    // different symbols
+    // different tags or functions mean different symbols
     var asymbolWeight = symbolWeight(a);
     var bsymbolWeight = symbolWeight(b);
     if (asymbolWeight < bsymbolWeight) return possible & LESS;
@@ -84,14 +89,18 @@ public final class KnuthBendixOrder {
     assert a.tag() == b.tag();
     assert a.size() == b.size();
 
-    // Constants
-    // TODO: cast
+    // in some cases, the same tags can still mean different symbols, e.g. constants
+    // with different values, or casts to different types
     switch (a.tag()) {
+      case CAST -> {
+        var c = a.type().compareTo(b.type());
+        if (c != 0) return fourWay(c);
+      }
       case INTEGER -> {
-        return comparison(a.integerValue().compareTo(b.integerValue()));
+        return fourWay(a.integerValue().compareTo(b.integerValue()));
       }
       case RATIONAL -> {
-        return comparison(a.rationalValue().compareTo(b.rationalValue()));
+        return fourWay(a.rationalValue().compareTo(b.rationalValue()));
       }
       case DISTINCT_OBJECT -> {
         // here, we rely on distinct objects being ordered by their names, in other words behaving
@@ -103,7 +112,7 @@ public final class KnuthBendixOrder {
         // to be compared by reference for efficiency in other contexts. so assert that
         // the precondition holds here, i.e. different objects have different names
         assert !(a != b && a.toString().equals(b.toString()));
-        return comparison(a.toString().compareTo(b.toString()));
+        return fourWay(a.toString().compareTo(b.toString()));
       }
     }
 
