@@ -17,6 +17,10 @@ public final class Stats {
     map.put(key, map.getOrDefault(key, 0L) + n);
   }
 
+  public static void inc(String key, long i, long n) {
+    inc(key + '/' + i, n);
+  }
+
   public static void print() {
     if (map.isEmpty()) return;
     System.out.println();
