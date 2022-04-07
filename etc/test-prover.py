@@ -108,7 +108,6 @@ if args.output_solved:
     except:
         pass
 
-
 attempted = 0
 solved = 0
 for filename in problems:
@@ -162,6 +161,11 @@ for filename in problems:
                     f.write(x + "\n")
 
         if meaning(result):
+            # At this stage of development,
+            # if the prover thinks it has solved an open problem,
+            # it's a bug
+            if expected in ("Open", "Unknown"):
+                raise Exception(expected)
             solved += 1
             if args.output_solved and filename not in alreadyWritten:
                 osf = open(args.output_solved, "a")
