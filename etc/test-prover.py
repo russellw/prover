@@ -75,6 +75,14 @@ if problems.casefold() == "tptp".casefold():
         for filename in files:
             if os.path.splitext(filename)[1] == ".p":
                 problems.append(os.path.join(root, filename))
+elif re.match(r"[a-zA-Z][a-zA-Z][a-zA-Z]", problems):
+    tptp = os.getenv("TPTP")
+    domain = problems.upper()
+    problems = []
+    for root, dirs, files in os.walk(tptp + "/Problems/" + domain):
+        for filename in files:
+            if os.path.splitext(filename)[1] == ".p":
+                problems.append(os.path.join(root, filename))
 elif problems.endswith(".lst"):
     problems = [s.rstrip() for s in open(problems)]
 else:
