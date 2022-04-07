@@ -66,6 +66,7 @@ parser.add_argument("-s", "--shuffle", help="shuffle problem list", action="stor
 parser.add_argument("-t", "--cpu-limit", help="time limit (seconds) per problem")
 args = parser.parse_args()
 
+print(args.prover)
 prover = args.prover.split()
 problems = args.problems
 
