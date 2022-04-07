@@ -53,6 +53,7 @@ def hasProof(xs):
             return 1
 
 
+# TODO: random seed option
 parser = argparse.ArgumentParser(description="Test prover")
 parser.add_argument("prover")
 parser.add_argument("problems")

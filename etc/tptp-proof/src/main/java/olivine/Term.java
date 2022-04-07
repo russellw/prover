@@ -626,7 +626,6 @@ public abstract class Term implements Iterable<Term> {
     return w;
   }
 
-  // TODO: could this go in Func?
   public final Term call(Term... args) {
     assert args.length > 0;
     return of(Tag.CALL, this, args);

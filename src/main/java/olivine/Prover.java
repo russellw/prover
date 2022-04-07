@@ -15,6 +15,7 @@ final class Prover {
   private static void help() {
     System.out.println("-h          Show help");
     System.out.println("-V          Show version");
+    // TODO: can option arguments be separated by spaces?
     System.out.println("-t seconds  Time limit");
   }
 

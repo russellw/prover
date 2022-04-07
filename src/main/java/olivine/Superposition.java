@@ -235,6 +235,7 @@ public final class Superposition {
       if (i != di) positive.add(d.literals[i].replace(map));
 
     // Negative and positive superposition
+    // TODO: recheck maximality after map?
     (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
