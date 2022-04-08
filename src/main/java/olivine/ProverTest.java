@@ -136,7 +136,7 @@ final class ProverTest {
       System.out.printf("%s\t%s\t", file, status);
       var start1 = System.currentTimeMillis();
       try {
-        var sat = Prover.solve(file, 10000000, steps);
+        var sat = Prover.solve(file, steps);
         System.out.printf("%s\t%.3f\n", sat ? "sat" : "uns", time(start1));
         if (status != null)
           switch (status) {

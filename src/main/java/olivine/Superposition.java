@@ -3,7 +3,6 @@ package olivine;
 import java.util.*;
 
 public final class Superposition {
-  private final int clauseLimit;
   private final KnuthBendixOrder order;
   private PriorityQueue<Clause> passive =
       new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
@@ -24,6 +23,7 @@ public final class Superposition {
   private void clause(Clause c) {
     if (c.isTrue()) return;
     // TODO: is the clause limit useful?
+    var clauseLimit = 10000000;
     if (passive.size() >= clauseLimit) {
       var passive1 = new PriorityQueue<>(Comparator.comparingLong(Superposition::volume));
       for (var i = 0; i < clauseLimit / 2; i++) passive1.add(passive.poll());
@@ -292,8 +292,7 @@ public final class Superposition {
     }
   }
 
-  private Superposition(List<Clause> clauses, int clauseLimit, long steps) {
-    this.clauseLimit = clauseLimit;
+  private Superposition(List<Clause> clauses, long steps) {
     order = new KnuthBendixOrder(clauses);
     List<Clause> active = new ArrayList<>();
     var subsumption = new Subsumption();
@@ -360,7 +359,7 @@ public final class Superposition {
     result = true;
   }
 
-  public static boolean sat(List<Clause> clauses, int clauseLimit, long steps) {
-    return new Superposition(clauses, clauseLimit, steps).result;
+  public static boolean sat(List<Clause> clauses, long steps) {
+    return new Superposition(clauses, steps).result;
   }
 }

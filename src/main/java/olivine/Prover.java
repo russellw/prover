@@ -8,7 +8,6 @@ import java.util.TimerTask;
 
 final class Prover {
   private static String file;
-  private static long steps = Long.MAX_VALUE;
 
   private Prover() {}
 
@@ -67,11 +66,11 @@ final class Prover {
     }
   }
 
-  public static boolean solve(String file, int clauseLimit, long steps) throws IOException {
+  public static boolean solve(String file, long steps) throws IOException {
     try (var stream = new BufferedInputStream(new FileInputStream(file))) {
       var cnf = new CNF();
       TptpParser.parse(file, stream, cnf);
-      return Superposition.sat(cnf.clauses, clauseLimit, steps);
+      return Superposition.sat(cnf.clauses, steps);
     }
   }
 
@@ -83,7 +82,7 @@ final class Prover {
         System.exit(1);
       }
 
-      System.out.println(solve(file, 10000000, steps) ? "sat" : "unsat");
+      System.out.println(solve(file, Long.MAX_VALUE) ? "sat" : "unsat");
     } catch (Fail ignored) {
       System.exit(0);
     } catch (Throwable e) {
