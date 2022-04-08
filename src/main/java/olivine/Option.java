@@ -1,5 +1,9 @@
 package olivine;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +26,11 @@ public abstract class Option {
   }
 
   private static int help(Option[] options, boolean live, int width) {
+    if (live) {
+      System.out.print("@file");
+      for (var i = 5; i < width; i++) System.out.print(' ');
+      System.out.println("  read args from file");
+    }
     var width1 = 0;
     for (var option : options) {
       // short name
@@ -91,72 +100,80 @@ public abstract class Option {
     return null;
   }
 
-  public static void parse(Option[] options, String[] args) {
+  public static void parse(Option[] options, String[] args) throws IOException {
     for (var i = 0; i < args.length; i++) {
       var s = args[i];
-      if (parsingOptions) {
-        if (s.charAt(0) == '-') {
-          // -
-          if (s.length() == 1) {
-            readStdin = true;
+      if (parsingOptions)
+        switch (s.charAt(0)) {
+          case '@' -> {
+            parse(
+                options,
+                Files.readAllLines(Path.of(s.substring(1)), StandardCharsets.UTF_8)
+                    .toArray(new String[0]));
             continue;
           }
-
-          // option, maybe with option arg
-          Option option;
-          int argBegin;
-          if (s.charAt(1) == '-') {
-            // --
-            if (s.length() == 2) {
-              parsingOptions = false;
+          case '-' -> {
+            // -
+            if (s.length() == 1) {
+              readStdin = true;
               continue;
             }
 
-            // --opt[=arg]
-            argBegin = separator(s, 2);
-            option = getOption(options, s.substring(2, argBegin));
-            argBegin++;
-          } else if (s.length() == 2) {
-            // -o
-            option = getOption(options, s.charAt(1));
-            argBegin = s.length();
-          } else if (isSeparator(s.charAt(2))) {
-            // -o=arg
-            option = getOption(options, s.charAt(1));
-            argBegin = 3;
-          } else {
-            // -oarg
-            option = getOption(options, s.charAt(1));
-            argBegin = 2;
-          }
+            // option, maybe with option arg
+            Option option;
+            int argBegin;
+            if (s.charAt(1) == '-') {
+              // --
+              if (s.length() == 2) {
+                parsingOptions = false;
+                continue;
+              }
 
-          // the option was not found
-          if (option == null) {
-            System.err.printf("%s: unknown option\n", s);
-            System.exit(1);
-          }
+              // --opt[=arg]
+              argBegin = separator(s, 2);
+              option = getOption(options, s.substring(2, argBegin));
+              argBegin++;
+            } else if (s.length() == 2) {
+              // -o
+              option = getOption(options, s.charAt(1));
+              argBegin = s.length();
+            } else if (isSeparator(s.charAt(2))) {
+              // -o=arg
+              option = getOption(options, s.charAt(1));
+              argBegin = 3;
+            } else {
+              // -oarg
+              option = getOption(options, s.charAt(1));
+              argBegin = 2;
+            }
 
-          // not expecting arg
-          if (option.argName == null) {
-            if (argBegin < s.length()) {
-              System.err.printf("%s: unexpected arg\n", s);
+            // the option was not found
+            if (option == null) {
+              System.err.printf("%s: unknown option\n", s);
               System.exit(1);
             }
-            option.accept(null);
+
+            // not expecting arg
+            if (option.argName == null) {
+              if (argBegin < s.length()) {
+                System.err.printf("%s: unexpected arg\n", s);
+                System.exit(1);
+              }
+              option.accept(null);
+              continue;
+            }
+
+            // expecting arg
+            String arg = null;
+            if (argBegin < s.length()) arg = s.substring(argBegin);
+            else if (i + 1 == args.length) {
+              System.err.printf("%s: expected arg\n", s);
+              System.exit(1);
+            } else arg = args[++i];
+            option.accept(arg);
             continue;
           }
-
-          // expecting arg
-          String arg = null;
-          if (argBegin < s.length()) arg = s.substring(argBegin);
-          else if (i + 1 == args.length) {
-            System.err.printf("%s: expected arg\n", s);
-            System.exit(1);
-          } else arg = args[++i];
-          option.accept(arg);
-          continue;
         }
-      }
       positionalArgs.add(s);
     }
   }

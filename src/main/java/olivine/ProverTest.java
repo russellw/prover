@@ -13,7 +13,6 @@ final class ProverTest {
       Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]\\d\\d\\d.\\d+(\\.\\d+)?");
   private static final Pattern STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
 
-  private static List<String> files = new ArrayList<>();
   private static boolean shuffle;
   private static Random random = new Random();
   private static int maxAttempted = -1;
@@ -62,68 +61,8 @@ final class ProverTest {
 
   private ProverTest() {}
 
-  private static void addFile(String s) throws IOException {
-    // accept unadorned TPTP
-    if (s.equalsIgnoreCase("tptp")) {
-      for (var file :
-          Files.walk(Path.of(Etc.tptp()))
-              .filter(p -> !Files.isDirectory(p))
-              .map(Path::toString)
-              .toArray(String[]::new)) addFile(file);
-      return;
-    }
-
-    // accept unadorned TPTP domain
-    var matcher = TPTP_DOMAIN_PATTERN.matcher(s);
-    if (matcher.matches()) {
-      s = s.toUpperCase(Locale.ROOT);
-      for (var file :
-          Files.walk(Path.of(Etc.tptp(), "Problems", s))
-              .filter(p -> !Files.isDirectory(p))
-              .map(Path::toString)
-              .toArray(String[]::new)) addFile(file);
-      return;
-    }
-
-    // accept unadorned TPTP problem name
-    matcher = TPTP_PROBLEM_PATTERN.matcher(s);
-    if (matcher.matches()) {
-      s = s.toUpperCase(Locale.ROOT);
-      var domain = s.substring(0, 3);
-      files.add(Path.of(Etc.tptp(), "Problems", domain, s + ".p").toString());
-      return;
-    }
-
-    // skip things that are not TPTP problem files
-    if (!s.endsWith(".p")) return;
-
-    // skip higher order problems
-    if (s.contains("^")) return;
-
-    // this is a file to be processed
-    files.add(s);
-  }
-
-  private static void args(String[] v) throws IOException {
-    for (var s : v) {
-      var path = Path.of(s);
-      if (Files.isDirectory(path)) {
-        for (var file :
-            Files.walk(path)
-                .filter(p -> !Files.isDirectory(p))
-                .map(Path::toString)
-                .toArray(String[]::new)) addFile(file);
-        continue;
-      }
-      if (s.endsWith(".lst")) {
-        try (var reader = new BufferedReader(new FileReader(s, StandardCharsets.UTF_8))) {
-          String file;
-          while ((file = reader.readLine()) != null) addFile(file);
-        }
-        continue;
-      }
-      addFile(s);
-    }
+  private static boolean isTptpFirstOrder(String file) {
+    return file.endsWith(".p") && !file.contains("^");
   }
 
   private static String status(String file) throws IOException {
@@ -144,6 +83,42 @@ final class ProverTest {
 
   public static void main(String[] args) throws IOException {
     Option.parse(OPTIONS, args);
+    List<String> files = new ArrayList<>();
+    for (var s : Option.positionalArgs) {
+      // accept unadorned TPTP
+      if (s.equalsIgnoreCase("tptp")) {
+        for (var file :
+            Files.walk(Path.of(Etc.tptp()))
+                .filter(p -> !Files.isDirectory(p))
+                .map(Path::toString)
+                .toArray(String[]::new)) if (isTptpFirstOrder(file)) files.add(file);
+        continue;
+      }
+
+      // accept unadorned TPTP domain
+      var matcher = TPTP_DOMAIN_PATTERN.matcher(s);
+      if (matcher.matches()) {
+        s = s.toUpperCase(Locale.ROOT);
+        for (var file :
+            Files.walk(Path.of(Etc.tptp(), "Problems", s))
+                .filter(p -> !Files.isDirectory(p))
+                .map(Path::toString)
+                .toArray(String[]::new)) if (isTptpFirstOrder(file)) files.add(file);
+        continue;
+      }
+
+      // accept unadorned TPTP problem name
+      matcher = TPTP_PROBLEM_PATTERN.matcher(s);
+      if (matcher.matches()) {
+        s = s.toUpperCase(Locale.ROOT);
+        var domain = s.substring(0, 3);
+        files.add(Path.of(Etc.tptp(), "Problems", domain, s + ".p").toString());
+        continue;
+      }
+
+      // this is a file to be processed
+      files.add(s);
+    }
     if (shuffle) Collections.shuffle(files, random);
     if (maxAttempted >= 0 && files.size() > maxAttempted) files = files.subList(0, maxAttempted);
 
