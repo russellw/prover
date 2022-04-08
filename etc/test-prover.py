@@ -56,14 +56,18 @@ def hasProof(xs):
 parser = argparse.ArgumentParser(description="Test prover")
 parser.add_argument("prover")
 parser.add_argument("problems")
-parser.add_argument("-b", "--batch", help="batch size limit")
+parser.add_argument("-m", "--max", help="max number of problems to attempt", type=int)
 parser.add_argument(
     "-o", "--output-solved", help="output list of solved problems to a file"
 )
 parser.add_argument("-p", "--proof", help="extract proofs", action="store_true")
-parser.add_argument("-r", "--random-seed", help="deterministic random sequence")
+parser.add_argument(
+    "-r", "--random", metavar="seed", help="deterministic random sequence"
+)
 parser.add_argument("-s", "--shuffle", help="shuffle problem list", action="store_true")
-parser.add_argument("-t", "--cpu-limit", help="time limit (seconds) per problem")
+parser.add_argument(
+    "-t", "--cpu-limit", metavar="seconds", help="time limit per problem", type=float
+)
 args = parser.parse_args()
 
 print(args.prover)
@@ -91,13 +95,13 @@ else:
     problems = [problems]
 
 if args.shuffle:
-    if args.random_seed:
-        random.seed(args.random_seed)
+    if args.seed:
+        random.seed(args.seed)
     random.shuffle(problems)
 
 timeout = 60.0
-if args.cpu_limit:
-    timeout = float(args.cpu_limit)
+if args.seconds:
+    timeout = args.seconds
 
 alreadyWritten = set()
 if args.output_solved:
@@ -113,7 +117,7 @@ solved = 0
 for filename in problems:
     if "^" in filename:
         continue
-    if args.batch and attempted == int(args.batch):
+    if args.max and attempted == args.max:
         break
     attempted += 1
     pname = os.path.basename(os.path.splitext(filename)[0])

@@ -90,18 +90,23 @@ public final class Etc {
     return new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
   }
 
-  public static String version() throws IOException {
+  public static String version() {
     var properties = new Properties();
     var stream =
         Prover.class
             .getClassLoader()
             .getResourceAsStream("META-INF/maven/olivine/olivine/pom.properties");
     if (stream == null) return null;
-    properties.load(stream);
+    try {
+      properties.load(stream);
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
     return properties.getProperty("version");
   }
 
-  public static void printVersion() throws IOException {
+  public static void printVersion() {
     System.out.printf(
         "Olivine %s, %s\n",
         Objects.toString(version(), "[unknown version, not running from jar]"),

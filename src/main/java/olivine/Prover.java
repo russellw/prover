@@ -7,40 +7,25 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 final class Prover {
-  private static String file;
-
-  private Prover() {}
-
-  private static void help() {
-    System.out.println("-h          Show help");
-    System.out.println("-V          Show version");
-    // TODO: can option arguments be separated by spaces?
-    System.out.println("-t seconds  Time limit");
-  }
-
-  private static void setFile(String s) {
-    if (file != null) {
-      System.err.printf("%s: file already specified\n", s);
-      System.exit(1);
-    }
-    file = s;
-  }
-
-  private static void args(String[] v) throws IOException {
-    for (var s : v) {
-      if (s.charAt(0) == '-') {
-        if (s.equals("-")) {
-          setFile("stdin");
-          continue;
-        }
-        var option = new Option(s);
-        switch (option.option) {
-          case "?", "h", "help" -> {
-            help();
+  private static final Option[] OPTIONS =
+      new Option[] {
+        new Option('h', "help", null, "show help") {
+          @Override
+          public void accept(String arg) {
+            Option.help(OPTIONS);
+          }
+        },
+        new Option('V', "version", null, "show version") {
+          @Override
+          public void accept(String arg) {
+            Etc.printVersion();
             System.exit(0);
           }
-          case "t", "T", "cpu-limit" -> {
-            var seconds = Double.parseDouble(option.getArg());
+        },
+        new Option('t', "cpu-limit", "seconds", "time limit") {
+          @Override
+          public void accept(String arg) {
+            var seconds = Double.parseDouble(arg);
             new Timer()
                 .schedule(
                     new TimerTask() {
@@ -51,22 +36,13 @@ final class Prover {
                     },
                     (long) (seconds * 1000));
           }
-          case "V", "version" -> {
-            Etc.printVersion();
-            System.exit(0);
-          }
-          default -> {
-            System.err.printf("%s: unknown option\n", s);
-            System.exit(1);
-          }
-        }
-        continue;
-      }
-      setFile(s);
-    }
-  }
+        },
+      };
+
+  private Prover() {}
 
   public static boolean solve(String file, long steps) throws IOException {
+    // TODO: accept stdin
     try (var stream = new BufferedInputStream(new FileInputStream(file))) {
       var cnf = new CNF();
       TptpParser.parse(file, stream, cnf);
@@ -76,11 +52,16 @@ final class Prover {
 
   public static void main(String[] args) throws IOException {
     try {
-      args(args);
-      if (file == null) {
+      Option.parse(OPTIONS, args);
+      if (Option.positionalArgs.isEmpty()) {
         System.err.println("Input not specified");
         System.exit(1);
       }
+      if (Option.positionalArgs.size() > 1) {
+        System.err.printf("%s: file already specified\n", Option.positionalArgs.get(1));
+        System.exit(1);
+      }
+      var file = Option.positionalArgs.get(0);
 
       System.out.println(solve(file, Long.MAX_VALUE) ? "sat" : "unsat");
     } catch (Fail ignored) {

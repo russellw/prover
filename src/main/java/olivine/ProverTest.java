@@ -15,9 +15,50 @@ final class ProverTest {
 
   private static List<String> files = new ArrayList<>();
   private static boolean shuffle;
-  private static int randomSeed = -1;
-  private static int maxFiles = -1;
+  private static Random random = new Random();
+  private static int maxAttempted = -1;
   private static long steps = 100;
+
+  private static final Option[] OPTIONS =
+      new Option[] {
+        new Option('h', "help", null, "show help") {
+          @Override
+          public void accept(String arg) {
+            Option.help(OPTIONS);
+          }
+        },
+        new Option('V', "version", null, "show version") {
+          @Override
+          public void accept(String arg) {
+            Etc.printVersion();
+            System.exit(0);
+          }
+        },
+        new Option('m', "max", "N", "max number of problems to attempt") {
+          @Override
+          public void accept(String arg) {
+            maxAttempted = Integer.parseInt(arg);
+          }
+        },
+        new Option('n', "steps", "N", "number of superposition steps to try") {
+          @Override
+          public void accept(String arg) {
+            steps = Long.parseLong(arg);
+          }
+        },
+        new Option('r', "random", "seed", "deterministic random sequence") {
+          @Override
+          public void accept(String arg) {
+            random = new Random(arg.hashCode());
+          }
+        },
+        new Option('s', "shuffle", null, "shuffle problem list") {
+          @Override
+          public void accept(String arg) {
+            shuffle = true;
+          }
+        },
+      };
 
   private ProverTest() {}
 
@@ -65,26 +106,6 @@ final class ProverTest {
 
   private static void args(String[] v) throws IOException {
     for (var s : v) {
-      if (s.charAt(0) == '-') {
-        var option = new Option(s);
-        switch (option.option) {
-          case "V", "version" -> {
-            Etc.printVersion();
-            System.exit(0);
-          }
-          case "b" -> maxFiles = Integer.parseInt(option.getArg());
-          case "n" -> steps = Long.parseLong(option.getArg());
-          case "s" -> {
-            shuffle = true;
-            if (option.arg != null) randomSeed = Integer.parseInt(option.arg);
-          }
-          default -> {
-            System.err.printf("%s: unknown option\n", s);
-            System.exit(1);
-          }
-        }
-        continue;
-      }
       var path = Path.of(s);
       if (Files.isDirectory(path)) {
         for (var file :
@@ -122,12 +143,9 @@ final class ProverTest {
   }
 
   public static void main(String[] args) throws IOException {
-    args(args);
-    if (shuffle) {
-      var random = randomSeed == -1 ? new Random() : new Random(randomSeed);
-      Collections.shuffle(files, random);
-    }
-    if (maxFiles >= 0 && files.size() > maxFiles) files = files.subList(0, maxFiles);
+    Option.parse(OPTIONS, args);
+    if (shuffle) Collections.shuffle(files, random);
+    if (maxAttempted >= 0 && files.size() > maxAttempted) files = files.subList(0, maxAttempted);
 
     var solved = 0;
     var start = System.currentTimeMillis();
