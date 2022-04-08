@@ -144,6 +144,14 @@ public final class Superposition {
     // substituting terms for variables would not make them become so.
     if (!Equation.equatable(c1, c3)) return;
 
+    // the superposition calculus condition regarding the orienting of equations,
+    // actually applies after the map. We already applied it before, to avoid spending time
+    // on equations that are definitely the wrong orientation to begin with,
+    // but in some cases, equations that were unordered, become ordered after substitution,
+    // and ordered the wrong way, so rechecking the orientation,
+    // suppresses some unnecessary inferences
+    if (less(c0.replace(map), c1.replace(map))) return;
+
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
     for (var i = 0; i < c.negativeSize; i++) negative.add(c.literals[i].replace(map));
@@ -221,6 +229,9 @@ public final class Superposition {
     // can only have True on the other)
     assert !(d0c1 == Term.TRUE && d1 != Term.TRUE);
     if (!Equation.equatable(d0c1, d1)) return;
+
+    if (less(c0.replace(map), c1.replace(map))) return;
+    if (less(d0.replace(map), d1.replace(map))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
