@@ -3,6 +3,7 @@ package olivine;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,27 +42,39 @@ final class Prover {
 
   private Prover() {}
 
+  private static boolean solve(String file, long steps, InputStream stream) throws IOException {
+    var cnf = new CNF();
+    TptpParser.parse(file, stream, cnf);
+    return Superposition.sat(cnf.clauses, steps);
+  }
+
   public static boolean solve(String file, long steps) throws IOException {
-    // TODO: accept stdin
+    if (file == null) return solve("stdin", steps, System.in);
     try (var stream = new BufferedInputStream(new FileInputStream(file))) {
-      var cnf = new CNF();
-      TptpParser.parse(file, stream, cnf);
-      return Superposition.sat(cnf.clauses, steps);
+      return solve(file, steps, stream);
     }
   }
 
   public static void main(String[] args) throws IOException {
     try {
       Option.parse(OPTIONS, args);
-      if (Option.positionalArgs.isEmpty()) {
-        System.err.println("Input not specified");
-        System.exit(1);
+      String file = null;
+      if (Option.readStdin) {
+        if (Option.positionalArgs.size() > 0) {
+          System.err.printf("%s: stdin already specified\n", Option.positionalArgs.get(0));
+          System.exit(1);
+        }
+      } else {
+        if (Option.positionalArgs.isEmpty()) {
+          System.err.println("Input not specified");
+          System.exit(1);
+        }
+        if (Option.positionalArgs.size() > 1) {
+          System.err.printf("%s: file already specified\n", Option.positionalArgs.get(1));
+          System.exit(1);
+        }
+        file = Option.positionalArgs.get(0);
       }
-      if (Option.positionalArgs.size() > 1) {
-        System.err.printf("%s: file already specified\n", Option.positionalArgs.get(1));
-        System.exit(1);
-      }
-      var file = Option.positionalArgs.get(0);
 
       System.out.println(solve(file, Long.MAX_VALUE) ? "sat" : "unsat");
     } catch (Fail ignored) {
