@@ -95,13 +95,13 @@ else:
     problems = [problems]
 
 if args.shuffle:
-    if args.seed:
-        random.seed(args.seed)
+    if args.random:
+        random.seed(args.random)
     random.shuffle(problems)
 
 timeout = 60.0
-if args.seconds:
-    timeout = args.seconds
+if args.cpu_limit:
+    timeout = args.cpu_limit
 
 alreadyWritten = set()
 if args.output_solved:
