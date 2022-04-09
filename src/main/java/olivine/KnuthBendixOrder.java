@@ -123,4 +123,13 @@ public final class KnuthBendixOrder {
     if (i == n) return EQUALS;
     return compare(a.get(i), b.get(i));
   }
+
+  public int compare(boolean pol0, Equation e0, boolean pol1, Equation e1) {
+    assert compare(e0.left, e0.right) != LESS;
+    assert compare(e1.left, e1.right) != LESS;
+    var c = compare(e0.left, e1.left);
+    if (c != EQUALS) return c;
+    if (pol0 != pol1) return pol0 ? LESS : GREATER;
+    return compare(e0.right, e1.right);
+  }
 }

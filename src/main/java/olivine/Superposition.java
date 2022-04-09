@@ -36,22 +36,13 @@ public final class Superposition {
     passive.add(c);
   }
 
-  private int compare(boolean pol0, Equation e0, boolean pol1, Equation e1) {
-    assert order.compare(e0.left, e0.right) != KnuthBendixOrder.LESS;
-    assert order.compare(e1.left, e1.right) != KnuthBendixOrder.LESS;
-    var c = order.compare(e0.left, e1.left);
-    if (c != KnuthBendixOrder.EQUALS) return c;
-    if (pol0 != pol1) return pol0 ? KnuthBendixOrder.LESS : KnuthBendixOrder.GREATER;
-    return order.compare(e0.right, e1.right);
-  }
-
   private boolean notMaximal(Term[] literals, int negativeSize, int i, Equation e) {
     var pol = i >= negativeSize;
     for (var j = 0; j < literals.length; j++) {
       if (j == i) continue;
       var pol1 = j >= negativeSize;
       var e1 = new Equation(literals[j]);
-      if (compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return true;
+      if (order.compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return true;
     }
     return false;
   }
@@ -62,7 +53,7 @@ public final class Superposition {
       if (j == i) continue;
       var pol1 = j >= negativeSize;
       var e1 = new Equation(literals[j]);
-      switch (compare(pol, e, pol1, e1)) {
+      switch (order.compare(pol, e, pol1, e1)) {
         case KnuthBendixOrder.LESS, KnuthBendixOrder.EQUALS -> {
           return true;
         }
