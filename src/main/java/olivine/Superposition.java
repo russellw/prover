@@ -49,18 +49,18 @@ public final class Superposition {
     return order.compare(e0.right, e1.right);
   }
 
-  private boolean maybeMaximal(Term[] literals, int negativeSize, int i, Equation e) {
+  private boolean notMaximal(Term[] literals, int negativeSize, int i, Equation e) {
     var pol = i >= negativeSize;
     for (var j = 0; j < literals.length; j++) {
       if (j == i) continue;
       var pol1 = j >= negativeSize;
       var e1 = new Equation(literals[j]);
-      if (compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return false;
+      if (compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return true;
     }
-    return true;
+    return false;
   }
 
-  private boolean maybeStrictlyMaximal(Term[] literals, int negativeSize, int i, Equation e) {
+  private boolean notStrictlyMaximal(Term[] literals, int negativeSize, int i, Equation e) {
     var pol = i >= negativeSize;
     for (var j = 0; j < literals.length; j++) {
       if (j == i) continue;
@@ -68,18 +68,18 @@ public final class Superposition {
       var e1 = new Equation(literals[j]);
       switch (compare(pol, e, pol1, e1)) {
         case KnuthBendixOrder.LESS, KnuthBendixOrder.EQUALS -> {
-          return false;
+          return true;
         }
       }
     }
-    return true;
+    return false;
   }
 
-  private boolean maybeSuperposMaximal(
+  private boolean notSuperposMaximal(
       boolean mode, Term[] literals, int negativeSize, int i, Equation e) {
     return mode
-        ? maybeStrictlyMaximal(literals, negativeSize, i, e)
-        : maybeMaximal(literals, negativeSize, i, e);
+        ? notStrictlyMaximal(literals, negativeSize, i, e)
+        : notMaximal(literals, negativeSize, i, e);
   }
 
   /*
@@ -110,7 +110,7 @@ public final class Superposition {
   private void resolve(Clause c) {
     for (var ci = 0; ci < c.negativeSize; ci++) {
       var e = new Equation(c.literals[ci]);
-      if (!maybeMaximal(c.literals, c.negativeSize, ci, e)) continue;
+      if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var map = e.left.unify(FMap.EMPTY, e.right);
       if (map != null) resolve(c, ci, map);
     }
@@ -189,7 +189,7 @@ public final class Superposition {
   private void factor(Clause c) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
-      if (!maybeMaximal(c.literals, c.negativeSize, ci, e)) continue;
+      if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
       assert !less(c0, c1);
@@ -296,7 +296,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
-      if (!maybeSuperposMaximal(di >= d.negativeSize, d.literals, d.negativeSize, di, e)) continue;
+      if (notSuperposMaximal(di >= d.negativeSize, d.literals, d.negativeSize, di, e)) continue;
       var d0 = e.left;
       var d1 = e.right;
       assert !less(d0, d1);
@@ -309,7 +309,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
-      if (!maybeStrictlyMaximal(c.literals, c.negativeSize, ci, e)) continue;
+      if (notStrictlyMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
       assert !less(c0, c1);
