@@ -27,6 +27,10 @@ public class KnuthBendixOrderTest {
     return f.call(args);
   }
 
+  private Equation randomIndividualEquation(int depth) {
+    return new Equation(randomIndividualTerm(depth), randomIndividualTerm(depth));
+  }
+
   private void makeOrder() {
     var negative = new ArrayList<Term>();
     var positive = new ArrayList<Term>();
@@ -53,6 +57,10 @@ public class KnuthBendixOrderTest {
 
   private boolean greater(Term a, Term b) {
     return order.compare(a, b) == KnuthBendixOrder.GREATER;
+  }
+
+  private boolean greater(Equation a, Equation b) {
+    return order.compare(true, a, true, b) == KnuthBendixOrder.GREATER;
   }
 
   @Test
@@ -136,6 +144,15 @@ public class KnuthBendixOrderTest {
     assertTrue(greater(a, b) || greater(b, a));
   }
 
+  private static boolean eql(Equation a, Equation b) {
+    if (a.left.equals(b.left) && a.right.equals(b.right)) return true;
+    return a.left.equals(b.right) && a.right.equals(b.left);
+  }
+
+  private void checkOrdered(Equation a, Equation b) {
+    assertTrue(greater(a, b) || greater(b, a));
+  }
+
   private void checkUnordered(Term a, Term b) {
     assertFalse(greater(a, b));
     assertFalse(greater(b, a));
@@ -188,5 +205,31 @@ public class KnuthBendixOrderTest {
     checkOrdered(Term.cast(Type.REAL, a), Term.cast(Type.RATIONAL, a));
     checkOrdered(Term.cast(Type.REAL, a), Term.cast(Type.REAL, b));
     checkEqual(Term.cast(Type.REAL, a), Term.cast(Type.REAL, a));
+  }
+
+  @Test
+  public void eqlEquations() {
+    makeRandomOrder();
+    for (var i = 0; i < ITERATIONS; i++) {
+      var a = randomIndividualTerm(4);
+      var b = randomIndividualTerm(4);
+      assertEquals(
+          KnuthBendixOrder.EQUALS,
+          order.compare(true, new Equation(a, b), true, new Equation(a, b)));
+      assertEquals(
+          KnuthBendixOrder.EQUALS,
+          order.compare(true, new Equation(a, b), true, new Equation(b, a)));
+    }
+  }
+
+  @Test
+  public void totalOnGroundEquations() {
+    makeRandomOrder();
+    vars.clear();
+    for (var i = 0; i < ITERATIONS; i++) {
+      var a = randomIndividualEquation(4);
+      var b = randomIndividualEquation(4);
+      if (!eql(a, b)) checkOrdered(a, b);
+    }
   }
 }
