@@ -49,23 +49,23 @@ public final class Superposition {
     return order.compare(e0.right, e1.right);
   }
 
-  private boolean maybeMaximal(Clause c, int i, Equation e) {
-    var pol = i >= c.negativeSize;
-    for (var j = 0; j < c.literals.length; j++) {
+  private boolean maybeMaximal(Term[] literals, int negativeSize, int i, Equation e) {
+    var pol = i >= negativeSize;
+    for (var j = 0; j < literals.length; j++) {
       if (j == i) continue;
-      var pol1 = j >= c.negativeSize;
-      var e1 = new Equation(c.literals[j]);
+      var pol1 = j >= negativeSize;
+      var e1 = new Equation(literals[j]);
       if (compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return false;
     }
     return true;
   }
 
-  private boolean maybeStrictlyMaximal(Clause c, int i, Equation e) {
-    var pol = i >= c.negativeSize;
-    for (var j = 0; j < c.literals.length; j++) {
+  private boolean maybeStrictlyMaximal(Term[] literals, int negativeSize, int i, Equation e) {
+    var pol = i >= negativeSize;
+    for (var j = 0; j < literals.length; j++) {
       if (j == i) continue;
-      var pol1 = j >= c.negativeSize;
-      var e1 = new Equation(c.literals[j]);
+      var pol1 = j >= negativeSize;
+      var e1 = new Equation(literals[j]);
       switch (compare(pol, e, pol1, e1)) {
         case KnuthBendixOrder.LESS, KnuthBendixOrder.EQUALS -> {
           return false;
@@ -73,6 +73,13 @@ public final class Superposition {
       }
     }
     return true;
+  }
+
+  private boolean maybeSuperposMaximal(
+      boolean mode, Term[] literals, int negativeSize, int i, Equation e) {
+    return mode
+        ? maybeStrictlyMaximal(literals, negativeSize, i, e)
+        : maybeMaximal(literals, negativeSize, i, e);
   }
 
   /*
@@ -103,7 +110,7 @@ public final class Superposition {
   private void resolve(Clause c) {
     for (var ci = 0; ci < c.negativeSize; ci++) {
       var e = new Equation(c.literals[ci]);
-      if (!maybeMaximal(c, ci, e)) continue;
+      if (!maybeMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var map = e.left.unify(FMap.EMPTY, e.right);
       if (map != null) resolve(c, ci, map);
     }
@@ -182,7 +189,7 @@ public final class Superposition {
   private void factor(Clause c) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
-      if (!maybeMaximal(c, ci, e)) continue;
+      if (!maybeMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
       assert !less(c0, c1);
@@ -230,20 +237,30 @@ public final class Superposition {
     assert !(d0c1 == Term.TRUE && d1 != Term.TRUE);
     if (!Equation.equatable(d0c1, d1)) return;
 
-    if (less(c0.replace(map), c1.replace(map))) return;
-    if (less(d0.replace(map), d1.replace(map))) return;
+    c0 = c0.replace(map);
+    c1 = c1.replace(map);
+    d0 = d0.replace(map);
+    d1 = d1.replace(map);
+
+    if (less(c0, c1)) return;
+    if (less(d0, d1)) return;
+
+    var cliterals = new Term[c.literals.length];
+    for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
+
+    var dliterals = new Term[d.literals.length];
+    for (var i = 0; i < d.literals.length; i++) dliterals[i] = d.literals[i].replace(map);
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
-    for (var i = 0; i < c.negativeSize; i++) negative.add(c.literals[i].replace(map));
-    for (var i = 0; i < d.negativeSize; i++) if (i != di) negative.add(d.literals[i].replace(map));
+    //noinspection ManualArrayToCollectionCopy
+    for (var i = 0; i < c.negativeSize; i++) negative.add(cliterals[i]);
+    for (var i = 0; i < d.negativeSize; i++) if (i != di) negative.add(dliterals[i]);
 
     // Positive literals
     var positive = new ArrayList<Term>(c.positiveSize() + d.positiveSize() - 1);
-    for (var i = c.negativeSize; i < c.literals.length; i++)
-      if (i != ci) positive.add(c.literals[i].replace(map));
-    for (var i = d.negativeSize; i < d.literals.length; i++)
-      if (i != di) positive.add(d.literals[i].replace(map));
+    for (var i = c.negativeSize; i < cliterals.length; i++) if (i != ci) positive.add(cliterals[i]);
+    for (var i = d.negativeSize; i < dliterals.length; i++) if (i != di) positive.add(dliterals[i]);
 
     // Negative and positive superposition
     // TODO: recheck maximality after map?
@@ -279,9 +296,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
-      if (di < d.negativeSize) {
-        if (!maybeMaximal(d, di, e)) continue;
-      } else if (!maybeStrictlyMaximal(d, di, e)) continue;
+      if (!maybeSuperposMaximal(di >= d.negativeSize, d.literals, d.negativeSize, di, e)) continue;
       var d0 = e.left;
       var d1 = e.right;
       assert !less(d0, d1);
@@ -294,7 +309,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d) {
     for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
-      if (!maybeStrictlyMaximal(c, ci, e)) continue;
+      if (!maybeStrictlyMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
       assert !less(c0, c1);
