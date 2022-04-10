@@ -132,7 +132,7 @@ public final class KnuthBendixOrder {
         return compare(a.right, b.right);
       }
       case GREATER -> {
-        // we have a decision on the left, now check the right
+        // we have a result on the left, now check the right
         switch (compare(a.right, b.right)) {
           case EQUALS, GREATER -> {
             // result on the right confirms or will not oppose the left
@@ -140,7 +140,9 @@ public final class KnuthBendixOrder {
           }
           case LESS -> {
             // opposite result on the right, but now we know which terms are larger, so we can
-            // compare them
+            // compare them. (on the face of it, we don't have the larger terms *within* each
+            // equation, which is what we need to decide the answer, but we can rely on
+            // transitivity, e.g. if a.left > b.right and b.right > a.right then a.left > a.right.)
             var c = compare(a.left, b.right);
 
             // if the larger terms give a result, or are unordered, that's the answer
@@ -150,7 +152,7 @@ public final class KnuthBendixOrder {
             return compare(a.right, b.left);
           }
           case UNORDERED -> {
-            // no decision on the right, but if a.left is greater than both b terms, then we do have
+            // no result on the right, but if a.left is greater than both b terms, then we do have
             // an answer,
             // because it doesn't matter what a.right ultimately resolves to
             if (compare(a.left, b.right) == GREATER) return GREATER;
@@ -158,7 +160,7 @@ public final class KnuthBendixOrder {
         }
       }
       case LESS -> {
-        // we have a decision on the left, now check the right
+        // we have a result on the left, now check the right
         switch (compare(a.right, b.right)) {
           case EQUALS, LESS -> {
             // result on the right confirms or will not oppose the left
@@ -176,7 +178,7 @@ public final class KnuthBendixOrder {
             return compare(a.left, b.right);
           }
           case UNORDERED -> {
-            // no decision on the right, but if b.left is greater than both a terms, then we do have
+            // no result on the right, but if b.left is greater than both a terms, then we do have
             // an answer,
             // because it doesn't matter what b.right ultimately resolves to
             if (compare(a.right, b.left) == LESS) return LESS;
@@ -205,15 +207,99 @@ public final class KnuthBendixOrder {
     return UNORDERED;
   }
 
-  public int compare(boolean apol, Equation a, boolean bpol, Equation b) {
-    var a0 = a.left;
-    var a1 = a.right;
-    var b0 = b.left;
-    var b1 = b.right;
+  public int comparePN(Equation a, Equation b) {
+    // compare a positive and negative equation. We don't need both PN and NP; if we have NP,
+    // we can calculate PN and flip the answer around
 
-    var c = compare(a.left, b.left);
-    if (c != EQUALS) return c;
-    if (apol != bpol) return apol ? LESS : GREATER;
-    return compare(a.right, b.right);
+    // Why PN rather than NP, when logically either would be an equally valid basis? Because PN
+    // is perhaps intuitively simpler: a is greater when it has a term that is strictly greater than
+    // both b
+    // terms. If its greatest term is merely equal to one of the b terms, then the answer will be
+    // decided by
+    // polarity, and a will be less. If we cannot prove that either of these will ultimately be the
+    // case, then the equations
+    // are unordered
+
+    // We don't need to worry about the case where the equations are equal, because equations are
+    // only compared
+    // to other equations in the same clause, and a clause containing equal positive and negative
+    // equations
+    // would have been discarded as a tautology
+    switch (compare(a.left, b.left)) {
+      case EQUALS -> {
+        // when comparing equations with the same polarity, if they were equal on the left,
+        // we could ignore the left and return the result of comparing the right. in this case we
+        // cannot do that,
+        // because if the right terms are smaller, the answer would instead be decided by polarity
+      }
+      case GREATER -> {
+        // we have a result on the left, now check the right
+        switch (compare(a.right, b.right)) {
+          case GREATER -> {
+            // both sides agree on the answer
+            return GREATER;
+          }
+          case EQUALS, UNORDERED -> {
+            // if there is no result on the right, but a.left is greater than both b terms, then we
+            // do have
+            // an answer,
+            // because it doesn't matter what a.right ultimately resolves to.
+            // so a.left > b.right is a sufficient condition
+
+            // if the right terms are equal, the result on the right  will not oppose the left, but
+            // that's not necessarily enough;
+            // the result on the left is only decisive if a.left is greater than the right
+            // terms, otherwise a substitution could produce ground equations
+            // where the right terms are greater than the left, and equal,
+            // leaving the answer to be decided by polarity.
+            // so a.left > b.right is a necessary condition
+            if (compare(a.left, b.right) == GREATER) return GREATER;
+          }
+          case LESS -> {
+            // opposite result on the right, but now we know which terms are larger, so we can
+            // compare them
+            var c = compare(a.left, b.right);
+
+            // if the larger terms give a result, or are unordered, that's the answer
+            if (c != EQUALS) return c;
+
+            // otherwise, the answer is decided by polarity
+            return LESS;
+          }
+        }
+      }
+      case UNORDERED -> {
+        // if the left terms are unordered, it is still possible to have an answer, but the
+        // requirements
+        // are quite specific. if a.right is greater than both b terms, then it doesn't matter what
+        // a.left ultimately resolves to; no matter whether it is greater or less than a.right,
+        // the answer will stand. But if a.right is merely equal to one of the b terms, the answer
+        // could end up depending on whether a.left ultimately resolves to something
+        // greater than both, or less than both, so we have no order. The same applies if b.right
+        // is greater than both a terms
+        switch (compare(a.right, b.right)) {
+          case GREATER -> {
+            if (compare(a.right, b.left) == GREATER) return GREATER;
+          }
+          case LESS -> {
+            if (compare(a.left, b.right) == LESS) return LESS;
+          }
+        }
+      }
+    }
+    return UNORDERED;
+  }
+
+  private static int flip(int c) {
+    return switch (c) {
+      case GREATER -> LESS;
+      case LESS -> GREATER;
+      default -> c;
+    };
+  }
+
+  public int compare(boolean apol, Equation a, boolean bpol, Equation b) {
+    if (apol == bpol) return compare(a, b);
+    return apol ? comparePN(a, b) : flip(comparePN(b, a));
   }
 }
