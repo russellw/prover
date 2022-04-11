@@ -135,6 +135,7 @@ def gen(ps):
     cs = set()
     for p in ps:
         cs.add(p.ords[(x, y)])
+    cs = sorted(list(cs))
     for c in cs:
         print("case ", end="")
         printorder(c)
