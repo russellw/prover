@@ -1,12 +1,3 @@
-def larger(x, y, ords):
-    c = ords[(x, y)]
-    if c == "l":
-        return y
-    if c == "e" or c == "g":
-        return x
-    return None
-
-
 def cyclic(g):
     for x in range(4):
         visited = set()
@@ -54,27 +45,6 @@ class Possibility:
     def __init__(self, ords):
         self.ords = ords
 
-        # get larger term in the first equation
-        x = larger(0, 1, ords)
-        if x is None:
-            self.answer = "u"
-            return
-
-        # get larger term in the second equation
-        y = larger(2, 3, ords)
-        if y is None:
-            self.answer = "u"
-            return
-
-        # compare the larger terms
-        c = ords[(x, y)]
-        if c != "e":
-            self.answer = c
-            return
-
-        # compare the smaller terms
-        self.answer = ords[(x ^ 1, y ^ 1)]
-
     def __repr__(self):
         return str(self.ords)
 
@@ -100,6 +70,34 @@ for i0 in range(4):
                             ords[(x, y)] = cs[i]
                         ps.append(Possibility(ords))
 ps = [p for p in ps if consistent(p.ords)]
+
+
+def larger(x, y, ords):
+    c = ords[(x, y)]
+    if c == "l":
+        return y
+    if c == "e" or c == "g":
+        return x
+
+
+def answer(ords):
+    # get larger term in the first equation
+    x = larger(0, 1, ords)
+    if x is None:
+        return "u"
+
+    # get larger term in the second equation
+    y = larger(2, 3, ords)
+    if y is None:
+        return "u"
+
+    # compare the larger terms
+    c = ords[(x, y)]
+    if c != "e":
+        return c
+
+    # compare the smaller terms
+    return ords[(x ^ 1, y ^ 1)]
 
 
 def discrimination(xy, ps):
@@ -167,9 +165,13 @@ print("// AUTO GENERATED CODE - DO NOT MODIFY")
 print("package olivine;")
 print("public final class EquationComparison {")
 print("private EquationComparison() {}")
+
+for p in ps:
+    p.answer = answer(p.ords)
 print(
     "public static PartialOrder compare(KnuthBendixOrder order, Equation a, Equation b) {"
 )
 gen(ps)
 print("}")
+
 print("}")
