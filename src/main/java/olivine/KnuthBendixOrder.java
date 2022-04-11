@@ -6,17 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class KnuthBendixOrder {
-  // comparison is usually encoded as a three-way integer. Here, the presence of variables
-  // (which substitution could expand into any term) make some pairs of terms unordered
-  // (because the result could change depending on what the variables are replaced with),
-  // so we need four-way comparison. The actual values should be treated as arbitrary
-  // by client code; they are chosen to make certain logical operations efficient
-  // TODO: change to enum PartialOrder?
-  public static final int EQUALS = 1;
-  public static final int LESS = 1 << 1;
-  public static final int GREATER = 1 << 2;
-  public static final int UNORDERED = 0;
-
   private final Map<Term, Integer> weights = new HashMap<>();
 
   public KnuthBendixOrder(List<Clause> clauses) {
@@ -51,42 +40,41 @@ public final class KnuthBendixOrder {
     return n;
   }
 
-  private static int fourWay(int c) {
-    if (c < 0) return LESS;
-    if (c == 0) return EQUALS;
-    return GREATER;
-  }
-
   // TODO: shortcut comparison of identical terms?
   // TODO: pacman lemma?
-  public int compare(Term a, Term b) {
+  public PartialOrder compare(Term a, Term b) {
     // variables
     var avars = vars(a);
     var bvars = vars(b);
-    var possible = LESS | GREATER;
+    var maybeLess = true;
+    var maybeGreater = true;
     for (var kv : avars.entrySet())
       if (kv.getValue() > bvars.getOrDefault(kv.getKey(), 0)) {
-        possible &= ~LESS;
+        maybeLess = false;
         break;
       }
     for (var kv : bvars.entrySet())
       if (kv.getValue() > avars.getOrDefault(kv.getKey(), 0)) {
-        possible &= ~GREATER;
+        maybeGreater = false;
         break;
       }
-    if (possible == UNORDERED) return UNORDERED;
+    if (!maybeLess && !maybeGreater)
+      return a.equals(b) ? PartialOrder.EQUALS : PartialOrder.UNORDERED;
 
     // total weight
     var atotalWeight = totalWeight(a);
     var btotalWeight = totalWeight(b);
-    if (atotalWeight < btotalWeight) return possible & LESS;
-    if (atotalWeight > btotalWeight) return possible & GREATER;
+    if (atotalWeight < btotalWeight) return maybeLess ? PartialOrder.LESS : PartialOrder.UNORDERED;
+    if (atotalWeight > btotalWeight)
+      return maybeGreater ? PartialOrder.GREATER : PartialOrder.UNORDERED;
 
     // different tags or functions mean different symbols
     var asymbolWeight = symbolWeight(a);
     var bsymbolWeight = symbolWeight(b);
-    if (asymbolWeight < bsymbolWeight) return possible & LESS;
-    if (asymbolWeight > bsymbolWeight) return possible & GREATER;
+    if (asymbolWeight < bsymbolWeight)
+      return maybeLess ? PartialOrder.LESS : PartialOrder.UNORDERED;
+    if (asymbolWeight > bsymbolWeight)
+      return maybeGreater ? PartialOrder.GREATER : PartialOrder.UNORDERED;
     assert a.tag() == b.tag();
     assert a.size() == b.size();
 
@@ -95,13 +83,13 @@ public final class KnuthBendixOrder {
     switch (a.tag()) {
       case CAST -> {
         var c = a.type().compareTo(b.type());
-        if (c != 0) return fourWay(c);
+        if (c != 0) return PartialOrder.of(c);
       }
       case INTEGER -> {
-        return fourWay(a.integerValue().compareTo(b.integerValue()));
+        return PartialOrder.of(a.integerValue().compareTo(b.integerValue()));
       }
       case RATIONAL -> {
-        return fourWay(a.rationalValue().compareTo(b.rationalValue()));
+        return PartialOrder.of(a.rationalValue().compareTo(b.rationalValue()));
       }
       case DISTINCT_OBJECT -> {
         // here, we rely on distinct objects being ordered by their names, in other words behaving
@@ -113,7 +101,7 @@ public final class KnuthBendixOrder {
         // to be compared by reference for efficiency in other contexts. so assert that
         // the precondition holds here, i.e. different objects have different names
         assert !(a != b && a.toString().equals(b.toString()));
-        return fourWay(a.toString().compareTo(b.toString()));
+        return PartialOrder.of(a.toString().compareTo(b.toString()));
       }
     }
 
@@ -121,11 +109,11 @@ public final class KnuthBendixOrder {
     var n = a.size();
     var i = 0;
     while (i < n && a.get(i).equals(b.get(i))) i++;
-    if (i == n) return EQUALS;
+    if (i == n) return PartialOrder.EQUALS;
     return compare(a.get(i), b.get(i));
   }
 
-  public int compare(Equation a, Equation b) {
+  public PartialOrder compare(Equation a, Equation b) {
     switch (compare(a.left, b.left)) {
       case EQUALS -> {
         // left terms are equal, so answer depends only on the right
@@ -136,7 +124,7 @@ public final class KnuthBendixOrder {
         switch (compare(a.right, b.right)) {
           case EQUALS, GREATER -> {
             // result on the right confirms or will not oppose the left
-            return GREATER;
+            return PartialOrder.GREATER;
           }
           case LESS -> {
             // opposite result on the right, but now we know which terms are larger, so we can
@@ -146,7 +134,7 @@ public final class KnuthBendixOrder {
             var c = compare(a.left, b.right);
 
             // if the larger terms give a result, or are unordered, that's the answer
-            if (c != EQUALS) return c;
+            if (c != PartialOrder.EQUALS) return c;
 
             // otherwise, compare the smaller terms
             return compare(a.right, b.left);
@@ -155,7 +143,7 @@ public final class KnuthBendixOrder {
             // no result on the right, but if a.left is greater than both b terms, then we do have
             // an answer,
             // because it doesn't matter what a.right ultimately resolves to
-            if (compare(a.left, b.right) == GREATER) return GREATER;
+            if (compare(a.left, b.right) == PartialOrder.GREATER) return PartialOrder.GREATER;
           }
         }
       }
@@ -164,7 +152,7 @@ public final class KnuthBendixOrder {
         switch (compare(a.right, b.right)) {
           case EQUALS, LESS -> {
             // result on the right confirms or will not oppose the left
-            return LESS;
+            return PartialOrder.LESS;
           }
           case GREATER -> {
             // opposite result on the right, but now we know which terms are larger, so we can
@@ -172,7 +160,7 @@ public final class KnuthBendixOrder {
             var c = compare(a.right, b.left);
 
             // if the larger terms give a result, or are unordered, that's the answer
-            if (c != EQUALS) return c;
+            if (c != PartialOrder.EQUALS) return c;
 
             // otherwise, compare the smaller terms
             return compare(a.left, b.right);
@@ -181,7 +169,7 @@ public final class KnuthBendixOrder {
             // no result on the right, but if b.left is greater than both a terms, then we do have
             // an answer,
             // because it doesn't matter what b.right ultimately resolves to
-            if (compare(a.right, b.left) == LESS) return LESS;
+            if (compare(a.right, b.left) == PartialOrder.LESS) return PartialOrder.LESS;
           }
         }
       }
@@ -196,18 +184,18 @@ public final class KnuthBendixOrder {
         // is greater than both a terms
         switch (compare(a.right, b.right)) {
           case GREATER -> {
-            if (compare(a.right, b.left) == GREATER) return GREATER;
+            if (compare(a.right, b.left) == PartialOrder.GREATER) return PartialOrder.GREATER;
           }
           case LESS -> {
-            if (compare(a.left, b.right) == LESS) return LESS;
+            if (compare(a.left, b.right) == PartialOrder.LESS) return PartialOrder.LESS;
           }
         }
       }
     }
-    return UNORDERED;
+    return PartialOrder.UNORDERED;
   }
 
-  public int comparePN(Equation a, Equation b) {
+  public PartialOrder comparePN(Equation a, Equation b) {
     // compare a positive and negative equation. We don't need both PN and NP; if we have NP,
     // we can calculate PN and flip the answer around
 
@@ -237,7 +225,7 @@ public final class KnuthBendixOrder {
         switch (compare(a.right, b.right)) {
           case GREATER -> {
             // both sides agree on the answer
-            return GREATER;
+            return PartialOrder.GREATER;
           }
           case EQUALS, UNORDERED -> {
             // if there is no result on the right, but a.left is greater than both b terms, then we
@@ -253,7 +241,7 @@ public final class KnuthBendixOrder {
             // where the right terms are greater than the left, and equal,
             // leaving the answer to be decided by polarity.
             // so a.left > b.right is a necessary condition
-            if (compare(a.left, b.right) == GREATER) return GREATER;
+            if (compare(a.left, b.right) == PartialOrder.GREATER) return PartialOrder.GREATER;
           }
           case LESS -> {
             // opposite result on the right, but now we know which terms are larger, so we can
@@ -261,10 +249,10 @@ public final class KnuthBendixOrder {
             var c = compare(a.left, b.right);
 
             // if the larger terms give a result, or are unordered, that's the answer
-            if (c != EQUALS) return c;
+            if (c != PartialOrder.EQUALS) return c;
 
             // otherwise, the answer is decided by polarity
-            return LESS;
+            return PartialOrder.LESS;
           }
         }
       }
@@ -279,27 +267,19 @@ public final class KnuthBendixOrder {
         // is greater than both a terms
         switch (compare(a.right, b.right)) {
           case GREATER -> {
-            if (compare(a.right, b.left) == GREATER) return GREATER;
+            if (compare(a.right, b.left) == PartialOrder.GREATER) return PartialOrder.GREATER;
           }
           case LESS -> {
-            if (compare(a.left, b.right) == LESS) return LESS;
+            if (compare(a.left, b.right) == PartialOrder.LESS) return PartialOrder.LESS;
           }
         }
       }
     }
-    return UNORDERED;
+    return PartialOrder.UNORDERED;
   }
 
-  private static int flip(int c) {
-    return switch (c) {
-      case GREATER -> LESS;
-      case LESS -> GREATER;
-      default -> c;
-    };
-  }
-
-  public int compare(boolean apol, Equation a, boolean bpol, Equation b) {
+  public PartialOrder compare(boolean apol, Equation a, boolean bpol, Equation b) {
     if (apol == bpol) return compare(a, b);
-    return apol ? comparePN(a, b) : flip(comparePN(b, a));
+    return apol ? comparePN(a, b) : comparePN(b, a).flip();
   }
 }

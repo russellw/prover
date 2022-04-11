@@ -56,11 +56,11 @@ public class KnuthBendixOrderTest {
   }
 
   private boolean greater(Term a, Term b) {
-    return order.compare(a, b) == KnuthBendixOrder.GREATER;
+    return order.compare(a, b) == PartialOrder.GREATER;
   }
 
   private boolean greater(Equation a, Equation b) {
-    return order.compare(true, a, true, b) == KnuthBendixOrder.GREATER;
+    return order.compare(true, a, true, b) == PartialOrder.GREATER;
   }
 
   @Test
@@ -159,7 +159,7 @@ public class KnuthBendixOrderTest {
   }
 
   private void checkEqual(Term a, Term b) {
-    assertEquals(order.compare(a, b), KnuthBendixOrder.EQUALS);
+    assertEquals(order.compare(a, b), PartialOrder.EQUALS);
   }
 
   private static boolean containsSubterm(Term a, Term b) {
@@ -214,11 +214,9 @@ public class KnuthBendixOrderTest {
       var a = randomIndividualTerm(4);
       var b = randomIndividualTerm(4);
       assertEquals(
-          KnuthBendixOrder.EQUALS,
-          order.compare(true, new Equation(a, b), true, new Equation(a, b)));
+          PartialOrder.EQUALS, order.compare(true, new Equation(a, b), true, new Equation(a, b)));
       assertEquals(
-          KnuthBendixOrder.EQUALS,
-          order.compare(true, new Equation(a, b), true, new Equation(b, a)));
+          PartialOrder.EQUALS, order.compare(true, new Equation(a, b), true, new Equation(b, a)));
     }
   }
 

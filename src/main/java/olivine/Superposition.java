@@ -42,7 +42,7 @@ public final class Superposition {
       if (j == i) continue;
       var pol1 = j >= negativeSize;
       var e1 = new Equation(literals[j]);
-      if (order.compare(pol, e, pol1, e1) == KnuthBendixOrder.LESS) return true;
+      if (order.compare(pol, e, pol1, e1) == PartialOrder.LESS) return true;
     }
     return false;
   }
@@ -54,7 +54,7 @@ public final class Superposition {
       var pol1 = j >= negativeSize;
       var e1 = new Equation(literals[j]);
       switch (order.compare(pol, e, pol1, e1)) {
-        case KnuthBendixOrder.LESS, KnuthBendixOrder.EQUALS -> {
+        case LESS, EQUALS -> {
           return true;
         }
       }
@@ -144,7 +144,7 @@ public final class Superposition {
     // but in some cases, equations that were unordered, become ordered after substitution,
     // and ordered the wrong way, so rechecking the orientation,
     // suppresses some unnecessary inferences
-    if (order.compare(c0.replace(map), c1.replace(map)) == KnuthBendixOrder.LESS) return;
+    if (order.compare(c0.replace(map), c1.replace(map)) == PartialOrder.LESS) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
@@ -179,9 +179,9 @@ public final class Superposition {
       if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
-      assert order.compare(c0, c1) != KnuthBendixOrder.LESS;
+      assert order.compare(c0, c1) != PartialOrder.LESS;
       factor(c, ci, c0, c1);
-      if (order.compare(c1, c0) != KnuthBendixOrder.LESS) factor(c, ci, c1, c0);
+      if (order.compare(c1, c0) != PartialOrder.LESS) factor(c, ci, c1, c0);
     }
   }
 
@@ -229,8 +229,8 @@ public final class Superposition {
     d0 = d0.replace(map);
     d1 = d1.replace(map);
 
-    if (order.compare(c0, c1) == KnuthBendixOrder.LESS) return;
-    if (order.compare(d0, d1) == KnuthBendixOrder.LESS) return;
+    if (order.compare(c0, c1) == PartialOrder.LESS) return;
+    if (order.compare(d0, d1) == PartialOrder.LESS) return;
 
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
@@ -286,9 +286,9 @@ public final class Superposition {
       if (notSuperposMaximal(di >= d.negativeSize, d.literals, d.negativeSize, di, e)) continue;
       var d0 = e.left;
       var d1 = e.right;
-      assert order.compare(d0, d1) != KnuthBendixOrder.LESS;
+      assert order.compare(d0, d1) != PartialOrder.LESS;
       superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
-      if (order.compare(d1, d0) != KnuthBendixOrder.LESS)
+      if (order.compare(d1, d0) != PartialOrder.LESS)
         superposition(c, d, ci, c0, c1, di, d1, d0, new ArrayList<>(), d1);
     }
   }
@@ -300,9 +300,9 @@ public final class Superposition {
       if (notStrictlyMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var c0 = e.left;
       var c1 = e.right;
-      assert order.compare(c0, c1) != KnuthBendixOrder.LESS;
+      assert order.compare(c0, c1) != PartialOrder.LESS;
       superposition(c, d, ci, c0, c1);
-      if (order.compare(c1, c0) != KnuthBendixOrder.LESS) superposition(c, d, ci, c1, c0);
+      if (order.compare(c1, c0) != PartialOrder.LESS) superposition(c, d, ci, c1, c0);
     }
   }
 
@@ -343,7 +343,7 @@ public final class Superposition {
         if (a.tag() != Tag.EQUALS) continue;
         var x = a.get(0);
         var y = a.get(1);
-        if (order.compare(x, y) == KnuthBendixOrder.LESS) g.literals[i] = Term.of(Tag.EQUALS, y, x);
+        if (order.compare(x, y) == PartialOrder.LESS) g.literals[i] = Term.of(Tag.EQUALS, y, x);
       }
 
       // Rename variables, because subsumption and superposition both assume
