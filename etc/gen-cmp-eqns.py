@@ -28,9 +28,19 @@ def cyclic(g):
 
 
 def consistent(ords):
+    es = {}
+    for xy, c in ords.items():
+        x, y = sorted(xy)
+        if c == "=":
+            es[y] = x
+
     g = set()
     for xy, c in ords.items():
         x, y = xy
+        if x in es:
+            x = es[x]
+        if y in es:
+            y = es[y]
         if c == "g":
             g.add((x, y))
         elif c == "l":
