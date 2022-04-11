@@ -1,8 +1,8 @@
 def larger(x, y, ords):
     c = ords[(x, y)]
-    if c == "<":
+    if c == "l":
         return y
-    if c == "=" or c == ">":
+    if c == "e" or c == "g":
         return x
     return None
 
@@ -31,9 +31,9 @@ def consistent(ords):
     g = set()
     for xy, c in ords.items():
         x, y = xy
-        if c == ">":
+        if c == "g":
             g.add((x, y))
-        elif c == "<":
+        elif c == "l":
             g.add((y, x))
     if cyclic(g):
         return 0
@@ -47,18 +47,18 @@ class Possibility:
         # get larger term in the first equation
         x = larger(0, 1, ords)
         if x is None:
-            self.answer = "?"
+            self.answer = "u"
             return
 
         # get larger term in the second equation
         y = larger(2, 3, ords)
         if y is None:
-            self.answer = "?"
+            self.answer = "u"
             return
 
         # compare the larger terms
         c = ords[(x, y)]
-        if c != "=":
+        if c != "e":
             self.answer = c
             return
 
@@ -72,7 +72,7 @@ for i in range(4 - 1):
         xys.append((i, j))
 assert len(xys) == 6
 
-orders = ("=", "<", ">", "?")
+orders = ("e", "g", "l", "u")
 ps = []
 for i0 in range(4):
     for i1 in range(4):
@@ -102,13 +102,13 @@ def printvar(x):
 
 
 def printorder(c):
-    if c == "=":
+    if c == "e":
         print("EQUALS", end="")
-    if c == ">":
+    if c == "g":
         print("GREATER", end="")
-    if c == "<":
+    if c == "l":
         print("LESS", end="")
-    if c == "?":
+    if c == "u":
         print("UNORDERED", end="")
 
 
@@ -124,8 +124,8 @@ def gen(ps):
         return
 
     # compare the pair of terms with most discriminating power
-    x, y = sorted(xys, key=lambda xy: discrimination(xy, ps))[-1]
-    print("switch(compare(", end="")
+    x, y = sorted(xys, key=lambda xy: discrimination(xy, ps), reverse=True)[0]
+    print("switch(order.compare(", end="")
     printvar(x)
     print(",", end="")
     printvar(y)
@@ -153,7 +153,9 @@ print("// AUTO GENERATED CODE - DO NOT MODIFY")
 print("package olivine;")
 print("public final class EquationComparison {")
 print("private EquationComparison() {}")
-print("public static PartialOrder compare(Equation a, Equation b) {")
+print(
+    "public static PartialOrder compare(KnuthBendixOrder order, Equation a, Equation b) {"
+)
 gen(ps)
 print("}")
 print("}")
