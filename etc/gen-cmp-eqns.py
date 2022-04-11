@@ -31,15 +31,15 @@ def consistent(ords):
     es = {}
     for xy, c in ords.items():
         x, y = sorted(xy)
-        if c == "=":
+        if c == "e":
             es[y] = x
 
     g = set()
     for xy, c in ords.items():
         x, y = xy
-        if x in es:
+        while x in es:
             x = es[x]
-        if y in es:
+        while y in es:
             y = es[y]
         if c == "g":
             g.add((x, y))
@@ -74,6 +74,9 @@ class Possibility:
 
         # compare the smaller terms
         self.answer = ords[(x ^ 1, y ^ 1)]
+
+    def __repr__(self):
+        return str(self.ords)
 
 
 xys = []
