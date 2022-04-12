@@ -95,7 +95,18 @@ for j0 in range(4):
 ps = [p for p in ps if consistent(p.ords)]
 
 
-def larger(x, y, ords):
+# check if two equations are equal
+def eqeqn(ords):
+    a = 0
+    b = 2
+    if ords[(a + 0, b + 0)] == "e" and ords[(a + 1, b + 1)] == "e":
+        return 1
+    if ords[(a + 0, b + 1)] == "e" and ords[(a + 1, b + 0)] == "e":
+        return 1
+
+
+# find which is the larger term within an equation, if possible
+def larger(ords, x, y):
     c = ords[(x, y)]
     if c == "l":
         return y
@@ -103,72 +114,88 @@ def larger(x, y, ords):
         return x
 
 
-def answer(ords):
-    # equal equations
-    if ords[(0, 2)] == "e" and ords[(1, 3)] == "e":
-        return "e"
-    if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
-        return "e"
+def gt(ords, x, y):
+    if (x, y) in ords:
+        return ords[(x, y)] == "g"
+    return ords[(y, x)] == "l"
 
+
+# check if one equation is definitely greater than another
+# according to the criterion of comparing larger terms
+def gteqn(ords, a, b):
     # if one term in one equation > both in the other equation
     # then that equation is greater
     # regardless of the orientation of terms within it
-    if ords[(0, 2)] == "g" and ords[(0, 3)] == "g":
+    if gt(ords, a + 0, b + 0) and gt(ords, a + 0, b + 1):
+        return 1
+    if gt(ords, a + 1, b + 0) and gt(ords, a + 1, b + 1):
+        return 1
+
+    # if each term in one equation > a counterpart in the other
+    # then that equation is greater
+    # regardless of the orientation of terms within it
+    if gt(ords, a + 0, b + 0) and gt(ords, a + 1, b + 1):
+        return 1
+    if gt(ords, a + 0, b + 1) and gt(ords, a + 1, b + 0):
+        return 1
+
+    # if we know which term in each equation is larger
+    # then compare those terms
+    x = larger(ords, a + 0, a + 1)
+    if x is not None:
+        y = larger(ords, b + 0, b + 1)
+        if y is not None:
+            return gt(ords, x, y)
+
+
+def answer(ords):
+    # equal equations
+    if eqeqn(ords):
+        return "e"
+
+    # one equation is definitely greater
+    if gteqn(ords, 0, 2):
         return "g"
-    if ords[(1, 2)] == "g" and ords[(1, 3)] == "g":
-        return "g"
-    if ords[(0, 2)] == "l" and ords[(1, 2)] == "l":
-        return "l"
-    if ords[(0, 3)] == "l" and ords[(1, 3)] == "l":
+    if gteqn(ords, 2, 0):
         return "l"
 
-    # compare the larger terms
-    x = larger(0, 1, ords)
-    if x is None:
-        return "u"
-    y = larger(2, 3, ords)
-    if y is None:
-        return "u"
-    c = ords[(x, y)]
-    if c != "e":
-        return c
+    # if we know which terms are larger in each equation
+    x = larger(ords, 0, 1)
+    if x is not None:
+        y = larger(ords, 2, 3)
+        if y is not None:
+            # and we know the larger terms are equal
+            if ords[(x, y)] == "e":
+                # compare the smaller terms
+                return ords[(x ^ 1, y ^ 1)]
 
-    # compare the smaller terms
-    return ords[(x ^ 1, y ^ 1)]
+    # otherwise, don't know
+    return "u"
 
 
 def answerNP(ords):
     # equal equations compare polarity
-    if ords[(0, 2)] == "e" and ords[(1, 3)] == "e":
-        return "g"
-    if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
+    if eqeqn(ords):
         return "g"
 
-    # if one term in one equation > both in the other equation
-    # then that equation is greater
-    # regardless of the orientation of terms within it
-    if ords[(0, 2)] == "g" and ords[(0, 3)] == "g":
+    # one equation is definitely greater
+    if gteqn(ords, 0, 2):
         return "g"
-    if ords[(1, 2)] == "g" and ords[(1, 3)] == "g":
-        return "g"
-    if ords[(0, 2)] == "l" and ords[(1, 2)] == "l":
-        return "l"
-    if ords[(0, 3)] == "l" and ords[(1, 3)] == "l":
+    if gteqn(ords, 2, 0):
         return "l"
 
-    # compare the larger terms
-    x = larger(0, 1, ords)
-    if x is None:
-        return "u"
-    y = larger(2, 3, ords)
-    if y is None:
-        return "u"
-    c = ords[(x, y)]
-    if c != "e":
-        return c
+    # if we know which terms are larger in each equation
+    x = larger(ords, 0, 1)
+    if x is not None:
+        y = larger(ords, 2, 3)
+        if y is not None:
+            # and we know the larger terms are equal
+            if ords[(x, y)] == "e":
+                # compare polarity
+                return "g"
 
-    # compare polarity
-    return "g"
+    # otherwise, don't know
+    return "u"
 
 
 def discrimination(xy, ps):
