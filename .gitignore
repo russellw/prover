@@ -4,6 +4,7 @@
 *.p
 .idea/
 .vs/
+EquationComparison.java
 bin/
 obj/
 target/
