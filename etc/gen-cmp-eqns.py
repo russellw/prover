@@ -97,6 +97,12 @@ def larger(x, y, ords):
 
 
 def answer(ords):
+    # equal equations
+    if ords[(0, 2)] == "e" and ords[(1, 3)] == "e":
+        return "e"
+    if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
+        return "e"
+
     # get larger term in the first equation
     x = larger(0, 1, ords)
     if x is None:
@@ -117,6 +123,12 @@ def answer(ords):
 
 
 def answerNP(ords):
+    # equal equations
+    if ords[(0, 2)] == "e" and ords[(1, 3)] == "e":
+        return "e"
+    if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
+        return "e"
+
     # get larger term in the first equation
     x = larger(0, 1, ords)
     if x is None:
