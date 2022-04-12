@@ -12,6 +12,13 @@ def trace(a):
     logger.debug(f"{info.filename}:{info.function}:{info.lineno}: {repr(a)}")
 
 
+# variables are represented by index numbers
+# 0 = a.left
+# 1 = a.right
+# 2 = b.left
+# 3 = b.right
+
+
 def cyclic(g):
     for x in range(4):
         visited = set()
@@ -103,17 +110,25 @@ def answer(ords):
     if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
         return "e"
 
-    # get larger term in the first equation
+    # if one term in one equation > both in the other equation
+    # then that equation is greater
+    # regardless of the orientation of terms within it
+    if ords[(0, 2)] == "g" and ords[(0, 3)] == "g":
+        return "g"
+    if ords[(1, 2)] == "g" and ords[(1, 3)] == "g":
+        return "g"
+    if ords[(0, 2)] == "l" and ords[(1, 2)] == "l":
+        return "l"
+    if ords[(0, 3)] == "l" and ords[(1, 3)] == "l":
+        return "l"
+
+    # compare the larger terms
     x = larger(0, 1, ords)
     if x is None:
         return "u"
-
-    # get larger term in the second equation
     y = larger(2, 3, ords)
     if y is None:
         return "u"
-
-    # compare the larger terms
     c = ords[(x, y)]
     if c != "e":
         return c
@@ -123,23 +138,31 @@ def answer(ords):
 
 
 def answerNP(ords):
-    # equal equations compare by polarity
+    # equal equations compare polarity
     if ords[(0, 2)] == "e" and ords[(1, 3)] == "e":
         return "g"
     if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
         return "g"
 
-    # get larger term in the first equation
+    # if one term in one equation > both in the other equation
+    # then that equation is greater
+    # regardless of the orientation of terms within it
+    if ords[(0, 2)] == "g" and ords[(0, 3)] == "g":
+        return "g"
+    if ords[(1, 2)] == "g" and ords[(1, 3)] == "g":
+        return "g"
+    if ords[(0, 2)] == "l" and ords[(1, 2)] == "l":
+        return "l"
+    if ords[(0, 3)] == "l" and ords[(1, 3)] == "l":
+        return "l"
+
+    # compare the larger terms
     x = larger(0, 1, ords)
     if x is None:
         return "u"
-
-    # get larger term in the second equation
     y = larger(2, 3, ords)
     if y is None:
         return "u"
-
-    # compare the larger terms
     c = ords[(x, y)]
     if c != "e":
         return c
