@@ -220,7 +220,7 @@ print(
     "public static PartialOrder compare(KnuthBendixOrder order, Equation a, Equation b) {"
 )
 gen(ps)
-print("return PartialOrder.UNORDERED;")
+print("throw new IllegalStateException();")
 print("}")
 
 for p in ps:
@@ -229,7 +229,7 @@ print(
     "public static PartialOrder compareNP(KnuthBendixOrder order, Equation a, Equation b) {"
 )
 gen(ps)
-print("return PartialOrder.UNORDERED;")
+print("throw new IllegalStateException();")
 print("}")
 
 print("}")
