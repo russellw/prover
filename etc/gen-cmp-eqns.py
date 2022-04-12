@@ -175,6 +175,11 @@ def answer(ords):
 
 def answerNP(ords):
     # equal equations compare polarity
+    # TODO:
+    # we don't need to worry about the case where the equations are equal
+    # because equations are only compared to other equations in the same clause
+    # and a clause containing equal positive and negative equations
+    # would have been discarded as a tautology
     if eqeqn(ords):
         return "g"
 
