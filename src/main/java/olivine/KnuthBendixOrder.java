@@ -75,7 +75,7 @@ public final class KnuthBendixOrder {
       return maybeLess ? PartialOrder.LESS : PartialOrder.UNORDERED;
     if (asymbolWeight > bsymbolWeight)
       return maybeGreater ? PartialOrder.GREATER : PartialOrder.UNORDERED;
-    assert a.tag() == b.tag();
+    assert asymbolWeight == 1 || a.tag() == b.tag();
     assert a.size() == b.size();
 
     // in some cases, the same tags can still mean different symbols, e.g. constants
