@@ -123,11 +123,11 @@ def answer(ords):
 
 
 def answerNP(ords):
-    # equal equations
+    # equal equations compare by polarity
     if ords[(0, 2)] == "e" and ords[(1, 3)] == "e":
-        return "e"
+        return "g"
     if ords[(0, 3)] == "e" and ords[(1, 2)] == "e":
-        return "e"
+        return "g"
 
     # get larger term in the first equation
     x = larger(0, 1, ords)
