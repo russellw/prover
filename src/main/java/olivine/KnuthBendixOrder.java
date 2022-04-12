@@ -279,7 +279,9 @@ public final class KnuthBendixOrder {
   }
 
   public PartialOrder compare(boolean apol, Equation a, boolean bpol, Equation b) {
-    if (apol == bpol) return EquationComparison. compare(this, a, b);
-    return bpol ?EquationComparison.  compareNP(this, a, b) :EquationComparison.  compareNP(this, b, a).flip();
+    if (apol == bpol) return EquationComparison.compare(this, a, b);
+    return bpol
+        ? EquationComparison.compareNP(this, a, b)
+        : EquationComparison.compareNP(this, b, a).flip();
   }
 }
