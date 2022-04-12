@@ -100,6 +100,26 @@ def answer(ords):
     return ords[(x ^ 1, y ^ 1)]
 
 
+def answerNP(ords):
+    # get larger term in the first equation
+    x = larger(0, 1, ords)
+    if x is None:
+        return "u"
+
+    # get larger term in the second equation
+    y = larger(2, 3, ords)
+    if y is None:
+        return "u"
+
+    # compare the larger terms
+    c = ords[(x, y)]
+    if c != "e":
+        return c
+
+    # compare polarity
+    return "g"
+
+
 def discrimination(xy, ps):
     cs = set()
     for p in ps:
@@ -172,6 +192,16 @@ print(
     "public static PartialOrder compare(KnuthBendixOrder order, Equation a, Equation b) {"
 )
 gen(ps)
+print("return PartialOrder.UNORDERED;")
+print("}")
+
+for p in ps:
+    p.answer = answerNP(p.ords)
+print(
+    "public static PartialOrder compareNP(KnuthBendixOrder order, Equation a, Equation b) {"
+)
+gen(ps)
+print("return PartialOrder.UNORDERED;")
 print("}")
 
 print("}")
