@@ -1,17 +1,32 @@
+import logging
+import inspect
+import sys
+
+logger = logging.getLogger()
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.setLevel(logging.DEBUG)
+
+
+def trace(a):
+    info = inspect.getframeinfo(inspect.currentframe().f_back)
+    logger.debug(f"{info.filename}:{info.function}:{info.lineno}: {repr(a)}")
+
+
 def cyclic(g):
     for x in range(4):
         visited = set()
         result = 0
 
-        def rec(x):
+        def rec(y):
             nonlocal result
-            if x in visited:
-                result = 1
+            if y in visited:
+                if y == x:
+                    result = 1
                 return
-            visited.add(x)
-            for y in range(4):
-                if (x, y) in g:
-                    rec(y)
+            visited.add(y)
+            for z in range(4):
+                if (y, z) in g:
+                    rec(z)
 
         rec(x)
         if result:
@@ -41,14 +56,6 @@ def consistent(ords):
     return 1
 
 
-class Possibility:
-    def __init__(self, ords):
-        self.ords = ords
-
-    def __repr__(self):
-        return str(self.ords)
-
-
 xys = []
 for i in range(4 - 1):
     for j in range(i + 1, 4):
@@ -56,19 +63,28 @@ for i in range(4 - 1):
 assert len(xys) == 6
 
 orders = ("e", "g", "l", "u")
+
+
+class Possibility:
+    def __init__(self, js):
+        cs = [orders[j] for j in js]
+        self.ords = {}
+        for i in range(6):
+            x, y = xys[i]
+            self.ords[(x, y)] = cs[i]
+
+    def __repr__(self):
+        return str(self.ords)
+
+
 ps = []
-for i0 in range(4):
-    for i1 in range(4):
-        for i2 in range(4):
-            for i3 in range(4):
-                for i4 in range(4):
-                    for i5 in range(4):
-                        cs = [orders[i] for i in (i0, i1, i2, i3, i4, i5)]
-                        ords = {}
-                        for i in range(6):
-                            x, y = xys[i]
-                            ords[(x, y)] = cs[i]
-                        ps.append(Possibility(ords))
+for j0 in range(4):
+    for j1 in range(4):
+        for j2 in range(4):
+            for j3 in range(4):
+                for j4 in range(4):
+                    for j5 in range(4):
+                        ps.append(Possibility((j0, j1, j2, j3, j4, j5)))
 ps = [p for p in ps if consistent(p.ords)]
 
 
