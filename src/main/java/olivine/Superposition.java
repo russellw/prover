@@ -62,11 +62,10 @@ public final class Superposition {
     return false;
   }
 
-  private boolean notSuperposMaximal(
-      boolean mode, Term[] literals, int negativeSize, int i, Equation e) {
-    return mode
-        ? notStrictlyMaximal(literals, negativeSize, i, e)
-        : notMaximal(literals, negativeSize, i, e);
+  private boolean notSuperposMaximal(Term[] literals, int negativeSize, int i, Equation e) {
+    return i < negativeSize
+        ? notMaximal(literals, negativeSize, i, e)
+        : notStrictlyMaximal(literals, negativeSize, i, e);
   }
 
   /*
@@ -80,14 +79,17 @@ public final class Superposition {
 
   // Substitute and make new clause
   private void resolve(Clause c, int ci, FMap map) {
+    var cliterals = new Term[c.literals.length];
+    for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
+
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize - 1);
-    for (var i = 0; i < c.negativeSize; i++) if (i != ci) negative.add(c.literals[i].replace(map));
+    for (var i = 0; i < c.negativeSize; i++) if (i != ci) negative.add(cliterals[i]);
 
     // Positive literals
     var positive = new ArrayList<Term>(c.positiveSize());
-    for (var i = c.negativeSize; i < c.literals.length; i++)
-      positive.add(c.literals[i].replace(map));
+    //noinspection ManualArrayToCollectionCopy
+    for (var i = c.negativeSize; i < cliterals.length; i++) positive.add(cliterals[i]);
 
     // Make new clause
     clause(new Clause(negative, positive));
@@ -234,9 +236,11 @@ public final class Superposition {
 
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
+    if (notStrictlyMaximal(cliterals, c.negativeSize, ci, new Equation(c0, c1))) return;
 
     var dliterals = new Term[d.literals.length];
     for (var i = 0; i < d.literals.length; i++) dliterals[i] = d.literals[i].replace(map);
+    if (notSuperposMaximal(dliterals, d.negativeSize, di, new Equation(d0, d1))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
@@ -283,7 +287,7 @@ public final class Superposition {
   private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
     for (var di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
-      if (notSuperposMaximal(di >= d.negativeSize, d.literals, d.negativeSize, di, e)) continue;
+      if (notSuperposMaximal(d.literals, d.negativeSize, di, e)) continue;
       var d0 = e.left;
       var d1 = e.right;
       assert order.compare(d0, d1) != PartialOrder.LESS;
