@@ -14,6 +14,10 @@ public final class Superposition {
   private boolean complete = true;
   private final boolean result;
 
+  Clause c, d;
+  int ci, cj, di;
+  Term c0, c1, c2, c3, d0, d1;
+
   private static long volume(Clause c) {
     var n = c.literals.length * 2L;
     for (var a : c.literals) n += a.symbolCount();
@@ -62,7 +66,7 @@ public final class Superposition {
     return false;
   }
 
-  private boolean notSuperposMaximal(Term[] literals, int negativeSize, int i, Equation e) {
+  private boolean notModeMaximal(Term[] literals, int negativeSize, int i, Equation e) {
     return i < negativeSize
         ? notMaximal(literals, negativeSize, i, e)
         : notStrictlyMaximal(literals, negativeSize, i, e);
@@ -77,8 +81,8 @@ public final class Superposition {
     c/map
   */
 
-  // Substitute and make new clause
-  private void resolve(Clause c, int ci, FMap map) {
+  // unify, substitute and make new clause
+  private void resolveu(FMap map) {
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
 
@@ -96,12 +100,12 @@ public final class Superposition {
   }
 
   // For each negative equation
-  private void resolve(Clause c) {
-    for (var ci = 0; ci < c.negativeSize; ci++) {
+  private void resolve() {
+    for (ci = 0; ci < c.negativeSize; ci++) {
       var e = new Equation(c.literals[ci]);
       if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var map = e.left.unify(FMap.EMPTY, e.right);
-      if (map != null) resolve(c, ci, map);
+      if (map != null) resolveu(map);
     }
   }
 
@@ -114,8 +118,8 @@ public final class Superposition {
     (c | c0 = c1 | c1 != c3)/map
   */
 
-  // Substitute and make new clause
-  private void factor(Clause c, Term c0, Term c1, int cj, Term c2, Term c3) {
+  // unify, substitute and make new clause
+  private void factoru() {
     // in tests, the unification check failed more often than the equatable
     // check,  so putting it first may save a little time
     var map = c0.unify(FMap.EMPTY, c2);
@@ -163,27 +167,37 @@ public final class Superposition {
   }
 
   // For each positive equation (both directions) again
-  private void factor(Clause c, int ci, Term c0, Term c1) {
-    for (var cj = c.negativeSize; cj < c.literals.length; cj++) {
+  private void factorj() {
+    for (cj = c.negativeSize; cj < c.literals.length; cj++) {
       if (cj == ci) continue;
       var e = new Equation(c.literals[cj]);
-      var c2 = e.left;
-      var c3 = e.right;
-      factor(c, c0, c1, cj, c2, c3);
-      factor(c, c0, c1, cj, c3, c2);
+
+      c2 = e.left;
+      c3 = e.right;
+      factoru();
+
+      c2 = e.right;
+      c3 = e.left;
+      factoru();
     }
   }
 
   // For each positive equation (both directions)
-  private void factor(Clause c) {
-    for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
+  private void factor() {
+    for (ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
       if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
-      var c0 = e.left;
-      var c1 = e.right;
-      assert order.compare(c0, c1) != PartialOrder.LESS;
-      factor(c, ci, c0, c1);
-      if (order.compare(c1, c0) != PartialOrder.LESS) factor(c, ci, c1, c0);
+
+      assert order.compare(e.left, e.right) != PartialOrder.LESS;
+      c0 = e.left;
+      c1 = e.right;
+      factorj();
+
+      if (order.compare(e.right, e.left) != PartialOrder.LESS) {
+        c0 = e.right;
+        c1 = e.left;
+        factorj();
+      }
     }
   }
 
@@ -197,18 +211,8 @@ public final class Superposition {
     (c | d | d0(c1) ?= d1)/map
   */
 
-  // Check this subterm, substitute and make new clause
-  private void superposition1(
-      Clause c,
-      Clause d,
-      int ci,
-      Term c0,
-      Term c1,
-      int di,
-      Term d0,
-      Term d1,
-      List<Integer> position,
-      Term a) {
+  // unify, substitute and make new clause
+  private void superpositionu(List<Integer> position, Term a) {
     var map = c0.unify(FMap.EMPTY, a);
     if (map == null) return;
 
@@ -240,7 +244,7 @@ public final class Superposition {
 
     var dliterals = new Term[d.literals.length];
     for (var i = 0; i < d.literals.length; i++) dliterals[i] = d.literals[i].replace(map);
-    if (notSuperposMaximal(dliterals, d.negativeSize, di, new Equation(d0, d1))) return;
+    if (notModeMaximal(dliterals, d.negativeSize, di, new Equation(d0, d1))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
@@ -261,52 +265,53 @@ public final class Superposition {
     clause(new Clause(negative, positive));
   }
 
-  // Descend into subterms
-  private void superposition(
-      Clause c,
-      Clause d,
-      int ci,
-      Term c0,
-      Term c1,
-      int di,
-      Term d0,
-      Term d1,
-      List<Integer> position,
-      Term a) {
+  // recur into subterms
+  private void superpositionr(List<Integer> position, Term a) {
     if (a instanceof Var) return;
-    superposition1(c, d, ci, c0, c1, di, d0, d1, position, a);
+    superpositionu(position, a);
     var n = a.size();
     for (var i = 0; i < n; i++) {
       position.add(i);
-      superposition(c, d, ci, c0, c1, di, d0, d1, position, a.get(i));
+      superpositionr(position, a.get(i));
       position.remove(position.size() - 1);
     }
   }
 
   // For each equation in d (both directions)
-  private void superposition(Clause c, Clause d, int ci, Term c0, Term c1) {
-    for (var di = 0; di < d.literals.length; di++) {
+  private void superpositiond() {
+    for (di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
-      if (notSuperposMaximal(d.literals, d.negativeSize, di, e)) continue;
-      var d0 = e.left;
-      var d1 = e.right;
-      assert order.compare(d0, d1) != PartialOrder.LESS;
-      superposition(c, d, ci, c0, c1, di, d0, d1, new ArrayList<>(), d0);
-      if (order.compare(d1, d0) != PartialOrder.LESS)
-        superposition(c, d, ci, c0, c1, di, d1, d0, new ArrayList<>(), d1);
+      if (notModeMaximal(d.literals, d.negativeSize, di, e)) continue;
+
+      assert order.compare(e.left, e.right) != PartialOrder.LESS;
+      d0 = e.left;
+      d1 = e.right;
+      superpositionr(new ArrayList<>(), d0);
+
+      if (order.compare(e.right, e.left) != PartialOrder.LESS) {
+        d0 = e.right;
+        d1 = e.left;
+        superpositionr(new ArrayList<>(), d0);
+      }
     }
   }
 
   // For each positive equation in c (both directions)
-  private void superposition(Clause c, Clause d) {
-    for (var ci = c.negativeSize; ci < c.literals.length; ci++) {
+  private void superposition() {
+    for (ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
       if (notStrictlyMaximal(c.literals, c.negativeSize, ci, e)) continue;
-      var c0 = e.left;
-      var c1 = e.right;
-      assert order.compare(c0, c1) != PartialOrder.LESS;
-      superposition(c, d, ci, c0, c1);
-      if (order.compare(c1, c0) != PartialOrder.LESS) superposition(c, d, ci, c1, c0);
+
+      assert order.compare(e.left, e.right) != PartialOrder.LESS;
+      c0 = e.left;
+      c1 = e.right;
+      superpositiond();
+
+      if (order.compare(e.right, e.left) != PartialOrder.LESS) {
+        c0 = e.right;
+        c1 = e.left;
+        superpositiond();
+      }
     }
   }
 
@@ -361,16 +366,22 @@ public final class Superposition {
       active = subsumption.subsumeBackward(g1, active);
 
       // Infer from one clause
-      resolve(g);
-      factor(g);
+      c = g;
+      resolve();
+      factor();
 
       // Sometimes need to match g with itself
       active.add(g);
 
       // Infer from two clauses
-      for (var c : active) {
-        superposition(c, g1);
-        superposition(g1, c);
+      for (var ac : active) {
+        c = ac;
+        d = g1;
+        superposition();
+
+        c = g1;
+        d = ac;
+        superposition();
       }
     }
     if (!complete) throw new Fail();
