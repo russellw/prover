@@ -83,9 +83,16 @@ public final class Superposition {
   */
 
   // unify, substitute and make new clause
-  private void resolvem(FMap map) {
+  private void resolvem() {
+    var map = c0.unify(FMap.EMPTY, c1);
+    if (map == null) return;
+
+    c0 = c0.replace(map);
+    c1 = c1.replace(map);
+
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
+    if (notMaximal(cliterals, c.negativeSize, ci, new Equation(c0, c1))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize - 1);
@@ -105,8 +112,10 @@ public final class Superposition {
     for (ci = 0; ci < c.negativeSize; ci++) {
       var e = new Equation(c.literals[ci]);
       if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
-      var map = e.left.unify(FMap.EMPTY, e.right);
-      if (map != null) resolvem(map);
+
+      c0 = e.left;
+      c1 = e.right;
+      resolvem();
     }
   }
 
@@ -145,23 +154,31 @@ public final class Superposition {
     // substituting terms for variables would not make them become so.
     if (!Equation.equatable(c1, c3)) return;
 
-    // the superposition calculus condition regarding the orienting of equations,
+    c0 = c0.replace(map);
+    c1 = c1.replace(map);
+
+    // the superposition calculus condition on the orienting of equations,
     // actually applies after the map. We already applied it before, to avoid spending time
     // on equations that are definitely the wrong orientation to begin with,
     // but in some cases, equations that were unordered, become ordered after substitution,
     // and ordered the wrong way, so rechecking the orientation,
     // suppresses some unnecessary inferences
-    if (order.compare(c0.replace(map), c1.replace(map)) == PartialOrder.LESS) return;
+    if (order.compare(c0, c1) == PartialOrder.LESS) return;
+
+    // ditto for the condition on equation being maximal within clause
+    var cliterals = new Term[c.literals.length];
+    for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
+    if (notMaximal(cliterals, c.negativeSize, ci, new Equation(c0, c1))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
-    for (var i = 0; i < c.negativeSize; i++) negative.add(c.literals[i].replace(map));
-    negative.add(new Equation(c1, c3).term().replace(map));
+    //noinspection ManualArrayToCollectionCopy
+    for (var i = 0; i < c.negativeSize; i++) negative.add(cliterals[i]);
+    negative.add(new Equation(c1, c3.replace(map)).term());
 
     // Positive literals
     var positive = new ArrayList<Term>(c.positiveSize() - 1);
-    for (var i = c.negativeSize; i < c.literals.length; i++)
-      if (i != cj) positive.add(c.literals[i].replace(map));
+    for (var i = c.negativeSize; i < cliterals.length; i++) if (i != cj) positive.add(cliterals[i]);
 
     // Make new clause
     clause(new Clause(negative, positive));
@@ -259,7 +276,6 @@ public final class Superposition {
     for (var i = d.negativeSize; i < dliterals.length; i++) if (i != di) positive.add(dliterals[i]);
 
     // Negative and positive superposition
-    // TODO: recheck maximality after map?
     (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
 
     // Make new clause
