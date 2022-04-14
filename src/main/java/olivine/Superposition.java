@@ -287,6 +287,7 @@ public final class Superposition {
     if (a instanceof Var) return;
     spm(a);
     var n = a.size();
+    // TODO: start at 1 for call?
     for (var i = 0; i < n; i++) {
       position.add(i);
       spr(a.get(i));
