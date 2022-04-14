@@ -83,7 +83,7 @@ public final class Superposition {
   */
 
   // unify, substitute and make new clause
-  private void resolveu(FMap map) {
+  private void resolvem(FMap map) {
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
 
@@ -106,7 +106,7 @@ public final class Superposition {
       var e = new Equation(c.literals[ci]);
       if (notMaximal(c.literals, c.negativeSize, ci, e)) continue;
       var map = e.left.unify(FMap.EMPTY, e.right);
-      if (map != null) resolveu(map);
+      if (map != null) resolvem(map);
     }
   }
 
@@ -120,7 +120,7 @@ public final class Superposition {
   */
 
   // unify, substitute and make new clause
-  private void factoru() {
+  private void factorm() {
     // in tests, the unification check failed more often than the equatable
     // check,  so putting it first may save a little time
     var map = c0.unify(FMap.EMPTY, c2);
@@ -175,11 +175,11 @@ public final class Superposition {
 
       c2 = e.left;
       c3 = e.right;
-      factoru();
+      factorm();
 
       c2 = e.right;
       c3 = e.left;
-      factoru();
+      factorm();
     }
   }
 
@@ -213,7 +213,7 @@ public final class Superposition {
   */
 
   // unify, substitute and make new clause
-  private void superpositionu(Term a) {
+  private void spm(Term a) {
     var map = c0.unify(FMap.EMPTY, a);
     if (map == null) return;
 
@@ -267,19 +267,19 @@ public final class Superposition {
   }
 
   // recur into subterms
-  private void superpositionr(Term a) {
+  private void spr(Term a) {
     if (a instanceof Var) return;
-    superpositionu(a);
+    spm(a);
     var n = a.size();
     for (var i = 0; i < n; i++) {
       position.add(i);
-      superpositionr(a.get(i));
+      spr(a.get(i));
       position.remove(position.size() - 1);
     }
   }
 
   // For each equation in d (both directions)
-  private void superpositiond() {
+  private void spd() {
     assert position.isEmpty();
     for (di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
@@ -288,18 +288,18 @@ public final class Superposition {
       assert order.compare(e.left, e.right) != PartialOrder.LESS;
       d0 = e.left;
       d1 = e.right;
-      superpositionr(d0);
+      spr(d0);
 
       if (order.compare(e.right, e.left) != PartialOrder.LESS) {
         d0 = e.right;
         d1 = e.left;
-        superpositionr(d0);
+        spr(d0);
       }
     }
   }
 
   // For each positive equation in c (both directions)
-  private void superposition() {
+  private void sp() {
     for (ci = c.negativeSize; ci < c.literals.length; ci++) {
       var e = new Equation(c.literals[ci]);
       if (notStrictlyMaximal(c.literals, c.negativeSize, ci, e)) continue;
@@ -307,12 +307,12 @@ public final class Superposition {
       assert order.compare(e.left, e.right) != PartialOrder.LESS;
       c0 = e.left;
       c1 = e.right;
-      superpositiond();
+      spd();
 
       if (order.compare(e.right, e.left) != PartialOrder.LESS) {
         c0 = e.right;
         c1 = e.left;
-        superpositiond();
+        spd();
       }
     }
   }
@@ -379,11 +379,11 @@ public final class Superposition {
       for (var ac : active) {
         c = ac;
         d = g1;
-        superposition();
+        sp();
 
         c = g1;
         d = ac;
-        superposition();
+        sp();
       }
     }
     if (!complete) throw new Fail();
