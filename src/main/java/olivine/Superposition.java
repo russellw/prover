@@ -14,9 +14,10 @@ public final class Superposition {
   private boolean complete = true;
   private final boolean result;
 
-  Clause c, d;
-  int ci, cj, di;
-  Term c0, c1, c2, c3, d0, d1;
+  private Clause c, d;
+  private int ci, cj, di;
+  private Term c0, c1, c2, c3, d0, d1;
+  private final List<Integer> position = new ArrayList<>();
 
   private static long volume(Clause c) {
     var n = c.literals.length * 2L;
@@ -212,7 +213,7 @@ public final class Superposition {
   */
 
   // unify, substitute and make new clause
-  private void superpositionu(List<Integer> position, Term a) {
+  private void superpositionu(Term a) {
     var map = c0.unify(FMap.EMPTY, a);
     if (map == null) return;
 
@@ -266,19 +267,20 @@ public final class Superposition {
   }
 
   // recur into subterms
-  private void superpositionr(List<Integer> position, Term a) {
+  private void superpositionr(Term a) {
     if (a instanceof Var) return;
-    superpositionu(position, a);
+    superpositionu(a);
     var n = a.size();
     for (var i = 0; i < n; i++) {
       position.add(i);
-      superpositionr(position, a.get(i));
+      superpositionr(a.get(i));
       position.remove(position.size() - 1);
     }
   }
 
   // For each equation in d (both directions)
   private void superpositiond() {
+    assert position.isEmpty();
     for (di = 0; di < d.literals.length; di++) {
       var e = new Equation(d.literals[di]);
       if (notModeMaximal(d.literals, d.negativeSize, di, e)) continue;
@@ -286,12 +288,12 @@ public final class Superposition {
       assert order.compare(e.left, e.right) != PartialOrder.LESS;
       d0 = e.left;
       d1 = e.right;
-      superpositionr(new ArrayList<>(), d0);
+      superpositionr(d0);
 
       if (order.compare(e.right, e.left) != PartialOrder.LESS) {
         d0 = e.right;
         d1 = e.left;
-        superpositionr(new ArrayList<>(), d0);
+        superpositionr(d0);
       }
     }
   }
