@@ -87,12 +87,12 @@ public final class Superposition {
     var map = c0.unify(FMap.EMPTY, c1);
     if (map == null) return;
 
-    c0 = c0.replace(map);
-    c1 = c1.replace(map);
+    var c0m = c0.replace(map);
+    var c1m = c1.replace(map);
 
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
-    if (notMaximal(cliterals, c.negativeSize, ci, new Equation(c0, c1))) return;
+    if (notMaximal(cliterals, c.negativeSize, ci, new Equation(c0m, c1m))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize - 1);
@@ -154,8 +154,8 @@ public final class Superposition {
     // substituting terms for variables would not make them become so.
     if (!Equation.equatable(c1, c3)) return;
 
-    c0 = c0.replace(map);
-    c1 = c1.replace(map);
+    var c0m = c0.replace(map);
+    var c1m = c1.replace(map);
 
     // the superposition calculus condition on the orienting of equations,
     // actually applies after the map. We already applied it before, to avoid spending time
@@ -163,18 +163,18 @@ public final class Superposition {
     // but in some cases, equations that were unordered, become ordered after substitution,
     // and ordered the wrong way, so rechecking the orientation,
     // suppresses some unnecessary inferences
-    if (order.compare(c0, c1) == PartialOrder.LESS) return;
+    if (order.compare(c0m, c1m) == PartialOrder.LESS) return;
 
     // ditto for the condition on equation being maximal within clause
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
-    if (notMaximal(cliterals, c.negativeSize, ci, new Equation(c0, c1))) return;
+    if (notMaximal(cliterals, c.negativeSize, ci, new Equation(c0m, c1m))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + 1);
     //noinspection ManualArrayToCollectionCopy
     for (var i = 0; i < c.negativeSize; i++) negative.add(cliterals[i]);
-    negative.add(new Equation(c1, c3.replace(map)).term());
+    negative.add(new Equation(c1m, c3.replace(map)).term());
 
     // Positive literals
     var positive = new ArrayList<Term>(c.positiveSize() - 1);
@@ -248,21 +248,21 @@ public final class Superposition {
     assert !(d0c1 == Term.TRUE && d1 != Term.TRUE);
     if (!Equation.equatable(d0c1, d1)) return;
 
-    c0 = c0.replace(map);
-    c1 = c1.replace(map);
-    d0 = d0.replace(map);
-    d1 = d1.replace(map);
+    var c0m = c0.replace(map);
+    var c1m = c1.replace(map);
+    var d0m = d0.replace(map);
+    var d1m = d1.replace(map);
 
-    if (order.compare(c0, c1) == PartialOrder.LESS) return;
-    if (order.compare(d0, d1) == PartialOrder.LESS) return;
+    if (order.compare(c0m, c1m) == PartialOrder.LESS) return;
+    if (order.compare(d0m, d1m) == PartialOrder.LESS) return;
 
     var cliterals = new Term[c.literals.length];
     for (var i = 0; i < c.literals.length; i++) cliterals[i] = c.literals[i].replace(map);
-    if (notStrictlyMaximal(cliterals, c.negativeSize, ci, new Equation(c0, c1))) return;
+    if (notStrictlyMaximal(cliterals, c.negativeSize, ci, new Equation(c0m, c1m))) return;
 
     var dliterals = new Term[d.literals.length];
     for (var i = 0; i < d.literals.length; i++) dliterals[i] = d.literals[i].replace(map);
-    if (notModeMaximal(dliterals, d.negativeSize, di, new Equation(d0, d1))) return;
+    if (notModeMaximal(dliterals, d.negativeSize, di, new Equation(d0m, d1m))) return;
 
     // Negative literals
     var negative = new ArrayList<Term>(c.negativeSize + d.negativeSize);
@@ -276,7 +276,7 @@ public final class Superposition {
     for (var i = d.negativeSize; i < dliterals.length; i++) if (i != di) positive.add(dliterals[i]);
 
     // Negative and positive superposition
-    (di < d.negativeSize ? negative : positive).add(new Equation(d0c1, d1).term().replace(map));
+    (di < d.negativeSize ? negative : positive).add(new Equation(d0c1.replace(map), d1m).term());
 
     // Make new clause
     clause(new Clause(negative, positive));
