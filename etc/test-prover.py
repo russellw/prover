@@ -25,16 +25,24 @@ def trace(a):
 
 
 def getExpected(filename):
-    for s in open(filename):
-        m = re.match(r"%\s*Status\s*:\s*(\w+)", s)
-        if m:
-            return m[1]
+    if filename.endswith(".p"):
+        for s in open(filename):
+            m = re.match(r"%\s*Status\s*:\s*(\w+)", s)
+            if m:
+                return m[1]
+    elif filename.endswith(".cnf"):
+        for s in open(filename):
+            m = re.match(r"c.* (SAT|UNSAT) .*", s)
+            if m:
+                return m[1]
     return "-"
 
 
 def meaning(s):
     if s in ("sat", "unsat"):
         return s
+    if s in ("SAT", "UNSAT"):
+        return s.lower()
     if s == "Satisfiable":
         return "sat"
     if s == "CounterSatisfiable":
