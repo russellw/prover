@@ -8,6 +8,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 final class Prover {
+  private static Language specified;
+
   private static final Option[] OPTIONS =
       new Option[] {
         new Option('h', "help", null, "show help") {
@@ -21,6 +23,18 @@ final class Prover {
           public void accept(String arg) {
             Etc.printVersion();
             System.exit(0);
+          }
+        },
+        new Option('\0', "tptp", null, "input language TPTP") {
+          @Override
+          public void accept(String arg) {
+            specified = Language.TPTP;
+          }
+        },
+        new Option('\0', "dimacs", null, "input language DIMACS") {
+          @Override
+          public void accept(String arg) {
+            specified = Language.DIMACS;
           }
         },
         new Option('t', "cpu-limit", "seconds", "time limit") {
@@ -42,13 +56,25 @@ final class Prover {
 
   private Prover() {}
 
+  private static Language language(String file) {
+    if (specified != null) return specified;
+    return switch (Etc.extension(file)) {
+      case "cnf" -> Language.DIMACS;
+      case "ax", "p" -> Language.TPTP;
+      default -> throw new IllegalArgumentException(file + ": language not specified");
+    };
+  }
+
   private static boolean solve(String file, long steps, InputStream stream) throws IOException {
     var cnf = new CNF();
-    TptpParser.parse(file, stream, cnf);
+    switch (language(file)) {
+      case DIMACS -> DimacsParser.parse(file, stream, cnf);
+      case TPTP -> TptpParser.parse(file, stream, cnf);
+    }
     return Superposition.sat(cnf.clauses, steps);
   }
 
-  public static boolean solve(String file, long steps) throws IOException {
+  static boolean solve(String file, long steps) throws IOException {
     if (file == null) return solve("stdin", steps, System.in);
     try (var stream = new BufferedInputStream(new FileInputStream(file))) {
       return solve(file, steps, stream);
@@ -58,6 +84,8 @@ final class Prover {
   public static void main(String[] args) throws IOException {
     try {
       Option.parse(OPTIONS, args);
+      if (Option.positionalArgs.isEmpty() && specified != null) Option.readStdin = true;
+
       String file = null;
       if (Option.readStdin) {
         if (Option.positionalArgs.size() > 0) {
