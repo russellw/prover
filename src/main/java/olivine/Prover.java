@@ -8,6 +8,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 final class Prover {
+  private enum Language {
+    DIMACS,
+    TPTP,
+  }
+
   private static Language specified;
 
   private static final Option[] OPTIONS =
