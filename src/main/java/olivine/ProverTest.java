@@ -11,7 +11,9 @@ final class ProverTest {
   private static final Pattern TPTP_DOMAIN_PATTERN = Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]");
   private static final Pattern TPTP_PROBLEM_PATTERN =
       Pattern.compile("[a-zA-Z][a-zA-Z][a-zA-Z]\\d\\d\\d.\\d+(\\.\\d+)?");
-  private static final Pattern STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
+
+  private static final Pattern DIMACS_STATUS_PATTERN = Pattern.compile("c.* (SAT|UNSAT) .*");
+  private static final Pattern TPTP_STATUS_PATTERN = Pattern.compile("%\\s*Status\\s*:\\s*(\\w+)");
 
   private static boolean shuffle;
   private static Random random = new Random();
@@ -68,10 +70,21 @@ final class ProverTest {
   private static String status(String file) throws IOException {
     try (var reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
       String s;
-      while ((s = reader.readLine()) != null) {
-        if (!s.isBlank() && s.charAt(0) != '%') break;
-        var matcher = STATUS_PATTERN.matcher(s);
-        if (matcher.matches()) return matcher.group(1);
+      switch (Etc.extension(file)) {
+        case "p" -> {
+          while ((s = reader.readLine()) != null) {
+            if (!s.isBlank() && s.charAt(0) != '%') break;
+            var matcher = TPTP_STATUS_PATTERN.matcher(s);
+            if (matcher.matches()) return matcher.group(1);
+          }
+        }
+        case "cnf" -> {
+          while ((s = reader.readLine()) != null) {
+            if (!s.isBlank() && s.charAt(0) != 'c') break;
+            var matcher = DIMACS_STATUS_PATTERN.matcher(s);
+            if (matcher.matches()) return matcher.group(1);
+          }
+        }
       }
     }
     return null;
@@ -116,6 +129,12 @@ final class ProverTest {
         continue;
       }
 
+      // list file
+      if (s.endsWith(".lst")) {
+        files.addAll(Files.readAllLines(Path.of(s), StandardCharsets.UTF_8));
+        continue;
+      }
+
       // this is a file to be processed
       files.add(s);
     }
@@ -133,10 +152,10 @@ final class ProverTest {
         System.out.printf("%s\t%.3f\n", sat ? "sat" : "uns", time(start1));
         if (status != null)
           switch (status) {
-            case "ContradictoryAxioms", "Unsatisfiable", "Theorem" -> {
+            case "UNSAT", "ContradictoryAxioms", "Unsatisfiable", "Theorem" -> {
               if (sat) throw new IllegalStateException(status);
             }
-            case "Satisfiable", "CounterSatisfiable" -> {
+            case "SAT", "Satisfiable", "CounterSatisfiable" -> {
               if (!sat) throw new IllegalStateException(status);
             }
             default -> throw new IllegalStateException(status);
