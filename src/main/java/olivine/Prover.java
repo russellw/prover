@@ -76,7 +76,10 @@ final class Prover {
       case DIMACS -> DimacsParser.parse(file, stream, cnf);
       case TPTP -> TptpParser.parse(file, stream, cnf);
     }
-    return Superposition.sat(cnf.clauses, steps);
+    var clauses = cnf.clauses;
+    return Clause.propositional(clauses)
+        ? Dpll.sat(clauses, steps)
+        : Superposition.sat(clauses, steps);
   }
 
   static boolean solve(String file, long steps) throws IOException {
