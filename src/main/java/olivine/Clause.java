@@ -43,6 +43,30 @@ public final class Clause {
     return free;
   }
 
+  public static List<Clause> replace(FMap map, List<Clause> clauses) {
+    var v = new ArrayList<Clause>(clauses.size());
+    for (var c : clauses) {
+      c = c.replace(map);
+      if (!c.isTrue()) v.add(c);
+    }
+    return v;
+  }
+
+  public Clause replace(FMap map) {
+    var negative = new ArrayList<Term>(negativeSize);
+    for (var i = 0; i < negativeSize; i++) negative.add(literals[i].replace(map));
+
+    var positive = new ArrayList<Term>(positiveSize());
+    for (var i = negativeSize; i < literals.length; i++) positive.add(literals[i].replace(map));
+
+    return new Clause(negative, positive);
+  }
+
+  public static boolean propositional(List<Clause> clauses) {
+    for (var c : clauses) for (var a : c.literals) if (a.size() > 0) return false;
+    return true;
+  }
+
   public Clause(List<Term> negative, List<Term> positive) {
     // Simplify
     for (var i = 0; i < negative.size(); i++) negative.set(i, negative.get(i).simplify());
