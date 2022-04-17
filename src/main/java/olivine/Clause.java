@@ -63,7 +63,7 @@ public final class Clause {
   }
 
   public static boolean propositional(List<Clause> clauses) {
-    for (var c : clauses) for (var a : c.literals) if (a.size() > 0) return false;
+    for (var c : clauses) for (var a : c.literals) if (!(a instanceof GlobalVar)) return false;
     return true;
   }
 

@@ -353,6 +353,7 @@ public final class CNF {
     negative.clear();
     positive.clear();
     literals(a);
+    // TODO: eliminate duplicate literals here?
     var c = new Clause(negative, positive);
     if (c.isTrue()) return;
     clauses.add(c);
