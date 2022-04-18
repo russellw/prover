@@ -5,12 +5,12 @@ import java.util.List;
 
 public final class Cdcl {
   private static final class Assignment {
-    final Term term;
+    final Term atom;
     final boolean value;
     final Clause reason;
 
-    Assignment(Term term, boolean value, Clause reason) {
-      this.term = term;
+    Assignment(Term atom, boolean value, Clause reason) {
+      this.atom = atom;
       this.value = value;
       this.reason = reason;
     }
@@ -21,7 +21,7 @@ public final class Cdcl {
   private final boolean result;
 
   private Assignment assignment(Term a) {
-    for (var assignment : trail) if (assignment.term == a) return assignment;
+    for (var assignment : trail) if (assignment.atom == a) return assignment;
     throw new IllegalStateException(a.toString());
   }
 
@@ -30,7 +30,7 @@ public final class Cdcl {
     for (var assignment : trail) {
       var c = assignment.reason;
       if (c != null)
-        for (var a : c.literals) if (a != assignment.term) graph.add(assignment(a), assignment);
+        for (var a : c.literals) if (a != assignment.atom) graph.add(assignment(a), assignment);
     }
     return graph;
   }
@@ -40,13 +40,14 @@ public final class Cdcl {
     loop:
     while (steps-- > 0) {
       var map = FMap.EMPTY;
-      for (var assignment : trail) map = map.add(assignment.term, Term.of(assignment.value));
+      for (var assignment : trail) map = map.add(assignment.atom, Term.of(assignment.value));
 
       // contradiction?
       for (var c : clauses) {
         var c1 = c.replace(map);
         if (c1.isFalse()) {
           //  backtrack
+          trail.add(new Assignment(null, false, c));
           var graph = implicationGraph();
           continue loop;
         }
