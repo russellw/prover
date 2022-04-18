@@ -153,6 +153,7 @@ public class CdclTest {
     trail.add(new Assignment(x11, true, c_9_10_11));
     trail.add(new Assignment(x12, false, c_10_12));
 
+    graph = implicationGraph();
     assertSuccessors(graph, x6, x7);
     assertSuccessors(graph, x7, x8);
     assertSuccessors(graph, x8, x9, x10);
