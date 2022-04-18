@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Cdcl {
-  private final class Assignment {
+  private static final class Assignment {
     final Term term;
     final boolean value;
     final Clause reason;
@@ -42,31 +42,36 @@ public final class Cdcl {
       var map = FMap.EMPTY;
       for (var assignment : trail) map = map.add(assignment.term, Term.of(assignment.value));
 
-      Clause c1 = null;
+      // contradiction?
       for (var c : clauses) {
-        c1 = c.replace(map);
-        if (c1.isTrue()) continue;
-        switch (c1.literals.length) {
-          case 1 -> {
-            // unit propagation
-            trail.add(new Assignment(c1.literals[0], c1.negativeSize == 0, c));
-            continue loop;
-          }
-          case 0 -> {
-            // contradiction, backtrack
-            var graph = implicationGraph();
-          }
+        var c1 = c.replace(map);
+        if (c1.isFalse()) {
+          //  backtrack
+          var graph = implicationGraph();
+          continue loop;
         }
       }
 
+      // unit propagation
+      Clause c2 = null;
+      for (var c : clauses) {
+        var c1 = c.replace(map);
+        if (c1.isTrue()) continue;
+        if (c1.literals.length == 1) {
+          trail.add(new Assignment(c1.literals[0], c1.negativeSize == 0, c));
+          continue loop;
+        }
+        if (c2 == null) c2 = c1;
+      }
+
       // no clause remains unsatisfied
-      if (c1 == null) {
+      if (c2 == null) {
         result = true;
         return;
       }
 
       // choice
-      trail.add(new Assignment(c1.literals[0], false, null));
+      trail.add(new Assignment(c2.literals[0], false, null));
     }
     throw new Fail();
   }
