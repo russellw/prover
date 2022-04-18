@@ -11,6 +11,11 @@ public class CdclTest {
     final boolean value;
     final Clause reason;
 
+    @Override
+    public String toString() {
+      return atom.toString();
+    }
+
     Assignment(Term atom, boolean value, Clause reason) {
       this.atom = atom;
       this.value = value;

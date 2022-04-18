@@ -6,6 +6,20 @@ import java.util.function.Consumer;
 public final class Graph<T> {
   private final Map<T, Set<T>> arcs = new HashMap<>();
 
+  @Override
+  public String toString() {
+    var sb = new StringBuilder();
+    sb.append('{');
+    for (var kv : arcs.entrySet()) {
+      if (sb.length() > 1) sb.append(", ");
+      sb.append(kv.getKey());
+      sb.append(" -> ");
+      sb.append(kv.getValue());
+    }
+    sb.append('}');
+    return sb.toString();
+  }
+
   public void add(T a, T b) {
     var v = arcs.computeIfAbsent(a, k -> new HashSet<>());
     v.add(b);
