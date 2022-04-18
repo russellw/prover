@@ -44,6 +44,7 @@ public final class Clause {
   }
 
   public static List<Clause> replace(FMap map, List<Clause> clauses) {
+    // TODO: delete
     var v = new ArrayList<Clause>(clauses.size());
     for (var c : clauses) {
       c = c.replace(map);

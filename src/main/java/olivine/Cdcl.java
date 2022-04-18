@@ -17,58 +17,56 @@ public final class Cdcl {
   }
 
   private final List<Clause> clauses;
+  private final List<Assignment> trail = new ArrayList<>();
   private final boolean result;
 
-  private static FMap map(List<Assignment> trail) {
-    var map = FMap.EMPTY;
-    for (var assignment : trail) map = map.add(assignment.term, Term.of(assignment.value));
-    return map;
+  private Assignment assignment(Term a) {
+    for (var assignment : trail) if (assignment.term == a) return assignment;
+    throw new IllegalStateException(a.toString());
   }
 
-  private static boolean isFalse(List<Clause> clauses) {
-    for (var c : clauses) if (c.isFalse()) return true;
-    return false;
-  }
-
-  private static boolean isTrue(List<Clause> clauses) {
-    return clauses.isEmpty();
-  }
-
-  private static Graph<Assignment> implicationGraph(List<Assignment> trail) {
+  private Graph<Assignment> implicationGraph() {
     var graph = new Graph<Assignment>();
-    for (var assignment : trail) {}
-
+    for (var assignment : trail) {
+      var c = assignment.reason;
+      if (c != null)
+        for (var a : c.literals) if (a != assignment.term) graph.add(assignment(a), assignment);
+    }
     return graph;
   }
 
   private Cdcl(List<Clause> clauses, long steps) {
     this.clauses = clauses;
-    var trail = new ArrayList<Assignment>();
     loop:
     while (steps-- > 0) {
-      var map = map(trail);
-      var cs = Clause.replace(map, clauses);
+      var map = FMap.EMPTY;
+      for (var assignment : trail) map = map.add(assignment.term, Term.of(assignment.value));
 
-      // solution
-      if (isTrue(cs)) {
+      Clause c1 = null;
+      for (var c : clauses) {
+        c1 = c.replace(map);
+        if (c1.isTrue()) continue;
+        switch (c1.literals.length) {
+          case 1 -> {
+            // unit propagation
+            trail.add(new Assignment(c1.literals[0], c1.negativeSize == 0, c));
+            continue loop;
+          }
+          case 0 -> {
+            // contradiction, backtrack
+            var graph = implicationGraph();
+          }
+        }
+      }
+
+      // no clause remains unsatisfied
+      if (c1 == null) {
         result = true;
         return;
       }
 
-      // contradiction
-      if (isFalse(cs)) {}
-
-      // unit propagation
-      for (var c : clauses) {
-        var c1 = c.replace(map);
-        if (c1.literals.length == 1) {
-          trail.add(new Assignment(c1.literals[0], c1.negativeSize == 0, c));
-          continue loop;
-        }
-      }
-
       // choice
-      trail.add(new Assignment(cs.get(0).literals[0], false, null));
+      trail.add(new Assignment(c1.literals[0], false, null));
     }
     throw new Fail();
   }
